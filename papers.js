@@ -14,6 +14,6 @@
 const PAPERS = [
   { name: "VT-KNT",  folder: "VT-KNT",  file: "VT-KNT.html"  },
   { name: "AI-321",  folder: "AI-321 VT-NMS",   file: "AI-321.html"   },
-  { name: "VT-EJT",  folder: "VT-ejt",  file: "VT-EJT.html"  },
+  { name: "VT-EJT",  folder: "VT-EJT",  file: "VT-EJT.html"  },
   /* add more papers below this line */
 ];
