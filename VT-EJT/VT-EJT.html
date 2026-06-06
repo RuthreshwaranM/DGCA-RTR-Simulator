@@ -404,41 +404,40 @@ const papers = [
     title:"VT-EJT",
     acIdent:"VT-EJT",    acType:"A320",
     dep:"VABB (Mumbai)", dest:"VECC (Kolkata)",
-    flightLevel:"FL350", pob:"165", squawk:"7154",
-    route:"W20S, W20N",        runway:"29R", taxiway:"Link 9, Alfa",
-    stand:"D 62",        alternate:"VANP (Nagpur)",
+    flightLevel:"FL350", pob:"165", squawk:"6132",
+    route:"G 450",        runway:"09", taxiway:"N",
+    stand:"A 12",        alternate:"VANP (Nagpur)",
 
     charts:[
       { label:"Aerodrome ", src:"CHART1.png" },
-      { label:"Route Chart",     src:"CHART2.png"     }
+      { label:"Route Chart",     src:"CHART2.png"     },
+      { label:"Route Chart",     src:"CHART3.png"     }
     ],
 
     atcFreqs:[
-      { group:"VIDP (DELHI)", rows:[
-        { lbl:"Delivery",   freq:"121.95"  },
-        { lbl:"Ground",   freq:"121.625"  },
-        { lbl:"Tower",   freq:"125.85"  },
-        { lbl:"Approach",   freq:"125.67"  },
-        { lbl:"Control",    freq:"120.9" }
+      { group:"VABB (MUMBAI))", rows:[
+        { lbl:"Tower",   freq:"118.1"  },
+        { lbl:"Departure",   freq:"127.7"  },
+        { lbl:"Control",    freq:"125.9" }
       ]},
-      { group:"VOMM (Chennai)", rows:[
-        { lbl:"Control",   freq:"118.9"  },
-        { lbl:"Approach",   freq:"127.45"  },
-        { lbl:"Tower",  freq:"118.10" }
+      { group:"VECC (Kolkata)", rows:[
+        { lbl:"Approach",   freq:"127.9"  },
+        { lbl:"132.45",  freq:"132.45" }
       ]},
       { group:"VANP (Nagpur) (Altn)", rows:[
-        { lbl:"Control",   freq:"118.9"  },
-        { lbl:"Approach",  freq:"122.7"  }
+        { lbl:"Tower",   freq:"118.9"  },
+        { lbl:"Approach",  freq:"122.7"  },
+        { lbl:"Control",   freq:"123.9"  }
       ]}
     ],
 
-    metar:"VIDP 191200Z WIND 280/08KT, VIS 2000M, RVR RWY28 1500M, HAZE, BKN080 TEMP 18, DEWPT 12 QNH 1015 HPA",
-    notam:"• RWY 11R/29L\nFully CLOSED for Rehabilitation work",
+    metar:"VANP 110930Z WIND 310/12KT, VIS 5000M, SKY CLEAR TEMP 26, DEW PT 18 QNH 1012 HPA",
+    notam:"• Terminal 2 access restricted to aircraft with < 65 m wing span.",
 
     scenarios:[
       {
         chartIndex:0,
-        qns:"SCENARIO 1a: Transmit the following phrases as per R/T procedure:\n(i) True or Accurate\n(ii) Listen out on (Ferequency)\n(iii) Squawk 2400\n(iv) Altitude 4300\n(v) Runway Visual Range 1700",
+        qns:"SCENARIO 1a: Transmit the following phrases as per R/T procedure:\n(i) 200 degrees 70 knots:\n(ii) Altimeter Setting 1000:\n(iii) Altitude 3400:\n(iv) 38143.9:\n(v) Time 1643(4.43 P.M.):",
         answer:{ transmissions:[
           { who:"pilot", text:"(i) Altitude 12000  →  ONE TWO THOUSAND FEET" },
           { who:"pilot", text:"(ii) 118.1  →  ONE ONE EIGHT DECIMAL ONE" },
@@ -449,7 +448,7 @@ const papers = [
       },
       {
         chartIndex:0,
-        qns:"SCENARIO 1b: While at Delhi at stand D 62, Request ATC and departure clearance",
+        qns:"SCENARIO 1b: You're on Taxiway N, get clearance to line up Runway 09 for a quick take-off to avoid delay due to heavy traffic.",
         answer:{ transmissions:[
           { who:"pilot",    text:"Lucknow Ground, AKASA AIR One Four Two, stand One Zero Five Left, information Bravo, QNH One Zero One Five, IFR to Kolkata, request start-up and ATC clearance." },
           { who:"atc",      text:"AKASA AIR One Four Two. Cleared to Kolkata via Romeo Four Six Zero, ASARI One Bravo Departure, Flight Level Three One Zero, Squawk Six Two One Five. Start-up approved, Runway Two Seven." },
@@ -457,8 +456,8 @@ const papers = [
         ]}
       },
       {
-        chartIndex:0,
-        qns:"SCENARIO 2a: Request push back and start-up.",
+        chartIndex:1,
+        qns:"SCENARIO 2a: You're at FLight Level 180, get further instructions to climb to cruising level.",
         answer:{ transmissions:[
           { who:"pilot",    text:"AKASA AIR One Four Two, persons on board One Six Nine, security check completed, request taxi." },
           { who:"atc",      text:"AKASA AIR One Four Two, taxi via Delta. Hold short of Runway Two Seven." },
@@ -466,8 +465,8 @@ const papers = [
         ]}
       },
       {
-        chartIndex:0,
-        qns:"SCENARIO 2b: Request Taxi ",
+        chartIndex:1,
+        qns:"SCENARIO 2b: You've crossed BU-TOX (MRP) at 0900. Give appropriate report to ATC.",
         answer:{ transmissions:[
           { who:"pilot",    text:"AKASA AIR One Four Two. Taxiway Delta blocked by unserviceable ambulance. Holding short of Delta, request taxi via Echo to holding point Two Seven." },
           { who:"atc",      text:"AKASA AIR One Four Two, taxi via Echo approved. Hold short of Runway Two Seven. Contact Tower One Two Two decimal Five." },
@@ -476,7 +475,7 @@ const papers = [
       },
       {
         chartIndex:1,
-        qns:"SCENARIO 3: Approaching AKELA, request a change of Level to Flight Level 340 due turbulence.",
+        qns:"SCENARIO 3 a): Fire warning light on starboard engine, you're 15 NM from DUBOX, take action.",
         answer:{ transmissions:[
           { who:"pilot", text:"STOPPING. STOPPING. STOPPING.\nAKASA AIR One Four Two — vehicle on the Runway." },
           { who:"atc",   text:"AKASA AIR One Four Two, roger." },
@@ -490,7 +489,7 @@ const papers = [
       },
       {
         chartIndex:1,
-        qns:"SCENARIO 4: Approaching KALNA, One passenger falls sick. Request to Delhi due to medical emergency.",
+        qns:"SCENARIO 3 b): While passing Flight Level One Five Zero, Spice Jet Two Five One calls you and wants you to relay his position to Mumbai Control. Respond to his call.",
         answer:{ transmissions:[
           { who:"pilot",    text:"Lucknow Approach, AKASA AIR One Four Two, passing Two Thousand Seven Hundred feet, climbing to Flight Level One Eight Zero. Request Flight Level Two Hundred." },
           { who:"atc",      text:"AKASA AIR One Four Two, unable due traffic. Report reaching Flight Level One Eight Zero." },
@@ -499,19 +498,31 @@ const papers = [
       },
       {
         chartIndex:1,
-        qns:"SCENARIO 5: Request descent clearance at Delhi Airport to Flight Level 100",
+        qns:"SCENARIO 4: Your fire warning light is extinguished. You have no fuel to reach Kolkata.",
         answer:{ transmissions:[
           { who:"pilot", text:"Varanasi Control. AKASA AIR One Four Two. Position Bravo Bravo November VOR, time Zero Three Five Six, Flight Level Three One Zero. Estimating Golf Golf Charlie VOR at Zero Four One Zero. TEPAL next." }
         ]}
       },
       {
-        chartIndex:1,
-        qns:"SCENARIO 6: You reach Flight Level One Hundred. Request Priority landing at Delhi Airport",
+        chartIndex:2,
+        qns:"SCENARIO 5: You're on finals Runway Three Two, You get under carriage warning light on, take action.",
         answer:{ transmissions:[
           { who:"pilot", text:"Varanasi Control, AKASA AIR One Four Two, relaying for Victor Golf Charlie — Cessna One Seven Two. Position Five Zero nautical miles west of Gaya, maintaining Three Thousand feet on QNH Nine Nine Eight, VMC, estimating Gaya Zero Four Three One." }
         ]}
       },
-      
+      {
+        chartIndex:2,
+        qns:"SCENARIO 6 a): You landed Runway Three Two. Ask for taxi instructions.",
+        answer:{ transmissions:[
+          { who:"pilot", text:"Varanasi Control, AKASA AIR One Four Two, relaying for Victor Golf Charlie — Cessna One Seven Two. Position Five Zero nautical miles west of Gaya, maintaining Three Thousand feet on QNH Nine Nine Eight, VMC, estimating Gaya Zero Four Three One." }
+        ]}
+      },{
+        chartIndex:2,
+        qns:"SCENARIO 6 b): Your bad luck contunues. As you turn to backtrack, your right main gear collapses.",
+        answer:{ transmissions:[
+          { who:"pilot", text:"Varanasi Control, AKASA AIR One Four Two, relaying for Victor Golf Charlie — Cessna One Seven Two. Position Five Zero nautical miles west of Gaya, maintaining Three Thousand feet on QNH Nine Nine Eight, VMC, estimating Gaya Zero Four Three One." }
+        ]}
+      },
     ]
   },
 
