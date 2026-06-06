@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DGCA RTR(A) Practical Exam Simulator</title>
+<style>
+/* ============================================================
+   HOW TO EDIT THIS FILE
+   ─────────────────────────────────────────────────────────
+   Find const papers = [...] in the <script> section below.
+
+   Each paper has:
+     title, acIdent, acType, dep, dest, flightLevel, pob,
+     squawk, route, runway, taxiway, stand, endurance,
+     startTime, alternate (object with name + freq rows),
+     charts   → [{label, src}]  ← image file in same folder
+     atcFreqs → [{group, rows:[{lbl,freq}]}]
+     metar, notam (strings)
+     scenarios → [{qns, chartIndex, subQns:[...], answer:{...}}]
+
+   subQns: optional array of sub-questions shown as a) b) c)
+   chartIndex: which chart tab auto-opens (0-based)
+   transmissions who: "pilot" | "atc" | "readback"
+============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+/* ══════════════════════════════════════════════════
+   CSS VARIABLES — light & dark themes
+══════════════════════════════════════════════════ */
+body.light {
+  --bg:          #f0f4f8;
+  --bg2:         #ffffff;
+  --bg3:         #e8eef6;
+  --bg4:         #dde6f0;
+  --border:      #c0cfe0;
+  --border2:     #a8bdd4;
+  --text:        #0a1828;
+  --text2:       #2a4060;
+  --text3:       #4a6080;
+  --head-bg:     #1a3a6a;
+  --head-text:   #ffffff;
+  --head-border: #0e2a50;
+  --tab-bg:      #d8e8f8;
+  --tab-active:  #ffffff;
+  --tab-text:    #3a5878;
+  --nav-bg:      #dce8f4;
+  --nav-border:  #b0c8e0;
+  --snum-bg:     #ccdaec;
+  --snum-text:   #3a5878;
+  --snum-active-bg: #1a3a6a;
+  --snum-active-text: #ffffff;
+  --snum-done-bg:   #d0f0d8;
+  --snum-done-border:#4aaa68;
+  --snum-done-text:  #1a6030;
+  --qtext-bg:    #f8faff;
+  --qtext-border:#4a7abc;
+  --qtext-color: #0a1828;
+  --reveal-bg:   #1a3a6a;
+  --reveal-color:#ffffff;
+  --ans-pilot-bg:#e8f0fc;
+  --ans-pilot-bdr:#3a6abc;
+  --ans-atc-bg:  #fff4e0;
+  --ans-atc-bdr: #c07820;
+  --ans-rb-bg:   #e8f8ec;
+  --ans-rb-bdr:  #3a8a50;
+  --freq-bg:     #ffffff;
+  --freq-grp:    #1a3a6a;
+  --freq-lbl:    #2a4860;
+  --freq-val:    #0a1828;
+  --squawk-bg:   #fff3cd;
+  --squawk-bdr:  #ffc107;
+  --squawk-val:  #7a4800;
+  --metar-bg:    #f0f8f0;
+  --metar-bdr:   #5a9a60;
+  --metar-text:  #0a2010;
+  --notam-bg:    #fff8e0;
+  --notam-bdr:   #d4a000;
+  --notam-text:  #3a2000;
+  --action-bg:   #dce8f4;
+  --btn-prev-bg: #c8d8ec;
+  --btn-prev-color:#2a4860;
+  --btn-next-bg: #1a3a6a;
+  --btn-next-color:#ffffff;
+  --btn-done-bg: #1a6a38;
+  --btn-done-color:#ffffff;
+  --topbar-bg:   #1a3a6a;
+  --topbar-text: #ffffff;
+  --topbar-sub:  #a8c8f0;
+  --ptab-bg:     #0e2a54;
+  --ptab-active: #ffffff;
+  --ptab-active-bg: #4a7abc;
+  --timer-color: #f0d840;
+  --toggle-bg:   #0e2a54;
+  --toggle-color:#a8c8f0;
+  --fi-lbl:      #4a6888;
+  --fi-val:      #0a1828;
+}
+
+body.dark {
+  --bg:          #080c18;
+  --bg2:         #0c1020;
+  --bg3:         #0a0e1c;
+  --bg4:         #070a14;
+  --border:      #1a2a4a;
+  --border2:     #2a3a5a;
+  --text:        #c8d8f0;
+  --text2:       #8aaad0;
+  --text3:       #4a6a8a;
+  --head-bg:     #060a18;
+  --head-text:   #4a8fff;
+  --head-border: #1a2a4a;
+  --tab-bg:      #0a0e1c;
+  --tab-active:  #080c18;
+  --tab-text:    #3a5a7a;
+  --nav-bg:      #06091a;
+  --nav-border:  #1a2a4a;
+  --snum-bg:     #0a0f22;
+  --snum-text:   #304870;
+  --snum-active-bg: #182e68;
+  --snum-active-text: #4a8fff;
+  --snum-done-bg:   #091c10;
+  --snum-done-border:#1a5038;
+  --snum-done-text:  #00aa66;
+  --qtext-bg:    #0c1530;
+  --qtext-border:#4a8fff;
+  --qtext-color: #b8d0f0;
+  --reveal-bg:   #09180e;
+  --reveal-color:#00bb77;
+  --ans-pilot-bg:#08182a;
+  --ans-pilot-bdr:#4a8fff;
+  --ans-atc-bg:  #180d00;
+  --ans-atc-bdr: #ff8800;
+  --ans-rb-bg:   #06101c;
+  --ans-rb-bdr:  #2a6aaa;
+  --freq-bg:     #070a18;
+  --freq-grp:    #4a8fff;
+  --freq-lbl:    #4a6888;
+  --freq-val:    #c8d8f0;
+  --squawk-bg:   #1a1200;
+  --squawk-bdr:  #aa8000;
+  --squawk-val:  #ffcc44;
+  --metar-bg:    #05100a;
+  --metar-bdr:   #1a4020;
+  --metar-text:  #66bb66;
+  --notam-bg:    #130e00;
+  --notam-bdr:   #3a2800;
+  --notam-text:  #ffcc44;
+  --action-bg:   #06091a;
+  --btn-prev-bg: transparent;
+  --btn-prev-color:#304870;
+  --btn-next-bg: #0c1e48;
+  --btn-next-color:#4a8fff;
+  --btn-done-bg: #091810;
+  --btn-done-color:#00aa66;
+  --topbar-bg:   #060a18;
+  --topbar-text: #c8d8f0;
+  --topbar-sub:  #2a4a6a;
+  --ptab-bg:     transparent;
+  --ptab-active: #e0ecff;
+  --ptab-active-bg:#192a54;
+  --timer-color: #00d4aa;
+  --toggle-bg:   #1a2a50;
+  --toggle-color:#4a8fff;
+  --fi-lbl:      #3a5878;
+  --fi-val:      #b8d0f0;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* ══════════════════════════════════════════════════
+   TOPBAR
+══════════════════════════════════════════════════ */
+#topbar {
+  background: var(--topbar-bg);
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  height: 44px;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.logo {
+  font-size: 12px; font-weight: 800;
+  color: var(--topbar-text);
+  letter-spacing: 2px; text-transform: uppercase; white-space: nowrap;
+}
+.logo em { color: #ff6b35; font-style: normal; }
+.vdiv { width:1px; height:20px; background: var(--border2); margin:0 4px; flex-shrink:0; }
+
+/* Paper tabs */
+#ptabs { display: flex; gap: 3px; }
+.ptab {
+  padding: 5px 13px; font-size: 11px; font-weight: 700;
+  color: var(--topbar-sub); cursor: pointer;
+  border: 1px solid transparent; border-radius: 4px;
+  text-transform: uppercase; letter-spacing: .5px; transition: all .15s;
+  background: var(--ptab-bg);
+}
+.ptab:hover { color: var(--topbar-text); background: var(--ptab-active-bg); }
+.ptab.on { color: var(--ptab-active); background: var(--ptab-active-bg); border-color: var(--border2); }
+
+/* Right section */
+.tright { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+#tclock {
+  font-family: 'Courier New', monospace; font-size: 22px; font-weight: 700;
+  color: var(--timer-color); letter-spacing: 3px; min-width: 82px;
+}
+#tclock.w { color: #ffaa00; }
+#tclock.d { color: #ff4444; animation: blink .8s infinite; }
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:.3} }
+.tbtn {
+  padding: 4px 11px; font-size: 10px; font-weight: 700;
+  border: 1px solid var(--border2); background: var(--toggle-bg);
+  color: var(--toggle-color); border-radius: 3px; cursor: pointer;
+  letter-spacing: .5px; text-transform: uppercase;
+}
+.tbtn:hover { opacity: .85; }
+#theme-toggle {
+  padding: 4px 11px; font-size: 10px; font-weight: 700;
+  border: 1px solid var(--border2); background: var(--toggle-bg);
+  color: var(--toggle-color); border-radius: 3px; cursor: pointer;
+  letter-spacing: .5px; text-transform: uppercase;
+}
+.train-badge { font-size: 9px; color: var(--topbar-sub); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+
+/* ══════════════════════════════════════════════════
+   SCENARIO NAV BAR (below topbar, full width)
+══════════════════════════════════════════════════ */
+#scen-topbar {
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--nav-border);
+  display: flex;
+  align-items: center;
+  padding: 6px 14px;
+  gap: 6px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.scen-label {
+  font-size: 10px; font-weight: 700;
+  color: var(--text3); letter-spacing: 1px; text-transform: uppercase;
+  margin-right: 4px; white-space: nowrap;
+}
+.snum {
+  width: 32px; height: 32px; border-radius: 4px;
+  border: 1px solid var(--border); background: var(--snum-bg);
+  color: var(--snum-text); font-size: 11px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.snum:hover { opacity: .85; }
+.snum.on { background: var(--snum-active-bg); color: var(--snum-active-text); border-color: var(--border2); }
+.snum.dn { background: var(--snum-done-bg); border-color: var(--snum-done-border); color: var(--snum-done-text); }
+#scen-info { margin-left: auto; font-size: 10px; color: var(--text3); letter-spacing: 1px; font-weight: 700; }
+
+/* ══════════════════════════════════════════════════
+   MAIN GRID  —  left 68% | right 32%
+══════════════════════════════════════════════════ */
+#grid {
+  flex: 1; display: grid;
+  grid-template-columns: 68% 32%;
+  grid-template-rows: 55% 45%;
+  min-height: 0;
+}
+
+/* Shared panel head */
+.phead {
+  background: var(--head-bg);
+  border-bottom: 1px solid var(--head-border);
+  padding: 6px 14px;
+  font-size: 10px; font-weight: 800; letter-spacing: 2px;
+  color: var(--head-text); text-transform: uppercase; text-align: center;
+  flex-shrink: 0;
+}
+
+/* ── TL: CHART ── */
+#pchart {
+  grid-column:1; grid-row:1;
+  display: flex; flex-direction: column;
+  border-right: 2px solid var(--border);
+  border-bottom: 2px solid var(--border);
+  overflow: hidden; background: var(--bg4);
+}
+#chart-tabs {
+  display: flex; gap: 2px; padding: 5px 8px 0;
+  background: var(--tab-bg); border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.ctab {
+  padding: 4px 14px; font-size: 10px; font-weight: 700;
+  color: var(--tab-text); cursor: pointer;
+  border: 1px solid transparent; border-bottom: none;
+  border-radius: 4px 4px 0 0; transition: all .12s;
+}
+.ctab:hover { opacity: .8; }
+.ctab.on { color: var(--text); background: var(--tab-active); border-color: var(--border); font-weight: 800; }
+
+/* Chart zoom wrapper */
+#chart-wrap {
+  flex: 1; overflow: hidden; position: relative; background: var(--bg4);
+  cursor: grab;
+}
+#chart-wrap.grabbing { cursor: grabbing; }
+#chart-inner {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  transform-origin: center center;
+  transition: none;
+}
+#chart-inner img { max-width: 100%; max-height: 100%; object-fit: contain; user-select: none; pointer-events: none; }
+.no-chart {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: var(--text3);
+}
+.no-chart p { font-size: 10px; letter-spacing: 1px; }
+
+/* Zoom controls */
+#zoom-btns {
+  position: absolute; bottom: 8px; right: 10px;
+  display: flex; flex-direction: column; gap: 3px; z-index: 10;
+}
+.zbtn {
+  width: 28px; height: 28px; border-radius: 4px;
+  background: var(--head-bg); color: var(--head-text);
+  border: 1px solid var(--border2); font-size: 16px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  opacity: .8;
+}
+.zbtn:hover { opacity: 1; }
+
+/* ── TR: FLIGHT INFO ── */
+#pinfo {
+  grid-column:2; grid-row:1;
+  display: flex; flex-direction: column;
+  border-bottom: 2px solid var(--border);
+  overflow: hidden; background: var(--bg2);
+}
+#fi-body {
+  flex: 1; display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 8px 10px; gap: 2px 12px;
+  align-content: space-around; overflow: hidden;
+}
+.fi-row { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); padding: 3px 0; }
+.fi-row:last-child { border-bottom: none; }
+.fi-lbl { font-size: 9px; font-weight: 700; letter-spacing: .3px; color: var(--fi-lbl); text-transform: uppercase; }
+.fi-val { font-size: 12px; font-weight: 800; color: var(--fi-val); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fi-val.blue   { color: #1a6ac0; }
+.fi-val.green  { color: #1a8040; }
+.fi-val.amber  { color: #8a5000; }
+.fi-val.purple { color: #6030a0; }
+.fi-val.red    { color: #c02020; }
+body.dark .fi-val.blue   { color: #4a9fff; }
+body.dark .fi-val.green  { color: #00cc88; }
+body.dark .fi-val.amber  { color: #ffaa44; }
+body.dark .fi-val.purple { color: #aa88ff; }
+body.dark .fi-val.red    { color: #ff6666; }
+
+/* ── BL: QUESTIONS ── */
+#pqns {
+  grid-column:1; grid-row:2;
+  display: flex; flex-direction: column;
+  border-right: 2px solid var(--border);
+  overflow: hidden; background: var(--bg);
+}
+#qbody { flex: 1; overflow-y: auto; padding: 10px 14px; }
+.qbadge {
+  display: inline-block; background: var(--head-bg);
+  color: var(--head-text); font-size: 9px; font-weight: 700;
+  padding: 2px 9px; border-radius: 3px; letter-spacing: 1px;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.qtitle {
+  font-size: 13px; font-weight: 800; color: var(--qtext-color);
+  line-height: 1.7; background: var(--qtext-bg);
+  border: 1px solid var(--border); border-left: 4px solid var(--qtext-border);
+  border-radius: 0 5px 5px 0; padding: 10px 12px; margin-bottom: 10px;
+  white-space: pre-line;
+}
+/* Sub-questions a) b) c) */
+.subqns-wrap { margin-bottom: 12px; }
+.subq {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 6px 10px; border-radius: 4px;
+  border: 1px solid var(--border); margin-bottom: 5px;
+  background: var(--bg2); font-size: 12px; color: var(--text); line-height: 1.6;
+}
+.subq-letter {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--head-bg); color: var(--head-text);
+  font-size: 11px; font-weight: 800; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+.subq-text { flex: 1; font-size: 12px; font-weight: 600; }
+.hint-text {
+  font-size: 10px; color: var(--text3); font-style: italic;
+  margin-bottom: 10px; margin-top: -4px;
+}
+
+#rbtn {
+  padding: 7px 16px; font-size: 10px; font-weight: 700;
+  border: 1px solid var(--border); background: var(--reveal-bg);
+  color: var(--reveal-color); border-radius: 4px; cursor: pointer;
+  letter-spacing: 1px; text-transform: uppercase; transition: all .15s;
+  margin-bottom: 10px;
+}
+#rbtn:hover { opacity: .85; }
+#ansbox { display: none; }
+#ansbox.vis { display: block; }
+.anshdr { font-size: 9px; font-weight: 700; color: var(--snum-done-text); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 7px; }
+.tx { padding: 8px 12px; border-radius: 4px; font-size: 12px; line-height: 1.6; margin-bottom: 6px; white-space: pre-line; }
+.twho { font-size: 9px; font-weight: 700; letter-spacing: 1px; margin-bottom: 2px; text-transform: uppercase; }
+.tx.pilot    { background: var(--ans-pilot-bg); border-left: 3px solid var(--ans-pilot-bdr); }
+.tx.pilot .twho  { color: var(--ans-pilot-bdr); }
+.tx.atc      { background: var(--ans-atc-bg); border-left: 3px solid var(--ans-atc-bdr); }
+.tx.atc .twho    { color: var(--ans-atc-bdr); }
+.tx.readback { background: var(--ans-rb-bg); border-left: 3px solid var(--ans-rb-bdr); }
+.tx.readback .twho { color: var(--ans-rb-bdr); }
+
+#qactions {
+  display: flex; gap: 7px; padding: 8px 12px;
+  border-top: 1px solid var(--border); background: var(--action-bg); flex-shrink: 0;
+}
+.abtn {
+  padding: 7px 18px; font-size: 11px; font-weight: 700;
+  border-radius: 4px; cursor: pointer; letter-spacing: .5px;
+  text-transform: uppercase; transition: all .12s; border: 1px solid var(--border);
+}
+.abtn-p { background: var(--btn-prev-bg); color: var(--btn-prev-color); }
+.abtn-n { background: var(--btn-next-bg); color: var(--btn-next-color); border-color: var(--border2); }
+.abtn-d { background: var(--btn-done-bg); color: var(--btn-done-color); border-color: var(--snum-done-border); margin-left: auto; }
+.abtn:hover { opacity: .85; }
+
+/* ── BR: FREQ + ATIS + NOTAM (no scroll, all visible) ── */
+#pbr {
+  grid-column:2; grid-row:2;
+  display: flex; flex-direction: column;
+  overflow: hidden; background: var(--bg2);
+}
+
+/* Each right sub-section */
+.rs { flex: 1; display: flex; flex-direction: column; border-bottom: 1px solid var(--border); min-height: 0; overflow: hidden; }
+.rs:last-child { border-bottom: none; }
+.rs-head {
+  background: var(--head-bg); border-bottom: 1px solid var(--head-border);
+  padding: 4px 12px; font-size: 9px; font-weight: 800; letter-spacing: 2px;
+  color: var(--head-text); text-transform: uppercase; flex-shrink: 0;
+}
+.rs-body { flex: 1; padding: 5px 10px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-evenly; }
+
+/* Frequency table */
+.fgrp { font-size: 9px; font-weight: 800; letter-spacing: 1.5px; color: var(--freq-grp); text-transform: uppercase; padding: 3px 0 1px; border-bottom: 1px solid var(--border); margin-bottom: 1px; }
+.frow { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; border-bottom: 1px solid var(--border); }
+.frow:last-child { border-bottom: none; }
+.frow-l { font-size: 11px; font-weight: 700; color: var(--freq-lbl); text-transform: uppercase; }
+.frow-v { font-size: 14px; font-weight: 900; color: var(--freq-val); font-family: 'Courier New', monospace; }
+
+/* Squawk highlight */
+.squawk-row {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--squawk-bg); border: 1px solid var(--squawk-bdr);
+  border-radius: 4px; padding: 5px 10px; margin-top: 4px;
+}
+.squawk-lbl { font-size: 11px; font-weight: 800; color: var(--squawk-val); text-transform: uppercase; letter-spacing: 1px; }
+.squawk-val { font-size: 16px; font-weight: 900; color: var(--squawk-val); font-family: 'Courier New', monospace; letter-spacing: 2px; }
+
+/* METAR */
+.metar-box {
+  font-family: 'Courier New', monospace; font-size: 11px; line-height: 1.6;
+  background: var(--metar-bg); border: 1px solid var(--metar-bdr);
+  color: var(--metar-text); border-radius: 4px; padding: 6px 8px;
+}
+/* NOTAM */
+.notam-box {
+  font-size: 11px; font-weight: 700; line-height: 1.6;
+  background: var(--notam-bg); border: 1px solid var(--notam-bdr);
+  color: var(--notam-text); border-radius: 4px; padding: 6px 8px;
+  white-space: pre-line;
+}
+/* Alternate */
+.alt-name { font-size: 12px; font-weight: 800; color: var(--fi-val); margin-bottom: 4px; }
+.alt-freq-row { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid var(--border); }
+.alt-freq-row:last-child { border-bottom: none; }
+.alt-fl { font-size: 10px; color: var(--fi-lbl); text-transform: uppercase; }
+.alt-fv { font-size: 13px; font-weight: 900; color: var(--freq-val); font-family: 'Courier New', monospace; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body class="light">
+
+<!-- ══ TOPBAR ══ -->
+<div id="topbar">
+  <div class="logo">DGCA <em>RTR(A)</em> Simulator</div>
+    <a href="../index.html" style="padding:4px 12px;font-size:10px;font-weight:700;border:1px solid var(--border2);background:var(--toggle-bg);color:var(--toggle-color);border-radius:3px;cursor:pointer;letter-spacing:.5px;text-transform:uppercase;text-decoration:none;display:flex;align-items:center;gap:5px;flex-shrink:0;">&#8592; HOME</a>
+  <div class="vdiv"></div>
+  <div id="ptabs"></div>
+  <div class="tright">
+    <span id="tclock">30:00</span>
+    <button class="tbtn" onclick="startT()">▶ START</button>
+    <button class="tbtn" onclick="pauseT()">⏸ PAUSE</button>
+    <button class="tbtn" onclick="resetT()">↺ RESET</button>
+    <div class="vdiv"></div>
+    <button id="theme-toggle" onclick="toggleTheme()">🌙 DARK</button>
+    <div class="vdiv"></div>
+    <span class="train-badge">FOR TRAINING USE ONLY</span>
+  </div>
+</div>
+
+<!-- ══ SCENARIO NAV (top, full width) ══ -->
+<div id="scen-topbar">
+  <span class="scen-label">Scenario</span>
+  <div id="scen-nav"></div>
+  <span id="scen-info"></span>
+</div>
+
+<!-- ══ GRID ══ -->
+<div id="grid">
+
+  <!-- TL: CHART -->
+  <div id="pchart">
+    <div class="phead" id="chart-head">Airway / Aerodrome Charts Section</div>
+    <div id="chart-tabs"></div>
+    <div id="chart-wrap">
+      <div id="chart-inner">
+        <div class="no-chart">
+          <svg width="50" height="50" viewBox="0 0 56 56" fill="none"><rect x="3" y="3" width="50" height="50" rx="5" stroke="#4a6a8a" stroke-width="1.5"/><path d="M10 42L10 26L22 14L34 24L46 10" stroke="#4a6a8a" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="46" cy="10" r="4" fill="#ff6b35" opacity=".5"/></svg>
+          <p>PLACE CHART IMAGE IN SAME FOLDER AS HTML</p>
+          <p style="font-size:9px">Then set src:"filename.jpg" in charts array</p>
+        </div>
+      </div>
+      <div id="zoom-btns">
+        <button class="zbtn" onclick="zoomIn()">+</button>
+        <button class="zbtn" onclick="zoomOut()">−</button>
+        <button class="zbtn" onclick="zoomReset()" style="font-size:11px">⟳</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TR: FLIGHT INFO -->
+  <div id="pinfo">
+    <div class="phead">Flight Information</div>
+    <div id="fi-body">
+      <div class="fi-row"><span class="fi-lbl">Aircraft Identification</span><span class="fi-val blue"   id="fi-ident">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">Type of Aircraft</span>       <span class="fi-val"        id="fi-type">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">Departure Aerodrome</span>    <span class="fi-val green"  id="fi-dep">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">Destination Aerodrome</span>  <span class="fi-val green"  id="fi-dest">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">ATS Route</span>              <span class="fi-val amber"  id="fi-route">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">Stand — RWY — TWY</span>      <span class="fi-val"        id="fi-ops">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">FL — POB</span>               <span class="fi-val amber"  id="fi-flpob">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">Alternate Aerodrome</span>    <span class="fi-val purple" id="fi-alt">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">Endurance</span>              <span class="fi-val"        id="fi-end">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">Exercise Start Time</span>    <span class="fi-val"        id="fi-start">—</span></div>
+    </div>
+  </div>
+
+  <!-- BL: QUESTIONS -->
+  <div id="pqns">
+    <div class="phead">Questions</div>
+    <div id="qbody">
+      <div class="qbadge" id="qbadge">Scenario 1</div>
+      <div class="qtitle" id="qtitle">Select a scenario above to begin.</div>
+      <div class="subqns-wrap" id="subqns-wrap"></div>
+      <p class="hint-text" id="hint-text"></p>
+      <button id="rbtn" onclick="revealAns()">▼ Show Model Answer</button>
+      <div id="ansbox">
+        <div class="anshdr">— Model Answer —</div>
+        <div id="anscontent"></div>
+      </div>
+    </div>
+    <div id="qactions">
+      <button class="abtn abtn-p" onclick="prevS()">◀ Previous</button>
+      <button class="abtn abtn-n" onclick="nextS()">Next Scenario →</button>
+      <button class="abtn abtn-d" onclick="markDone()">✓ Mark Done</button>
+    </div>
+  </div>
+
+  <!-- BR: ALL INFO NO SCROLL -->
+  <div id="pbr">
+
+    <!-- Frequencies -->
+    <div class="rs">
+      <div class="rs-head">Frequencies In Use</div>
+      <div class="rs-body" id="rs-freq"></div>
+    </div>
+
+    <!-- Alternate -->
+    <div class="rs">
+      <div class="rs-head">Alternate Aerodrome</div>
+      <div class="rs-body" id="rs-alt"></div>
+    </div>
+
+    <!-- METAR -->
+    <div class="rs">
+      <div class="rs-head">ATIS / METAR</div>
+      <div class="rs-body" id="rs-metar" style="justify-content:center"></div>
+    </div>
+
+    <!-- NOTAM -->
+    <div class="rs">
+      <div class="rs-head">NOTAM / Other Information</div>
+      <div class="rs-body" id="rs-notam" style="justify-content:center"></div>
+    </div>
+
+  </div>
+
+</div><!-- /grid -->
+
+<script>
+/* ================================================================
+   ██████╗  █████╗ ████████╗ █████╗
+   ██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗
+   ██║  ██║███████║   ██║   ███████║
+   ██║  ██║██╔══██║   ██║   ██╔══██║
+   ██████╔╝██║  ██║   ██║   ██║  ██║
+   ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
+
+   EDIT THE papers[] ARRAY BELOW TO ADD YOUR CONTENT
+================================================================ */
+const papers = [
+
+  /* ════════════════════════════════════════════════
+     VT-KNT  |  VABP → VECC
+  ════════════════════════════════════════════════ */
+  {
+    title: "VT-KNT",
+
+    /* Flight Info */
+    acIdent:    "VT-KNT",
+    acType:     "ATR 72",
+    dep:        "VABP — Bhopal",
+    dest:       "VECC — Kolkata",
+    route:      "A 791",
+    stand:      "01",
+    runway:     "32",
+    taxiway:    "D, E",
+    flightLevel:"FL 210",
+    pob:        "47",
+    squawk:     "4312",
+    endurance:  "03:00 Hrs",
+    startTime:  "0900 UTC",
+
+    /* Alternate aerodrome */
+    alternate: {
+      name: "VAJB — Jabalpur",
+      rows: [
+        { lbl:"Tower",    freq:"118.3" },
+        { lbl:"Approach", freq:"122.3" }
+      ]
+    },
+
+    /* Charts — place image files in same folder as this HTML */
+    charts: [
+      { label:"Aerodrome — VABP", src:"CHART 1.jpg"  },
+      { label:"Route Chart",      src:"CHART2.jpg"    },
+      { label:"Route Chart 2",    src:"CHART3.jpg"    },
+      { label:"Aerodrome — JLR",  src:"CHART4.jpg"    }
+    ],
+
+    /* ATC Frequencies (departure & destination only — alternate shown separately) */
+    atcFreqs: [
+      { group:"VABP — Bhopal", rows:[
+        { lbl:"Ground",   freq:"118.05"  },
+        { lbl:"Tower",    freq:"118.550" }
+      ]},
+      { group:"Nagpur", rows:[
+        { lbl:"Arrival",  freq:"125.1"   }
+      ]},
+      { group:"VECC — Kolkata", rows:[
+        { lbl:"Control",  freq:"126.40"  }
+      ]}
+    ],
+
+    metar: "VABP 091230Z\nWIND 300/10KT VIS 6000M NSW\nFEW020 SCT100\nTEMP 22 DEWPT 14 QNH 1012 HPA",
+    notam: "• Nagpur Arrival: 125.1",
+
+    /* Scenarios
+       qns       — main question text (bold, shown above sub-questions)
+       subQns    — optional a/b/c/d sub-questions array of strings
+       chartIndex — which chart tab opens (0-based)
+       answer    — model answer transmissions */
+    scenarios: [
+      {
+        chartIndex: 0,
+        qns: "SCENARIO 1a: Transmit the following phrases as per R/T procedure:",
+        subQns: [
+          "Ignore",
+          "I repeat for clarity or emphasis",
+          "I wish to obtain.....",
+          "Squawk 2000",
+          "Heading 100 degrees"
+        ],
+        answer: { transmissions: [
+          { who:"pilot", text:"(i)   Ignore  →  DISREGARD" },
+          { who:"pilot", text:"(ii)  I repeat for clarity/emphasis  →  I SAY AGAIN" },
+          { who:"pilot", text:"(iii) I wish to obtain...  →  REQUEST" },
+          { who:"pilot", text:"(iv)  Squawk 2000  →  SQUAWK TWO THOUSAND" },
+          { who:"pilot", text:"(v)   Heading 100 degrees  →  HEADING ONE ZERO ZERO" }
+        ]}
+      },
+      {
+        chartIndex: 0,
+        qns: "SCENARIO 1b: You are at Stand 1. Request ATC clearance, push back and start.\n(ATIS: Information Hotel, QNH 1012)",
+        answer: { transmissions: [
+          { who:"pilot",    text:"Bhopal Ground, Victor Tango Kilo November Tango, stand One, information Hotel, QNH One Zero One Two, IFR to Kolkata, request ATC clearance and start up." },
+          { who:"atc",      text:"Victor Tango Kilo November Tango, cleared to Kolkata via flight planned route, Flight Level Two One Zero, squawk Four Three One Two. Pushback and start approved facing East." },
+          { who:"readback", text:"Cleared to Kolkata via flight planned route, Flight Level Two One Zero, squawk Four Three One Two, pushback and start approved facing East. Victor Tango Kilo November Tango." }
+        ]}
+      },
+      {
+        chartIndex: 1,
+        qns: "SCENARIO 2a: Taxi Request.",
+        answer: { transmissions: [
+          { who:"pilot",    text:"Bhopal Ground, Victor Tango Kilo November Tango, information Hotel, security check completed, persons on board Four Seven, request taxi." },
+          { who:"atc",      text:"Victor November Tango, taxi via Delta and Echo, hold short Runway Three Zero. Contact Tower One One Eight decimal Five Five Zero." },
+          { who:"readback", text:"Taxi via Delta and Echo, hold short Runway Three Zero. Tower One One Eight decimal Five Five Zero. Victor November Tango." }
+        ]}
+      },
+      {
+        chartIndex: 1,
+        qns: "SCENARIO 2b: You're holding short of Runway Three Zero on Taxiway E. You see Air India 321 on finals. Request line up and departure.",
+        answer: { transmissions: [
+          { who:"pilot",    text:"Bhopal Tower, Victor November Tango at holding point Echo, Runway Three Zero. Air India Three Two One on finals in sight. Request backtrack and line up Runway Three Zero after Air India clears abeam Echo link. Ready for departure." },
+          { who:"atc",      text:"Victor November Tango, behind Air India Three Two One on final, line up behind and wait, Runway Three Zero." },
+          { who:"readback", text:"Behind Air India Three Two One on final, line up behind and wait Runway Three Zero. Victor November Tango." }
+        ]}
+      },
+      {
+        chartIndex: 2,
+        qns: "SCENARIO 3: Report your position over JJB VOR and request higher level.\n(Time: 1430Z, FL210, next: IBUDA at 45, ARIVO next)",
+        answer: { transmissions: [
+          { who:"pilot",    text:"Nagpur Approach, Victor Tango Kilo November Tango, over Juliette Juliette Bravo VOR at One Four Three Zero, Flight Level Two One Zero, estimating IBUDA at Four Five, ARIVO next. Request Flight Level Two Three Zero due light turbulence." },
+          { who:"atc",      text:"Victor Tango Kilo November Tango, maintain Flight Level Two One Zero due traffic, report IBUDA." },
+          { who:"readback", text:"Flight Level Two One Zero, will report IBUDA. Victor Tango Kilo November Tango." }
+        ]}
+      },
+      {
+        chartIndex: 2,
+        qns: "SCENARIO 4: 80 NM outbound JJB VOR — engine vibrations experienced. Divert to Jabalpur.\n(Pos: 80 DME R092 JJB VOR | FL210 | POB 47 | Endurance 3 hrs | ETA JJB 1316)",
+        answer: { transmissions: [
+          { who:"pilot",    text:"PAN PAN. PAN PAN. PAN PAN.\nNagpur Arrival, Victor Tango Kilo November Tango, position Eight Zero DME, radial Zero Nine Two outbound from Juliette Juliette Bravo VOR, Flight Level Two One Zero. Experiencing abnormal vibrations. Diverting to Jabalpur. Request descent. Persons on board Four Seven. Fuel endurance Three Hours. ETA JJB One Three One Six." },
+          { who:"atc",      text:"Victor Tango Kilo November Tango, Nagpur Control, roger PAN PAN. Descend to Flight Level One Two Zero. Cleared direct Jabalpur." },
+          { who:"readback", text:"Descend to Flight Level One Two Zero. Cleared direct Jabalpur. Victor Tango Kilo November Tango." }
+        ]}
+      },
+      {
+        chartIndex: 3,
+        qns: "SCENARIO 5: Enroute to Jabalpur — port engine catches fire.\n(Pos: 26 DME inbound JJB VOR | Passing FL160 descending | POB 47 | Endurance 2 hrs)",
+        answer: { transmissions: [
+          { who:"pilot",    text:"MAYDAY. MAYDAY. MAYDAY.\nNagpur Control, Victor Tango Kilo November Tango, ATR Seven Two. Switched off port engine due fire. Position Two Six DME inbound Juliette Juliette Bravo VOR. Passing Flight Level One Six Zero descending. Request descend to Five Thousand feet and contact Jabalpur tower for emergency landing. Squawking Seven Seven Zero Zero. Persons on board Four Seven. Fuel endurance Two Hours." },
+          { who:"atc",      text:"Victor Tango Kilo November Tango, roger MAYDAY. Clear descend to Five Thousand feet QNH Nine Nine Eight. Contact Jabalpur Tower on One One Eight decimal Three." },
+          { who:"readback", text:"Descend to Five Thousand feet QNH Nine Nine Eight. Contact Jabalpur Tower on One One Eight decimal Three. Victor Tango Kilo November Tango." }
+        ]}
+      },
+      {
+        chartIndex: 3,
+        qns: "SCENARIO 6: You land at Jabalpur but are not familiar with the aerodrome layout. Ask ATC for taxi instructions and emergency services.",
+        answer: { transmissions: [
+          { who:"pilot",    text:"Jabalpur Tower, Victor Tango Kilo November Tango, landed Runway Two Four, approaching Alfa taxiway, request progressive taxi instructions, unfamiliar with aerodrome layout." },
+          { who:"atc",      text:"Victor Tango Kilo November Tango, taxi via Alfa to parking stand Two. Follow the follow-me vehicle. Emergency services proceeding to your location." },
+          { who:"readback", text:"Taxi via Alfa to stand Two, follow-me vehicle in sight. Victor Tango Kilo November Tango." }
+        ]}
+      }
+    ]
+  }
+
+  /* ── ADD MORE PAPERS HERE following the same structure ── */
+];
+
+/* ================================================================
+   APP ENGINE
+================================================================ */
+let cp=0, cs=0;
+const done = papers.map(()=>new Set());
+let tSec=1800, tOn=false, tInt=null;
+
+/* Theme */
+function toggleTheme(){
+  const b=document.body;
+  const isDark=b.classList.toggle('dark');
+  b.classList.toggle('light',!isDark);
+  document.getElementById('theme-toggle').textContent=isDark?'☀ LIGHT':'🌙 DARK';
+}
+
+function init(){
+  // paper tabs
+  document.getElementById('ptabs').innerHTML=
+    papers.map((p,i)=>`<div class="ptab${i===0?' on':''}" onclick="loadPaper(${i})">${p.title}</div>`).join('');
+  loadPaper(0);
+}
+
+function loadPaper(i){
+  cp=i; cs=0;
+  document.querySelectorAll('.ptab').forEach((t,j)=>t.classList.toggle('on',j===i));
+  const p=papers[i];
+
+  // Flight info
+  document.getElementById('fi-ident').textContent  = p.acIdent;
+  document.getElementById('fi-type').textContent   = p.acType;
+  document.getElementById('fi-dep').textContent    = p.dep;
+  document.getElementById('fi-dest').textContent   = p.dest;
+  document.getElementById('fi-route').textContent  = p.route;
+  document.getElementById('fi-ops').textContent    = `${p.stand}   RWY ${p.runway}   TWY ${p.taxiway}`;
+  document.getElementById('fi-flpob').textContent  = `${p.flightLevel}   POB ${p.pob}`;
+  document.getElementById('fi-alt').textContent    = p.alternate.name;
+  document.getElementById('fi-end').textContent    = p.endurance||'—';
+  document.getElementById('fi-start').textContent  = p.startTime||'—';
+
+  // Frequencies
+  document.getElementById('rs-freq').innerHTML=
+    p.atcFreqs.map(g=>
+      `<div class="fgrp">${g.group}</div>`+
+      g.rows.map(r=>`<div class="frow"><span class="frow-l">${r.lbl}</span><span class="frow-v">${r.freq}</span></div>`).join('')
+    ).join('')+
+    `<div class="squawk-row"><span class="squawk-lbl">Squawk</span><span class="squawk-val">${p.squawk}</span></div>`;
+
+  // Alternate
+  const alt=p.alternate;
+  document.getElementById('rs-alt').innerHTML=
+    `<div class="alt-name">${alt.name}</div>`+
+    alt.rows.map(r=>`<div class="alt-freq-row"><span class="alt-fl">${r.lbl}</span><span class="alt-fv">${r.freq}</span></div>`).join('');
+
+  // METAR / NOTAM
+  document.getElementById('rs-metar').innerHTML=`<div class="metar-box">${p.metar}</div>`;
+  document.getElementById('rs-notam').innerHTML=`<div class="notam-box">${p.notam}</div>`;
+
+  // Charts + scenarios
+  buildChartTabs(0);
+  buildScenNav();
+  loadScenario(0);
+  resetT();
+}
+
+/* Chart tabs */
+function buildChartTabs(ai){
+  const p=papers[cp];
+  document.getElementById('chart-tabs').innerHTML=
+    p.charts.map((c,i)=>`<div class="ctab${i===ai?' on':''}" onclick="switchChart(${i})">${c.label}</div>`).join('');
+  showChart(p,ai);
+}
+function switchChart(i){
+  document.querySelectorAll('.ctab').forEach((t,j)=>t.classList.toggle('on',j===i));
+  showChart(papers[cp],i);
+  zoomReset();
+}
+function showChart(p,i){
+  const c=p.charts[i];
+  const inn=document.getElementById('chart-inner');
+  if(c&&c.src){
+    inn.innerHTML=`<img src="${c.src}" alt="${c.label}" onerror="this.outerHTML='<div class=no-chart><p>IMAGE NOT FOUND: ${c.src}</p><p style=font-size:9px>Place file in same folder as HTML</p></div>'">`;
+  } else {
+    inn.innerHTML=`<div class="no-chart"><p>NO CHART ASSIGNED</p></div>`;
+  }
+}
+
+/* Zoom & pan */
+let zScale=1, zX=0, zY=0, dragging=false, dragStart={x:0,y:0};
+function applyTransform(){
+  document.getElementById('chart-inner').style.transform=`translate(${zX}px,${zY}px) scale(${zScale})`;
+}
+function zoomIn(){ zScale=Math.min(zScale+0.25,5); applyTransform(); }
+function zoomOut(){ zScale=Math.max(zScale-0.25,0.5); applyTransform(); }
+function zoomReset(){ zScale=1; zX=0; zY=0; applyTransform(); }
+
+(function setupDrag(){
+  const wrap=document.getElementById('chart-wrap');
+  wrap.addEventListener('wheel',e=>{
+    e.preventDefault();
+    if(e.deltaY<0) zoomIn(); else zoomOut();
+  },{passive:false});
+  wrap.addEventListener('mousedown',e=>{
+    dragging=true; dragStart={x:e.clientX-zX, y:e.clientY-zY};
+    wrap.classList.add('grabbing');
+  });
+  window.addEventListener('mousemove',e=>{
+    if(!dragging)return;
+    zX=e.clientX-dragStart.x; zY=e.clientY-dragStart.y;
+    applyTransform();
+  });
+  window.addEventListener('mouseup',()=>{ dragging=false; document.getElementById('chart-wrap').classList.remove('grabbing'); });
+})();
+
+/* Scenario nav */
+function buildScenNav(){
+  const p=papers[cp];
+  document.getElementById('scen-nav').innerHTML=
+    p.scenarios.map((s,i)=>{
+      const d=done[cp].has(i);
+      return `<div class="snum${i===cs?' on':''}${d?' dn':''}" onclick="loadScenario(${i})">${i+1}</div>`;
+    }).join('');
+  document.getElementById('scen-info').textContent=`${cs+1} OF ${p.scenarios.length}`;
+}
+
+function loadScenario(i){
+  cs=i;
+  const p=papers[cp]; const s=p.scenarios[i];
+  document.querySelectorAll('.snum').forEach((b,j)=>b.classList.toggle('on',j===i));
+  document.getElementById('scen-info').textContent=`${i+1} OF ${p.scenarios.length}`;
+  document.getElementById('qbadge').textContent=`Scenario ${i+1}`;
+  document.getElementById('qtitle').textContent=s.qns;
+
+  // Sub-questions
+  const sw=document.getElementById('subqns-wrap');
+  const letters='abcdefghijklmnopqrstuvwxyz';
+  if(s.subQns&&s.subQns.length){
+    sw.innerHTML=s.subQns.map((q,j)=>
+      `<div class="subq"><div class="subq-letter">${letters[j]}</div><div class="subq-text">${q}</div></div>`
+    ).join('');
+    document.getElementById('hint-text').textContent='Write your RT phraseology response for each question.';
+  } else {
+    sw.innerHTML='';
+    document.getElementById('hint-text').textContent='';
+  }
+
+  // Hide answer
+  document.getElementById('ansbox').classList.remove('vis');
+  document.getElementById('anscontent').innerHTML='';
+  document.getElementById('rbtn').textContent='▼ Show Model Answer';
+
+  // Auto chart
+  if(s.chartIndex!==undefined){
+    document.querySelectorAll('.ctab').forEach((t,j)=>t.classList.toggle('on',j===s.chartIndex));
+    showChart(p,s.chartIndex);
+    zoomReset();
+  }
+}
+
+function revealAns(){
+  const s=papers[cp].scenarios[cs];
+  const ab=document.getElementById('ansbox');
+  if(ab.classList.contains('vis')){
+    ab.classList.remove('vis');
+    document.getElementById('rbtn').textContent='▼ Show Model Answer';
+    return;
+  }
+  const map={pilot:['pilot','✈ Pilot'],atc:['atc','📻 ATC'],readback:['readback','↺ Readback']};
+  document.getElementById('anscontent').innerHTML=
+    s.answer.transmissions.map(t=>{
+      const[cls,lbl]=map[t.who]||['pilot','Pilot'];
+      return `<div class="tx ${cls}"><div class="twho">${lbl}</div>${t.text}</div>`;
+    }).join('');
+  ab.classList.add('vis');
+  document.getElementById('rbtn').textContent='▲ Hide Answer';
+  done[cp].add(cs);
+  buildScenNav();
+}
+
+function markDone(){ done[cp].add(cs); buildScenNav(); nextS(); }
+function prevS(){ if(cs>0) loadScenario(cs-1); }
+function nextS(){ if(cs<papers[cp].scenarios.length-1) loadScenario(cs+1); }
+
+/* Timer */
+function updT(){
+  const m=Math.floor(tSec/60),s=tSec%60;
+  const el=document.getElementById('tclock');
+  el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className=tSec<=300?'d':tSec<=600?'w':'';
+}
+function startT(){ if(tOn)return; tOn=true; tInt=setInterval(()=>{ if(tSec>0){tSec--;updT();}else{clearInterval(tInt);tOn=false;}},1000); }
+function pauseT(){ clearInterval(tInt); tOn=false; }
+function resetT(){ pauseT(); tSec=1800; updT(); }
+
+init();
+</script>
+</body>
+</html>

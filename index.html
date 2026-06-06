@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DGCA RTR Practice Simulator</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── THEME VARIABLES ── */
+body.light {
+  --bg:           #f0f4f8;
+  --bg2:          #ffffff;
+  --bg3:          #e4edf8;
+  --border:       #c0cfe0;
+  --text:         #0a1828;
+  --text2:        #2a4060;
+  --text3:        #5a7090;
+  --topbar-bg:    #1a3a6a;
+  --topbar-text:  #ffffff;
+  --topbar-sub:   #a8c8f0;
+  --card-bg:      #ffffff;
+  --card-border:  #c0d0e8;
+  --card-hover:   #e8f0fc;
+  --card-shadow:  rgba(10,30,80,0.10);
+  --card-text:    #0a1828;
+  --badge-bg:     #e0ecff;
+  --badge-text:   #1a3a6a;
+  --accent:       #1a3a6a;
+  --accent2:      #ff6b35;
+  --hero-text:    #0a1828;
+  --hero-sub:     #3a5878;
+  --divider:      #c0cfe0;
+  --footer-text:  #8aaac8;
+  --toggle-bg:    #0e2a54;
+  --toggle-color: #a8c8f0;
+  --count-bg:     #1a3a6a;
+  --count-text:   #ffffff;
+}
+
+body.dark {
+  --bg:           #080c18;
+  --bg2:          #0c1020;
+  --bg3:          #0a0e1c;
+  --border:       #1a2a4a;
+  --text:         #c8d8f0;
+  --text2:        #8aaad0;
+  --text3:        #4a6a8a;
+  --topbar-bg:    #060a18;
+  --topbar-text:  #c8d8f0;
+  --topbar-sub:   #2a4a6a;
+  --card-bg:      #0d1428;
+  --card-border:  #1a2a4a;
+  --card-hover:   #131e38;
+  --card-shadow:  rgba(0,0,0,0.4);
+  --card-text:    #c8d8f0;
+  --badge-bg:     #0a1530;
+  --badge-text:   #4a8fff;
+  --accent:       #4a8fff;
+  --accent2:      #ff6b35;
+  --hero-text:    #d0e4ff;
+  --hero-sub:     #4a7aaa;
+  --divider:      #1a2a4a;
+  --footer-text:  #2a4a6a;
+  --toggle-bg:    #1a2a50;
+  --toggle-color: #4a8fff;
+  --count-bg:     #1a3060;
+  --count-text:   #4a8fff;
+}
+
+html, body {
+  min-height: 100vh;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background .25s, color .25s;
+}
+
+/* ── TOPBAR ── */
+#topbar {
+  background: var(--topbar-bg);
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  height: 50px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  font-size: 13px; font-weight: 800;
+  color: var(--topbar-text);
+  letter-spacing: 2px; text-transform: uppercase;
+}
+.logo em { color: #ff6b35; font-style: normal; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+#theme-btn {
+  padding: 5px 13px; font-size: 10px; font-weight: 700;
+  border: 1px solid var(--border);
+  background: var(--toggle-bg); color: var(--toggle-color);
+  border-radius: 4px; cursor: pointer;
+  letter-spacing: .5px; text-transform: uppercase;
+}
+#theme-btn:hover { opacity: .85; }
+.train-badge {
+  font-size: 9px; color: var(--topbar-sub);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+
+/* ── HERO ── */
+#hero {
+  text-align: center;
+  padding: 52px 24px 36px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--divider);
+}
+.hero-icon {
+  margin-bottom: 16px;
+  display: flex; justify-content: center;
+}
+.hero-title {
+  font-size: clamp(18px, 3vw, 28px);
+  font-weight: 900;
+  color: var(--hero-text);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 1.3;
+  margin-bottom: 10px;
+}
+.hero-title span { color: var(--accent2); }
+.hero-sub {
+  font-size: 13px;
+  color: var(--hero-sub);
+  letter-spacing: 1px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+.hero-divider {
+  width: 60px; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 2px; margin: 0 auto;
+}
+
+/* ── CONTENT AREA ── */
+#content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 36px 24px 60px;
+}
+
+/* Section header */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.section-title {
+  font-size: 11px; font-weight: 800;
+  color: var(--text3); letter-spacing: 2.5px; text-transform: uppercase;
+}
+.section-line { flex: 1; height: 1px; background: var(--divider); }
+.paper-count {
+  background: var(--count-bg); color: var(--count-text);
+  font-size: 10px; font-weight: 800;
+  padding: 2px 9px; border-radius: 10px;
+  letter-spacing: 1px;
+}
+
+/* ── CARDS GRID ── */
+#cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.paper-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 28px 20px 24px;
+  cursor: pointer;
+  transition: all .2s;
+  box-shadow: 0 2px 8px var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+}
+.paper-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  opacity: 0;
+  transition: opacity .2s;
+}
+.paper-card:hover {
+  background: var(--card-hover);
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px var(--card-shadow);
+}
+.paper-card:hover::before { opacity: 1; }
+
+.card-icon {
+  width: 52px; height: 52px;
+  background: var(--badge-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.paper-card:hover .card-icon {
+  background: var(--accent);
+}
+.paper-card:hover .card-icon svg path,
+.paper-card:hover .card-icon svg rect,
+.paper-card:hover .card-icon svg circle {
+  stroke: #ffffff;
+}
+
+.card-name {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--card-text);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.card-open {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.paper-card:hover .card-open { opacity: 1; }
+
+/* Empty state */
+#empty-state {
+  display: none;
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text3);
+}
+#empty-state p { font-size: 13px; line-height: 1.8; }
+#empty-state code {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 2px 8px; border-radius: 3px;
+  font-size: 12px; color: var(--accent);
+}
+
+/* ── FOOTER ── */
+#footer {
+  text-align: center;
+  padding: 20px 24px;
+  border-top: 1px solid var(--divider);
+  font-size: 10px;
+  color: var(--footer-text);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+</style>
+</head>
+<body class="dark">
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="logo">DGCA <em>RTR(A)</em> Simulator</div>
+  <div class="topbar-right">
+    <button id="theme-btn" onclick="toggleTheme()">☀ LIGHT</button>
+    <span class="train-badge">For PRAJYOT STUDENT Use Only</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<div id="hero">
+  <div class="hero-icon">
+    <!-- Plane SVG -->
+    <svg width="54" height="54" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="27" cy="27" r="26" stroke="#4a8fff" stroke-width="1.5" opacity=".3"/>
+      <path d="M14 27 L40 27 M32 19 L40 27 L32 35" stroke="#4a8fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M22 22 L22 17 L26 19 L26 22" stroke="#ff6b35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M22 32 L22 37 L26 35 L26 32" stroke="#ff6b35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="hero-title">
+    Welcome to <span>DGCA RTR</span><br>Practice Simulator PRAJYOT S RT
+  </div>
+  <div class="hero-sub">Radio Telephony Practical Exam </div>
+  <div class="hero-divider"></div>
+</div>
+
+<!-- CONTENT -->
+<div id="content">
+  <div class="section-head">
+    <span class="section-title">Question Papers</span>
+    <div class="section-line"></div>
+    <span class="paper-count" id="paper-count">0 Papers</span>
+  </div>
+
+  <div id="cards-grid"></div>
+
+  <div id="empty-state">
+    <p>No papers found.<br>
+    Open <code>papers.js</code> and add your paper entries.<br><br>
+    Example:<br>
+    <code>{ name: "VT-KNT", folder: "VT-KNT", file: "VT-KNT.html" },</code>
+    </p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div id="footer">
+  DGCA RTR(A) Practice Simulator &nbsp;|&nbsp; For Training Use Only
+</div>
+
+<script src="papers.js"></script>
+<script>
+function toggleTheme(){
+  const b = document.body;
+  const isDark = b.classList.toggle('dark');
+  b.classList.toggle('light', !isDark);
+  document.getElementById('theme-btn').textContent = isDark ? '☀ LIGHT' : '🌙 DARK';
+}
+
+function buildCards(){
+  const grid = document.getElementById('cards-grid');
+  const empty = document.getElementById('empty-state');
+  const count = document.getElementById('paper-count');
+
+  if(!PAPERS || PAPERS.length === 0){
+    empty.style.display = 'block';
+    count.textContent = '0 Papers';
+    return;
+  }
+
+  count.textContent = `${PAPERS.length} Paper${PAPERS.length > 1 ? 's' : ''}`;
+
+  grid.innerHTML = PAPERS.map(p => `
+    <a class="paper-card" href="${p.folder}/${p.file}">
+      <div class="card-icon">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+          <rect x="3" y="2" width="20" height="22" rx="3" stroke="#4a8fff" stroke-width="1.5"/>
+          <path d="M7 8h12M7 12h12M7 16h8" stroke="#4a8fff" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="card-name">${p.name}</div>
+      <div class="card-open">Open Paper →</div>
+    </a>
+  `).join('');
+}
+
+buildCards();
+</script>
+</body>
+</html>
