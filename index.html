@@ -5,270 +5,118 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DGCA RTR Practice Simulator</title>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-/* ── THEME VARIABLES ── */
-body.light {
-  --bg:           #f0f4f8;
-  --bg2:          #ffffff;
-  --bg3:          #e4edf8;
-  --border:       #c0cfe0;
-  --text:         #0a1828;
-  --text2:        #2a4060;
-  --text3:        #5a7090;
-  --topbar-bg:    #1a3a6a;
-  --topbar-text:  #ffffff;
-  --topbar-sub:   #a8c8f0;
-  --card-bg:      #ffffff;
-  --card-border:  #c0d0e8;
-  --card-hover:   #e8f0fc;
-  --card-shadow:  rgba(10,30,80,0.10);
-  --card-text:    #0a1828;
-  --badge-bg:     #e0ecff;
-  --badge-text:   #1a3a6a;
-  --accent:       #1a3a6a;
-  --accent2:      #ff6b35;
-  --hero-text:    #0a1828;
-  --hero-sub:     #3a5878;
-  --divider:      #c0cfe0;
-  --footer-text:  #8aaac8;
-  --toggle-bg:    #0e2a54;
-  --toggle-color: #a8c8f0;
-  --count-bg:     #1a3a6a;
-  --count-text:   #ffffff;
+body.light{
+  --bg:#f0f4f8;--bg2:#ffffff;--border:#c0cfe0;--text:#0a1828;--text2:#2a4060;
+  --text3:#5a7090;--topbar-bg:#1a3a6a;--topbar-text:#ffffff;--topbar-sub:#a8c8f0;
+  --card-bg:#ffffff;--card-border:#c0d0e8;--card-hover:#e8f0fc;
+  --card-shadow:rgba(10,30,80,0.10);--card-text:#0a1828;--badge-bg:#e0ecff;
+  --badge-text:#1a3a6a;--accent:#1a3a6a;--accent2:#ff6b35;--hero-text:#0a1828;
+  --hero-sub:#3a5878;--divider:#c0cfe0;--footer-text:#8aaac8;
+  --toggle-bg:#0e2a54;--toggle-color:#a8c8f0;--count-bg:#1a3a6a;--count-text:#ffffff;
+  --login-bg:#ffffff;--login-border:#c0d0e8;--input-bg:#f8faff;--input-border:#b0c8e0;
+}
+body.dark{
+  --bg:#080c18;--bg2:#0c1020;--border:#1a2a4a;--text:#c8d8f0;--text2:#8aaad0;
+  --text3:#4a6a8a;--topbar-bg:#060a18;--topbar-text:#c8d8f0;--topbar-sub:#2a4a6a;
+  --card-bg:#0d1428;--card-border:#1a2a4a;--card-hover:#131e38;
+  --card-shadow:rgba(0,0,0,0.4);--card-text:#c8d8f0;--badge-bg:#0a1530;
+  --badge-text:#4a8fff;--accent:#4a8fff;--accent2:#ff6b35;--hero-text:#d0e4ff;
+  --hero-sub:#4a7aaa;--divider:#1a2a4a;--footer-text:#2a4a6a;
+  --toggle-bg:#1a2a50;--toggle-color:#4a8fff;--count-bg:#1a3060;--count-text:#4a8fff;
+  --login-bg:#0d1428;--login-border:#1a2a4a;--input-bg:#080c18;--input-border:#1a2a4a;
 }
 
-body.dark {
-  --bg:           #080c18;
-  --bg2:          #0c1020;
-  --bg3:          #0a0e1c;
-  --border:       #1a2a4a;
-  --text:         #c8d8f0;
-  --text2:        #8aaad0;
-  --text3:        #4a6a8a;
-  --topbar-bg:    #060a18;
-  --topbar-text:  #c8d8f0;
-  --topbar-sub:   #2a4a6a;
-  --card-bg:      #0d1428;
-  --card-border:  #1a2a4a;
-  --card-hover:   #131e38;
-  --card-shadow:  rgba(0,0,0,0.4);
-  --card-text:    #c8d8f0;
-  --badge-bg:     #0a1530;
-  --badge-text:   #4a8fff;
-  --accent:       #4a8fff;
-  --accent2:      #ff6b35;
-  --hero-text:    #d0e4ff;
-  --hero-sub:     #4a7aaa;
-  --divider:      #1a2a4a;
-  --footer-text:  #2a4a6a;
-  --toggle-bg:    #1a2a50;
-  --toggle-color: #4a8fff;
-  --count-bg:     #1a3060;
-  --count-text:   #4a8fff;
-}
-
-html, body {
-  min-height: 100vh;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  transition: background .25s, color .25s;
-}
+html,body{min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);transition:background .25s,color .25s}
 
 /* ── TOPBAR ── */
-#topbar {
-  background: var(--topbar-bg);
-  border-bottom: 2px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  height: 50px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.logo {
-  font-size: 13px; font-weight: 800;
-  color: var(--topbar-text);
-  letter-spacing: 2px; text-transform: uppercase;
-}
-.logo em { color: #ff6b35; font-style: normal; }
-.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-#theme-btn {
-  padding: 5px 13px; font-size: 10px; font-weight: 700;
-  border: 1px solid var(--border);
-  background: var(--toggle-bg); color: var(--toggle-color);
-  border-radius: 4px; cursor: pointer;
-  letter-spacing: .5px; text-transform: uppercase;
-}
-#theme-btn:hover { opacity: .85; }
-.train-badge {
-  font-size: 9px; color: var(--topbar-sub);
-  letter-spacing: 1px; text-transform: uppercase;
-}
+#topbar{background:var(--topbar-bg);border-bottom:2px solid var(--border);display:flex;align-items:center;padding:0 24px;height:50px;position:sticky;top:0;z-index:100}
+.logo{font-size:13px;font-weight:800;color:var(--topbar-text);letter-spacing:2px;text-transform:uppercase}
+.logo em{color:#ff6b35;font-style:normal}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+#theme-btn{padding:5px 13px;font-size:10px;font-weight:700;border:1px solid var(--border);background:var(--toggle-bg);color:var(--toggle-color);border-radius:4px;cursor:pointer;letter-spacing:.5px;text-transform:uppercase}
+#theme-btn:hover{opacity:.85}
+.train-badge{font-size:9px;color:var(--topbar-sub);letter-spacing:1px;text-transform:uppercase}
+#user-info{display:none;align-items:center;gap:8px}
+#user-avatar{width:28px;height:28px;border-radius:50%;border:2px solid var(--accent)}
+#user-name{font-size:11px;color:var(--topbar-text);font-weight:600}
+#signout-btn{padding:4px 10px;font-size:10px;font-weight:700;border:1px solid rgba(255,100,100,.4);background:rgba(255,50,50,.1);color:#ff8888;border-radius:3px;cursor:pointer;letter-spacing:.5px;text-transform:uppercase}
+#signout-btn:hover{background:rgba(255,50,50,.2)}
+
+/* ── FULL SCREEN OVERLAYS ── */
+.overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:rgba(5,10,25,0.92);backdrop-filter:blur(6px)}
+.overlay-box{background:var(--login-bg);border:1px solid var(--login-border);border-radius:16px;padding:48px 40px;max-width:420px;width:90%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.4)}
+.overlay-logo{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px}
+.overlay-logo em{color:#ff6b35;font-style:normal}
+.overlay-title{font-size:22px;font-weight:900;color:var(--text);margin-bottom:8px;line-height:1.3}
+.overlay-sub{font-size:12px;color:var(--text3);margin-bottom:32px;line-height:1.6}
+.overlay-divider{width:40px;height:2px;background:linear-gradient(90deg,var(--accent),#ff6b35);border-radius:2px;margin:0 auto 28px}
+
+/* Google button */
+#google-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px 20px;background:#ffffff;border:1px solid #dadce0;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;color:#3c4043;transition:all .2s;margin-bottom:16px}
+#google-btn:hover{background:#f8f9fa;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+#google-btn svg{flex-shrink:0}
+.login-note{font-size:10px;color:var(--text3);letter-spacing:.5px}
+
+/* Loading spinner */
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;color:var(--text3);letter-spacing:1px}
+
+/* Access denied */
+.denied-icon{font-size:48px;margin-bottom:16px}
+.denied-title{font-size:20px;font-weight:800;color:#ff4444;margin-bottom:8px}
+.denied-sub{font-size:12px;color:var(--text3);line-height:1.7;margin-bottom:24px}
+.denied-email{background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2);border-radius:6px;padding:8px 14px;font-size:13px;font-weight:600;color:#ff6666;margin-bottom:20px;word-break:break-all}
+#try-another-btn{padding:8px 20px;font-size:11px;font-weight:700;border:1px solid var(--border);background:transparent;color:var(--text3);border-radius:4px;cursor:pointer;letter-spacing:.5px;text-transform:uppercase}
+#try-another-btn:hover{background:var(--bg2)}
+
+/* Registration form */
+.form-title{font-size:18px;font-weight:800;color:var(--text);margin-bottom:6px}
+.form-sub{font-size:12px;color:var(--text3);margin-bottom:24px;line-height:1.6}
+.form-group{margin-bottom:16px;text-align:left}
+.form-group label{display:block;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.form-group input{width:100%;padding:10px 14px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:6px;font-size:13px;color:var(--text);outline:none;transition:border .2s}
+.form-group input:focus{border-color:var(--accent)}
+.form-group input::placeholder{color:var(--text3)}
+#submit-reg-btn{width:100%;padding:12px;background:var(--accent);color:#ffffff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px;text-transform:uppercase;transition:all .2s;margin-top:4px}
+#submit-reg-btn:hover{filter:brightness(1.1)}
+#submit-reg-btn:disabled{opacity:.6;cursor:not-allowed}
+.reg-note{font-size:10px;color:var(--text3);margin-top:12px;line-height:1.6}
+
+/* Student ID badge on main page */
+#student-badge{display:none;background:var(--badge-bg);border:1px solid var(--card-border);border-radius:6px;padding:3px 10px;font-size:10px;font-weight:700;color:var(--badge-text);letter-spacing:1px}
 
 /* ── HERO ── */
-#hero {
-  text-align: center;
-  padding: 52px 24px 36px;
-  background: var(--bg);
-  border-bottom: 1px solid var(--divider);
-}
-.hero-icon {
-  margin-bottom: 16px;
-  display: flex; justify-content: center;
-}
-.hero-title {
-  font-size: clamp(18px, 3vw, 28px);
-  font-weight: 900;
-  color: var(--hero-text);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  line-height: 1.3;
-  margin-bottom: 10px;
-}
-.hero-title span { color: var(--accent2); }
-.hero-sub {
-  font-size: 13px;
-  color: var(--hero-sub);
-  letter-spacing: 1px;
-  font-weight: 500;
-  margin-bottom: 20px;
-}
-.hero-divider {
-  width: 60px; height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  border-radius: 2px; margin: 0 auto;
-}
+#hero{text-align:center;padding:52px 24px 36px;background:var(--bg);border-bottom:1px solid var(--divider)}
+.hero-title{font-size:clamp(18px,3vw,28px);font-weight:900;color:var(--hero-text);letter-spacing:2px;text-transform:uppercase;line-height:1.3;margin-bottom:10px}
+.hero-title span{color:var(--accent2)}
+.hero-sub{font-size:13px;color:var(--hero-sub);letter-spacing:1px;font-weight:500;margin-bottom:20px}
+.hero-divider{width:60px;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;margin:0 auto}
 
-/* ── CONTENT AREA ── */
-#content {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 36px 24px 60px;
-}
-
-/* Section header */
-.section-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-.section-title {
-  font-size: 11px; font-weight: 800;
-  color: var(--text3); letter-spacing: 2.5px; text-transform: uppercase;
-}
-.section-line { flex: 1; height: 1px; background: var(--divider); }
-.paper-count {
-  background: var(--count-bg); color: var(--count-text);
-  font-size: 10px; font-weight: 800;
-  padding: 2px 9px; border-radius: 10px;
-  letter-spacing: 1px;
-}
-
-/* ── CARDS GRID ── */
-#cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-}
-
-.paper-card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 10px;
-  padding: 28px 20px 24px;
-  cursor: pointer;
-  transition: all .2s;
-  box-shadow: 0 2px 8px var(--card-shadow);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 14px;
-  position: relative;
-  overflow: hidden;
-  text-decoration: none;
-}
-.paper-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  opacity: 0;
-  transition: opacity .2s;
-}
-.paper-card:hover {
-  background: var(--card-hover);
-  border-color: var(--accent);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px var(--card-shadow);
-}
-.paper-card:hover::before { opacity: 1; }
-
-.card-icon {
-  width: 52px; height: 52px;
-  background: var(--badge-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  transition: all .2s;
-}
-.paper-card:hover .card-icon {
-  background: var(--accent);
-}
-.paper-card:hover .card-icon svg path,
-.paper-card:hover .card-icon svg rect,
-.paper-card:hover .card-icon svg circle {
-  stroke: #ffffff;
-}
-
-.card-name {
-  font-size: 16px;
-  font-weight: 900;
-  color: var(--card-text);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-.card-open {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  opacity: 0;
-  transition: opacity .2s;
-}
-.paper-card:hover .card-open { opacity: 1; }
-
-/* Empty state */
-#empty-state {
-  display: none;
-  text-align: center;
-  padding: 48px 24px;
-  color: var(--text3);
-}
-#empty-state p { font-size: 13px; line-height: 1.8; }
-#empty-state code {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  padding: 2px 8px; border-radius: 3px;
-  font-size: 12px; color: var(--accent);
-}
+/* ── CONTENT ── */
+#content{max-width:960px;margin:0 auto;padding:36px 24px 60px}
+.section-head{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.section-title{font-size:11px;font-weight:800;color:var(--text3);letter-spacing:2.5px;text-transform:uppercase}
+.section-line{flex:1;height:1px;background:var(--divider)}
+.paper-count{background:var(--count-bg);color:var(--count-text);font-size:10px;font-weight:800;padding:2px 9px;border-radius:10px;letter-spacing:1px}
+#cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.paper-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:28px 20px 24px;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px var(--card-shadow);display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;position:relative;overflow:hidden;text-decoration:none}
+.paper-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:0;transition:opacity .2s}
+.paper-card:hover{background:var(--card-hover);border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 24px var(--card-shadow)}
+.paper-card:hover::before{opacity:1}
+.card-icon{width:52px;height:52px;background:var(--badge-bg);border:1px solid var(--card-border);border-radius:12px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.paper-card:hover .card-icon{background:var(--accent)}
+.card-name{font-size:16px;font-weight:900;color:var(--card-text);letter-spacing:1px;text-transform:uppercase}
+.card-open{font-size:10px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;opacity:0;transition:opacity .2s}
+.paper-card:hover .card-open{opacity:1}
 
 /* ── FOOTER ── */
-#footer {
-  text-align: center;
-  padding: 20px 24px;
-  border-top: 1px solid var(--divider);
-  font-size: 10px;
-  color: var(--footer-text);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
+#footer{text-align:center;padding:20px 24px;border-top:1px solid var(--divider);font-size:10px;color:var(--footer-text);letter-spacing:1px;text-transform:uppercase}
+
+/* watermark */
+#watermark{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-size:10px;color:rgba(100,150,200,0.25);letter-spacing:2px;text-transform:uppercase;pointer-events:none;z-index:999;white-space:nowrap}
 </style>
 </head>
 <body class="dark">
@@ -277,76 +125,286 @@ html, body {
 <div id="topbar">
   <div class="logo">DGCA <em>RTR(A)</em> Simulator</div>
   <div class="topbar-right">
+    <div id="user-info">
+      <img id="user-avatar" src="" alt="">
+      <span id="user-name"></span>
+      <span id="student-badge"></span>
+      <button id="signout-btn" onclick="signOut()">Sign Out</button>
+    </div>
     <button id="theme-btn" onclick="toggleTheme()">☀ LIGHT</button>
-    <span class="train-badge">For PRAJYOT STUDENT Use Only</span>
+    <span class="train-badge">For Students Use Only</span>
   </div>
 </div>
 
-<!-- HERO -->
-<div id="hero">
-  <div class="hero-icon">
-    <!-- Plane SVG -->
-    <svg width="54" height="54" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="27" cy="27" r="26" stroke="#4a8fff" stroke-width="1.5" opacity=".3"/>
-      <path d="M14 27 L40 27 M32 19 L40 27 L32 35" stroke="#4a8fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M22 22 L22 17 L26 19 L26 22" stroke="#ff6b35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M22 32 L22 37 L26 35 L26 32" stroke="#ff6b35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </div>
-  <div class="hero-title">
-    Welcome to <span>DGCA RTR</span><br>Practice Simulator PRAJYOT S RT
-  </div>
-  <div class="hero-sub">Radio Telephony Practical Exam </div>
-  <div class="hero-divider"></div>
-</div>
-
-<!-- CONTENT -->
-<div id="content">
-  <div class="section-head">
-    <span class="section-title">Question Papers</span>
-    <div class="section-line"></div>
-    <span class="paper-count" id="paper-count">0 Papers</span>
-  </div>
-
-  <div id="cards-grid"></div>
-
-  <div id="empty-state">
-    <p>No papers found.<br>
-    Open <code>papers.js</code> and add your paper entries.<br><br>
-    Example:<br>
-    <code>{ name: "VT-KNT", folder: "VT-KNT", file: "VT-KNT.html" },</code>
-    </p>
+<!-- LOADING OVERLAY -->
+<div class="overlay" id="overlay-loading">
+  <div class="overlay-box">
+    <div class="overlay-logo">DGCA <em>RTR(A)</em> Simulator</div>
+    <div class="spinner"></div>
+    <div class="loading-text" id="loading-text">Checking access...</div>
   </div>
 </div>
 
-<!-- FOOTER -->
-<div id="footer">
-  DGCA RTR(A) Practice Simulator &nbsp;|&nbsp; For Training Use Only
+<!-- LOGIN OVERLAY -->
+<div class="overlay" id="overlay-login" style="display:none">
+  <div class="overlay-box">
+    <div class="overlay-logo">DGCA <em>RTR(A)</em> Simulator</div>
+    <div class="overlay-title">Radio Telephony<br>Practice Simulator</div>
+    <div class="overlay-sub">Sign in with your Google account to access the RTR practice papers. Access is restricted to approved students only.</div>
+    <div class="overlay-divider"></div>
+    <button id="google-btn" onclick="signInWithGoogle()">
+      <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.96 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Sign in with Google
+    </button>
+    <div class="login-note">Only approved student emails can access this simulator</div>
+  </div>
 </div>
 
+<!-- ACCESS DENIED OVERLAY -->
+<div class="overlay" id="overlay-denied" style="display:none">
+  <div class="overlay-box">
+    <div class="denied-icon">🚫</div>
+    <div class="denied-title">Access Denied</div>
+    <div class="denied-sub">Your email is not on the approved student list. Please contact your instructor to get access.</div>
+    <div class="denied-email" id="denied-email-text"></div>
+    <button id="try-another-btn" onclick="signOut()">Try Another Account</button>
+  </div>
+</div>
+
+<!-- REGISTRATION OVERLAY -->
+<div class="overlay" id="overlay-register" style="display:none">
+  <div class="overlay-box">
+    <div class="overlay-logo">DGCA <em>RTR(A)</em> Simulator</div>
+    <div class="form-title">Complete Your Profile</div>
+    <div class="form-sub">Welcome! Please fill in your details to complete registration. This is a one-time step.</div>
+    <div class="form-group">
+      <label>Full Name *</label>
+      <input type="text" id="reg-name" placeholder="Your full name" maxlength="60">
+    </div>
+    <div class="form-group">
+      <label>Phone Number *</label>
+      <input type="tel" id="reg-phone" placeholder="10-digit mobile number" maxlength="15">
+    </div>
+    <div class="form-group">
+      <label>Email (auto-filled)</label>
+      <input type="email" id="reg-email" placeholder="your@gmail.com" readonly style="opacity:.7">
+    </div>
+    <button id="submit-reg-btn" onclick="submitRegistration()">Complete Registration →</button>
+    <div class="reg-note">Your details are only visible to your instructor and will not be shared.</div>
+  </div>
+</div>
+
+<!-- WATERMARK -->
+<div id="watermark"></div>
+
+<!-- MAIN CONTENT (hidden until logged in) -->
+<div id="main-content" style="display:none">
+  <div id="hero">
+    <div class="hero-title">Welcome to <span>DGCA RTR</span><br>Practice Simulator</div>
+    <div class="hero-sub">Radio Telephony Practical Exam</div>
+    <div class="hero-divider"></div>
+  </div>
+  <div id="content">
+    <div class="section-head">
+      <span class="section-title">Question Papers</span>
+      <div class="section-line"></div>
+      <span class="paper-count" id="paper-count">0 Papers</span>
+    </div>
+    <div id="cards-grid"></div>
+  </div>
+  <div id="footer">DGCA RTR(A) Practice Simulator &nbsp;|&nbsp; For Training Use Only</div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as fbSignOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, addDoc, collection, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* ── YOUR FIREBASE CONFIG ── */
+const firebaseConfig = {
+  apiKey: "AIzaSyBhiXiEfs35FPwLF51hVq0tD9yhGBCE27k",
+  authDomain: "dgca-rtr-simulator.firebaseapp.com",
+  projectId: "dgca-rtr-simulator",
+  storageBucket: "dgca-rtr-simulator.firebasestorage.app",
+  messagingSenderId: "885634894964",
+  appId: "1:885634894964:web:ac5fa7b21f409ac1b05521"
+};
+
+/* ── EMAILJS CONFIG ── */
+const EMAILJS_SERVICE  = "service_w1ep6lz";
+const EMAILJS_TEMPLATE = "ho7fdyj";
+const EMAILJS_KEY      = "28GA_rndKYplQYqPZ";
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+/* expose to window for onclick handlers */
+window.signInWithGoogle = async () => {
+  try {
+    showOverlay('loading');
+    setLoadingText('Signing in with Google...');
+    await signInWithPopup(auth, provider);
+  } catch(e) {
+    console.error(e);
+    showOverlay('login');
+  }
+};
+
+window.signOut = async () => {
+  await fbSignOut(auth);
+  showOverlay('login');
+  document.getElementById('main-content').style.display = 'none';
+  document.getElementById('user-info').style.display = 'none';
+};
+
+window.submitRegistration = async () => {
+  const name  = document.getElementById('reg-name').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const email = auth.currentUser?.email || '';
+  if(!name){ alert('Please enter your full name.'); return; }
+  if(!phone || phone.length < 10){ alert('Please enter a valid phone number.'); return; }
+  const btn = document.getElementById('submit-reg-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const uid = auth.currentUser.uid;
+    /* get student ID from approvedUsers */
+    const approvedDoc = await getDoc(doc(db,'approvedUsers', email));
+    const studentId = approvedDoc.exists() ? (approvedDoc.data().studentId || 'CRW-???') : 'CRW-???';
+    /* save to students collection */
+    await setDoc(doc(db,'students', uid), {
+      name, phone, email, studentId,
+      registeredAt: serverTimestamp()
+    });
+    /* send email alert */
+    await sendLoginEmail({ student_name:name, student_phone:phone, student_email:email, student_id:studentId });
+    /* show main */
+    showMainApp(name, email, studentId, auth.currentUser.photoURL);
+  } catch(e) {
+    console.error(e);
+    btn.disabled = false; btn.textContent = 'Complete Registration →';
+    alert('Error saving. Please try again.');
+  }
+};
+
+/* ── AUTH STATE LISTENER ── */
+onAuthStateChanged(auth, async (user) => {
+  if(!user){
+    showOverlay('login');
+    return;
+  }
+  showOverlay('loading');
+  setLoadingText('Verifying access...');
+  try {
+    const email = user.email;
+    /* check approved list */
+    const approvedSnap = await getDoc(doc(db,'approvedUsers', email));
+    if(!approvedSnap.exists() || approvedSnap.data().approved !== true){
+      document.getElementById('denied-email-text').textContent = email;
+      showOverlay('denied');
+      return;
+    }
+    const studentId = approvedSnap.data().studentId || 'CRW-???';
+    /* check if already registered */
+    const studentSnap = await getDoc(doc(db,'students', user.uid));
+    if(!studentSnap.exists()){
+      /* show registration form */
+      document.getElementById('reg-email').value = email;
+      showOverlay('register');
+      return;
+    }
+    /* already registered — log login & show app */
+    const data = studentSnap.data();
+    await logLoginAndAlert(data, email, studentId);
+    showMainApp(data.name, email, studentId, user.photoURL);
+  } catch(e) {
+    console.error(e);
+    showOverlay('login');
+  }
+});
+
+async function logLoginAndAlert(data, email, studentId){
+  /* log to Firestore */
+  try{
+    await addDoc(collection(db,'loginLogs'),{
+      email, studentId, name: data.name,
+      loginAt: serverTimestamp()
+    });
+  }catch(e){ console.warn('Log error',e); }
+  /* send email alert */
+  await sendLoginEmail({
+    student_name:  data.name,
+    student_phone: data.phone,
+    student_email: email,
+    student_id:    studentId
+  });
+}
+
+async function sendLoginEmail(params){
+  try{
+    const now = new Date();
+    const timeStr = now.toLocaleString('en-IN',{timeZone:'Asia/Kolkata'}) + ' IST';
+    await fetch('https://api.emailjs.com/api/v1.0/email/send',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        service_id:  EMAILJS_SERVICE,
+        template_id: EMAILJS_TEMPLATE,
+        user_id:     EMAILJS_KEY,
+        template_params:{ ...params, login_time: timeStr }
+      })
+    });
+  }catch(e){ console.warn('Email error',e); }
+}
+
+function showMainApp(name, email, studentId, photoURL){
+  /* hide all overlays */
+  ['loading','login','denied','register'].forEach(id=>{
+    document.getElementById('overlay-'+id).style.display='none';
+  });
+  /* show topbar user info */
+  document.getElementById('user-info').style.display='flex';
+  document.getElementById('user-name').textContent = name || email;
+  document.getElementById('student-badge').textContent = studentId;
+  document.getElementById('student-badge').style.display = 'block';
+  if(photoURL) document.getElementById('user-avatar').src = photoURL;
+  /* watermark */
+  document.getElementById('watermark').textContent = email + ' | ' + studentId;
+  /* show main content */
+  document.getElementById('main-content').style.display='block';
+  buildCards();
+}
+
+function showOverlay(name){
+  ['loading','login','denied','register'].forEach(id=>{
+    document.getElementById('overlay-'+id).style.display = id===name ? 'flex' : 'none';
+  });
+}
+function setLoadingText(t){ document.getElementById('loading-text').textContent = t; }
+</script>
+
+<!-- PAPERS CONFIG -->
 <script src="papers.js"></script>
+
+<!-- THEME + CARDS -->
 <script>
 function toggleTheme(){
-  const b = document.body;
-  const isDark = b.classList.toggle('dark');
-  b.classList.toggle('light', !isDark);
-  document.getElementById('theme-btn').textContent = isDark ? '☀ LIGHT' : '🌙 DARK';
+  const b=document.body;
+  const isDark=b.classList.toggle('dark');
+  b.classList.toggle('light',!isDark);
+  document.getElementById('theme-btn').textContent=isDark?'☀ LIGHT':'🌙 DARK';
 }
 
 function buildCards(){
-  const grid = document.getElementById('cards-grid');
-  const empty = document.getElementById('empty-state');
-  const count = document.getElementById('paper-count');
-
-  if(!PAPERS || PAPERS.length === 0){
-    empty.style.display = 'block';
-    count.textContent = '0 Papers';
-    return;
-  }
-
-  count.textContent = `${PAPERS.length} Paper${PAPERS.length > 1 ? 's' : ''}`;
-
-  grid.innerHTML = PAPERS.map(p => `
+  const grid=document.getElementById('cards-grid');
+  const count=document.getElementById('paper-count');
+  if(!window.PAPERS||PAPERS.length===0){ count.textContent='0 Papers'; return; }
+  count.textContent=`${PAPERS.length} Paper${PAPERS.length>1?'s':''}`;
+  grid.innerHTML=PAPERS.map(p=>`
     <a class="paper-card" href="${p.folder}/${p.file}">
       <div class="card-icon">
         <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
@@ -359,8 +417,6 @@ function buildCards(){
     </a>
   `).join('');
 }
-
-buildCards();
 </script>
 </body>
 </html>
