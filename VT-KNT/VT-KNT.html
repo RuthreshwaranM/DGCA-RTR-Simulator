@@ -287,10 +287,13 @@ body
 </style>
 </head>
 <body>
-<!-- ======================================================
-  AUTH GUARD — paste this right after <body> tag
-  in every paper HTML file
-====================================================== -->
+<!--
+=======================================================
+  AUTH GUARD — paste this as the FIRST thing inside <body>
+  in every paper HTML file (VT-KNT.html, AI-321.html etc.)
+  It redirects unapproved users back to index.html
+=======================================================
+-->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -309,94 +312,45 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-/* Create loading overlay */
+/* Show a loading screen while checking */
+document.body.style.display='none';
 const guard = document.createElement('div');
-guard.id = 'auth-guard';
-guard.style.cssText = [
-  'position:fixed',
-  'inset:0',
-  'background:#080c18',
-  'display:flex',
-  'align-items:center',
-  'justify-content:center',
-  'z-index:99999',
-  'font-family:Arial,sans-serif'
-].join(';');
-guard.innerHTML = `
-  <div style="text-align:center;color:#4a8fff">
-    <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;opacity:.5">
-      DGCA RTR Simulator
-    </div>
-    <div style="
-      width:34px;height:34px;
-      border:2px solid #1a2a4a;
-      border-top-color:#4a8fff;
-      border-radius:50%;
-      animation:rtr-spin .8s linear infinite;
-      margin:0 auto 14px;
-    "></div>
-    <div style="font-size:11px;color:#4a6a8a;letter-spacing:1px">
-      Verifying access...
-    </div>
-  </div>
-  <style>
-    @keyframes rtr-spin { to { transform: rotate(360deg); } }
-  </style>
-`;
-
-/* Wait for DOM to be ready before appending */
-if(document.body){
-  document.body.appendChild(guard);
-} else {
-  document.addEventListener('DOMContentLoaded', () => {
-    document.body.appendChild(guard);
-  });
-}
+guard.style.cssText='position:fixed;inset:0;background:#080c18;display:flex;align-items:center;justify-content:center;z-index:99999;font-family:Arial,sans-serif';
+guard.innerHTML='<div style="text-align:center;color:#4a8fff"><div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;opacity:.6">DGCA RTR Simulator</div><div style="width:32px;height:32px;border:2px solid #1a2a4a;border-top-color:#4a8fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px"></div><div style="font-size:11px;color:#4a6a8a;letter-spacing:1px">Verifying access...</div></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+document.documentElement.appendChild(guard);
 
 onAuthStateChanged(auth, async (user) => {
   if(!user){
     window.location.href = '../index.html';
     return;
   }
-  try {
-    const snap = await getDoc(doc(db, 'approvedUsers', user.email));
+  try{
+    const snap = await getDoc(doc(db,'approvedUsers', user.email));
     if(!snap.exists() || snap.data().approved !== true){
       window.location.href = '../index.html';
       return;
     }
-    /* ✅ Approved — remove the guard overlay */
-    const g = document.getElementById('auth-guard');
-    if(g) g.remove();
+    /* Approved — show the page */
+    guard.remove();
+    document.body.style.display='';
 
-    /* Add watermark with student email + ID */
+    /* Show student watermark */
+    const studentSnap = await getDoc(doc(db,'students', user.uid));
     const studentId = snap.data().studentId || '';
     const wm = document.createElement('div');
-    wm.style.cssText = [
-      'position:fixed',
-      'bottom:8px',
-      'left:50%',
-      'transform:translateX(-50%)',
-      'font-size:9px',
-      'color:rgba(100,150,200,0.18)',
-      'letter-spacing:2px',
-      'text-transform:uppercase',
-      'pointer-events:none',
-      'z-index:9999',
-      'white-space:nowrap',
-      'font-family:Arial,sans-serif'
-    ].join(';');
+    wm.style.cssText='position:fixed;bottom:8px;left:50%;transform:translateX(-50%);font-size:9px;color:rgba(100,150,200,0.2);letter-spacing:2px;text-transform:uppercase;pointer-events:none;z-index:9999;white-space:nowrap;font-family:Arial,sans-serif';
     wm.textContent = user.email + (studentId ? ' | ' + studentId : '');
     document.body.appendChild(wm);
 
-  } catch(e) {
-    console.error('Auth guard error:', e);
-    /* On error just remove guard and show page */
-    const g = document.getElementById('auth-guard');
-    if(g) g.remove();
+  }catch(e){
+    console.error(e);
+    guard.remove();
+    document.body.style.display='';
   }
 });
 </script>
 <!-- END AUTH GUARD -->
+
 
 <!-- TOP BAR -->
 <div id="topbar">
