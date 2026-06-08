@@ -212,13 +212,7 @@ if(!isMobile){
     }
   },true);
 
-  /* Right click — sends email */
-  document.addEventListener('contextmenu',function(e){
-    e.preventDefault();
-    sendAlert('Right-click attempted (context menu)'); /* ✅ EMAIL */
-    return false;
-  },true);
-
+  
   /* Print dialog */
   window.addEventListener('beforeprint',function(){
     showWarning('Printing is not allowed.');
