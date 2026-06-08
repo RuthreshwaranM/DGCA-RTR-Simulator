@@ -211,7 +211,12 @@ if(!isMobile){
       return false;
     }
   },true);
-
+   
+/* Right click — sends email */
+  document.addEventListener('contextmenu',function(e){
+    e.preventDefault();
+    return false;
+  },true);
   
   /* Print dialog */
   window.addEventListener('beforeprint',function(){
