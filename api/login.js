@@ -9,7 +9,7 @@
    Format: { name, userId, password }
    ────────────────────────────────────────────────── */
 const STUDENTS = [
-  { name:"Ruthresh M",   userId:"CRW-000", password:"admin123"  },
+  { name:"Ruthresh",   userId:"CRW-000", password:"admin123"  },
   { name:"Prajyot",      userId:"CRW-001", password:"rtr2024"   },
   { name:"Student Two",  userId:"CRW-002", password:"pilot99"   }
   /* add more students below */
