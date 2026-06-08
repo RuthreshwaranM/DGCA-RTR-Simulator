@@ -8,6 +8,7 @@ const STUDENTS = [
   { name: "Prajyot",  userId: "CRW-001", password: "rtr2024"  },
   { name: "Priya",    userId: "CRW-002", password: "Priya123" },
   { name: "Kunal",    userId: "CRW-003", password: "Kunal123" },
+  { name: "Ammu",    userId: "CRW-004", password: "Ammu123" },
   /* ── add more students below ──
   { name: "Full Name", userId: "CRW-004", password: "pass123" },
   ─────────────────────────────── */
