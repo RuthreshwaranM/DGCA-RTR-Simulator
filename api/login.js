@@ -21,7 +21,7 @@ const STUDENTS = [
 
 /* ── EmailJS config ──────────────────────────────────────────── */
 const EJS_SERVICE  = "service_w1ep6lz";
-const EJS_TEMPLATE = "ho7fdyj";
+const EJS_TEMPLATE = "template_o9w21fv";
 const EJS_KEY      = "28GA_rndKYplQYqPZ";
 
 export default async function handler(req, res) {
