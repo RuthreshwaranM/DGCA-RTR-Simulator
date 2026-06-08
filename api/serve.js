@@ -16,6 +16,7 @@ const PAPERS = [
   { name: "AI-239",  id: "AI-239"  },
   { name: "VT-ITM",  id: "VT-ITM"  },
   { name: "SEJ-993", id: "SEJ-993" },
+  { name: "IGO-153", id: "IGO-153" },
 ];
 
 /* ── PAPER DATA ─────────────────────────────────────────────────
