@@ -272,6 +272,62 @@ html, body {
 </style>
 </head>
 <body class="dark">
+<!-- ============================================================
+  Paste this as the FIRST thing inside <body> in index.html ONLY
+  This redirects unauthenticated users back to login.html
+  No changes needed to any paper HTML files!
+============================================================ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBhiXiEfs35FPwLF51hVq0tD9yhGBCE27k",
+  authDomain: "dgca-rtr-simulator.firebaseapp.com",
+  projectId: "dgca-rtr-simulator",
+  storageBucket: "dgca-rtr-simulator.firebasestorage.app",
+  messagingSenderId: "885634894964",
+  appId: "1:885634894964:web:ac5fa7b21f409ac1b05521"
+};
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+/* Overlay while checking */
+const ov = document.createElement('div');
+ov.style.cssText='position:fixed;inset:0;background:#0a0d1a;display:flex;align-items:center;justify-content:center;z-index:99999;font-family:Arial,sans-serif';
+ov.innerHTML='<div style="text-align:center"><div style="font-size:10px;letter-spacing:2px;color:#4a8fff;text-transform:uppercase;margin-bottom:14px">DGCA RTR Simulator</div><div style="width:32px;height:32px;border:2px solid #1a2a4a;border-top-color:#4a8fff;border-radius:50%;animation:s .8s linear infinite;margin:0 auto 12px"></div><div style="font-size:11px;color:#2a4a6a;letter-spacing:1px">Checking session...</div></div><style>@keyframes s{to{transform:rotate(360deg)}}</style>';
+document.addEventListener('DOMContentLoaded',()=>document.body.appendChild(ov));
+
+onAuthStateChanged(auth, async (user) => {
+  if(!user){ window.location.href='login.html'; return; }
+  try{
+    const snap = await getDoc(doc(db,'approvedUsers', user.email));
+    if(!snap.exists() || snap.data().approved !== true){
+      window.location.href='login.html'; return;
+    }
+    /* Approved — remove overlay, show page */
+    ov.remove();
+    /* Show student name + ID in topbar if elements exist */
+    const studentId = snap.data().studentId || '';
+    const nb = document.getElementById('user-name');
+    const sb = document.getElementById('student-badge');
+    const ui = document.getElementById('user-info');
+    if(nb) nb.textContent = user.displayName || user.email;
+    if(sb){ sb.textContent = studentId; sb.style.display='block'; }
+    if(ui) ui.style.display='flex';
+    /* Watermark */
+    const wm=document.createElement('div');
+    wm.style.cssText='position:fixed;bottom:8px;left:50%;transform:translateX(-50%);font-size:9px;color:rgba(100,150,200,0.18);letter-spacing:2px;text-transform:uppercase;pointer-events:none;z-index:9999;white-space:nowrap;font-family:Arial,sans-serif';
+    wm.textContent=user.email+(studentId?' | '+studentId:'');
+    document.body.appendChild(wm);
+  }catch(e){
+    console.error(e); ov.remove();
+  }
+});
+</script>
+<!-- END INDEX AUTH -->
 
 <!-- TOPBAR -->
 <div id="topbar">
