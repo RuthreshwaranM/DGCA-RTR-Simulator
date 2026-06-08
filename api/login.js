@@ -5,11 +5,10 @@
 
 const STUDENTS = [
   { name: "Ruthresh", userId: "CRW-000", password: "admin123" },
-  { name: "Prajyot",  userId: "CRW-001", password: "rtr2024"  },
-  { name: "Priya",    userId: "CRW-002", password: "Priya123" },
-  { name: "Kunal",    userId: "CRW-003", password: "Kunal123" },
-  { name: "Ammu",    userId: "CRW-004", password: "Ammu123" },
-  { name: "Abishek",    userId: "CRW-005", password: "Abishek123" },
+  { name: "Prajyot",  userId: "CRW-001", password: "admin123"  },
+  { name: "Kunal",    userId: "CRW-002", password: "Kunal123PSRT" },
+  { name: "Soumya",    userId: "CRW-003", password: "Soumya123PSRT" },
+  { name: "Sahil",    userId: "CRW-004", password: "Sahil123PSRT" }
   /* ── add more students below ──
   { name: "Full Name", userId: "CRW-004", password: "pass123" },
   ─────────────────────────────── */
