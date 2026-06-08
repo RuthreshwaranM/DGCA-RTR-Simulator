@@ -228,6 +228,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 #msg.ok{background:rgba(0,200,100,.08);border:1px solid rgba(0,200,100,.2);color:#00cc88}
 .foot{margin-top:22px;padding-top:18px;border-top:1px solid #0e1830;text-align:center;font-size:9px;color:#162030;letter-spacing:1px;text-transform:uppercase}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("28GA_rndKYplQYqPZ");</script>
 </head>
 <body>
 <div class="card">
@@ -282,6 +284,16 @@ async function go(){
       sessionStorage.setItem('rtr_token', d.token);
       sessionStorage.setItem('rtr_name',  d.name);
       sessionStorage.setItem('rtr_userId',d.userId);
+      try{
+        const now=new Date().toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST";
+        emailjs.send("service_w1ep6lz","template_o9w21fv",{
+          student_name:  d.name,
+          student_phone: d.userId,
+          student_email: "Password Login",
+          student_id:    d.userId,
+          login_time:    now
+        });
+      }catch(err){ console.warn("EmailJS error:",err); }
       setTimeout(()=>{ window.location.href='/simulator'; },700);
     }else{
       setLoading(false);
