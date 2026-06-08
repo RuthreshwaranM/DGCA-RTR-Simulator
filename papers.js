@@ -18,7 +18,8 @@ const PAPERS = [
   { name: "AI-239",  folder: "AI-239",  file: "AI-239.html"  },
   { name: "VT-ITM",  folder: "VT-ITM",  file: "VT-ITM.html"  },
   { name: "SEJ-993",  folder: "SEJ-993",  file: "SEJ-993.html"  },
-  { name: "AXB-142",  folder: "AXB-142",  file: "AXB-142.html"  }
+  { name: "AXB-142",  folder: "AXB-142",  file: "AXB-142.html"  },
+  { name: "IGO-153",  folder: "IGO-153",  file: "IGO-153"  }
 
   /* add more papers below this line */
 ];
