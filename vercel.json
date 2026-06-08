@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/",         "destination": "/api/serve?page=login"  },
+    { "source": "/simulator","destination": "/api/serve?page=home"   },
+    { "source": "/paper",    "destination": "/api/serve?page=paper"  }
+  ]
+}
