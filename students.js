@@ -13,7 +13,7 @@
 
 const STUDENTS = [
   { name:"Ruthresh",   userId:"CRW-000", password:"admin123"  },
-  { name:"Student One",  userId:"CRW-001", password:"rtr2024"   },
+  { name:"Prajyot",  userId:"CRW-000", password:"admin123"   },
   { name:"Student Two",  userId:"CRW-002", password:"pilot99"   }
   /* add more students below this line */
 ];
