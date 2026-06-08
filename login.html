@@ -5,227 +5,102 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DGCA RTR Simulator — Login</title>
 <style>
-/* ============================================================
-   LOGIN PAGE — login.html
-   Students enter: Full Name + User ID + Password
-   On success → redirected to index.html
-   You receive email alert on every login
-   ============================================================ */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{
-  height:100%;
-  font-family:'Segoe UI',Arial,sans-serif;
-  background:#070a14;
-  display:flex;align-items:center;justify-content:center;
-  min-height:100vh;
+  height:100%;font-family:'Segoe UI',Arial,sans-serif;
+  background:#070a14;display:flex;align-items:center;
+  justify-content:center;min-height:100vh;
 }
-
-/* background glow */
 body::before{
-  content:'';
-  position:fixed;inset:0;
+  content:'';position:fixed;inset:0;
   background:
-    radial-gradient(ellipse at 25% 40%, rgba(26,58,106,0.35) 0%, transparent 55%),
-    radial-gradient(ellipse at 75% 60%, rgba(255,107,53,0.07) 0%, transparent 50%);
+    radial-gradient(ellipse at 25% 40%,rgba(26,58,106,.35) 0%,transparent 55%),
+    radial-gradient(ellipse at 75% 60%,rgba(255,107,53,.07) 0%,transparent 50%);
   pointer-events:none;
 }
-
-/* ── CARD ── */
 .card{
-  background:#0c1120;
-  border:1px solid #1a2a4a;
-  border-radius:18px;
-  padding:44px 40px 36px;
-  width:100%;max-width:420px;
-  position:relative;
-  box-shadow:0 32px 80px rgba(0,0,0,0.6);
+  background:#0c1120;border:1px solid #1a2a4a;
+  border-radius:18px;padding:44px 40px 36px;
+  width:100%;max-width:420px;position:relative;
+  box-shadow:0 32px 80px rgba(0,0,0,.6);
   animation:fadeUp .4s ease;
 }
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-
-/* top accent bar */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .card::before{
-  content:'';
-  position:absolute;top:0;left:0;right:0;
-  height:3px;
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
   background:linear-gradient(90deg,#1a3a6a 0%,#4a8fff 50%,#ff6b35 100%);
   border-radius:18px 18px 0 0;
 }
-
-/* ── LOGO ── */
-.logo{
-  text-align:center;margin-bottom:28px;
-}
-.logo-text{
-  font-size:11px;font-weight:800;
-  color:#4a8fff;letter-spacing:3px;
-  text-transform:uppercase;margin-bottom:4px;
-}
+.logo{text-align:center;margin-bottom:26px}
+.logo-text{font-size:11px;font-weight:800;color:#4a8fff;letter-spacing:3px;text-transform:uppercase;margin-bottom:4px}
 .logo-text em{color:#ff6b35;font-style:normal}
-.logo-sub{
-  font-size:10px;color:#2a4a6a;
-  letter-spacing:1.5px;text-transform:uppercase;
-}
-
-/* ── PLANE SVG ── */
-.plane-wrap{
-  display:flex;justify-content:center;
-  margin-bottom:22px;
-}
-
-/* ── TITLE ── */
-.login-title{
-  font-size:20px;font-weight:900;
-  color:#c8d8f0;text-align:center;
-  letter-spacing:.5px;margin-bottom:6px;
-  line-height:1.3;
-}
+.logo-sub{font-size:10px;color:#2a4a6a;letter-spacing:1.5px;text-transform:uppercase}
+.plane-wrap{display:flex;justify-content:center;margin-bottom:20px}
+.login-title{font-size:20px;font-weight:900;color:#c8d8f0;text-align:center;letter-spacing:.5px;margin-bottom:6px;line-height:1.3}
 .login-title span{color:#ff6b35}
-.login-sub{
-  font-size:11px;color:#3a5878;
-  text-align:center;margin-bottom:28px;
-  line-height:1.6;letter-spacing:.3px;
-}
-
-/* divider */
-.divider{
-  width:44px;height:2px;
-  background:linear-gradient(90deg,#1a3a6a,#4a8fff);
-  border-radius:2px;margin:0 auto 28px;
-}
-
-/* ── FORM ── */
-.form-group{margin-bottom:16px}
-.form-group label{
-  display:block;
-  font-size:9px;font-weight:700;
-  color:#3a5878;letter-spacing:1.5px;
-  text-transform:uppercase;margin-bottom:7px;
-}
+.login-sub{font-size:11px;color:#3a5878;text-align:center;margin-bottom:26px;line-height:1.6}
+.divider{width:44px;height:2px;background:linear-gradient(90deg,#1a3a6a,#4a8fff);border-radius:2px;margin:0 auto 26px}
+.form-group{margin-bottom:15px}
+.form-group label{display:block;font-size:9px;font-weight:700;color:#3a5878;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px}
 .input-wrap{position:relative}
-.input-wrap .icon{
-  position:absolute;left:13px;top:50%;
-  transform:translateY(-50%);
-  font-size:14px;opacity:.5;
-  pointer-events:none;
-}
+.input-wrap .icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.45;pointer-events:none}
 .form-group input{
-  width:100%;
-  padding:11px 14px 11px 38px;
-  background:#080d1c;
-  border:1px solid #1a2a4a;
-  border-radius:8px;
-  font-size:13px;color:#c8d8f0;
-  outline:none;
-  transition:border-color .2s, box-shadow .2s;
-  letter-spacing:.3px;
+  width:100%;padding:11px 14px 11px 38px;
+  background:#080d1c;border:1px solid #1a2a4a;
+  border-radius:8px;font-size:13px;color:#c8d8f0;
+  outline:none;transition:border-color .2s,box-shadow .2s;
 }
-.form-group input:focus{
-  border-color:#4a8fff;
-  box-shadow:0 0 0 3px rgba(74,143,255,0.1);
-}
+.form-group input:focus{border-color:#4a8fff;box-shadow:0 0 0 3px rgba(74,143,255,.1)}
 .form-group input::placeholder{color:#1e3050;font-size:12px}
-
-/* ── LOGIN BUTTON ── */
 #login-btn{
   width:100%;padding:13px;
   background:linear-gradient(135deg,#1a3a6a 0%,#2a5aaa 100%);
-  color:#ffffff;border:none;border-radius:8px;
-  font-size:13px;font-weight:700;
-  cursor:pointer;letter-spacing:1px;
-  text-transform:uppercase;
+  color:#fff;border:none;border-radius:8px;
+  font-size:13px;font-weight:700;cursor:pointer;
+  letter-spacing:1px;text-transform:uppercase;
   transition:all .2s;margin-top:6px;
-  position:relative;overflow:hidden;
 }
-#login-btn:hover{filter:brightness(1.15);transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,58,106,0.4)}
-#login-btn:active{transform:translateY(0)}
-#login-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
-#login-btn .btn-text{transition:opacity .2s}
-#login-btn .btn-spinner{
-  display:none;
-  width:18px;height:18px;
+#login-btn:hover{filter:brightness(1.15);transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,58,106,.4)}
+#login-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;filter:none}
+.btn-inner{display:flex;align-items:center;justify-content:center;gap:10px;height:20px}
+.btn-spinner{
+  display:none;width:18px;height:18px;
   border:2px solid rgba(255,255,255,.3);
-  border-top-color:#fff;
-  border-radius:50%;
+  border-top-color:#fff;border-radius:50%;
   animation:spin .7s linear infinite;
-  margin:0 auto;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
-#login-btn.loading .btn-text{display:none}
-#login-btn.loading .btn-spinner{display:block}
-
-/* ── ERROR MESSAGE ── */
-#error-msg{
-  display:none;
-  background:rgba(255,60,60,0.08);
-  border:1px solid rgba(255,60,60,0.2);
-  border-radius:6px;
-  padding:10px 14px;
-  font-size:12px;color:#ff7070;
-  text-align:center;margin-top:14px;
-  animation:shake .3s ease;
-}
-#error-msg.show{display:block}
-@keyframes shake{
-  0%,100%{transform:translateX(0)}
-  25%{transform:translateX(-6px)}
-  75%{transform:translateX(6px)}
-}
-
-/* ── SUCCESS MESSAGE ── */
-#success-msg{
-  display:none;
-  background:rgba(0,200,100,0.08);
-  border:1px solid rgba(0,200,100,0.2);
-  border-radius:6px;
-  padding:10px 14px;
-  font-size:12px;color:#00cc88;
+.loading .btn-text{display:none}
+.loading .btn-spinner{display:block}
+#msg{
+  display:none;border-radius:6px;
+  padding:10px 14px;font-size:12px;
   text-align:center;margin-top:14px;
 }
-#success-msg.show{display:block}
-
-/* ── FOOTER ── */
-.card-footer{
-  margin-top:24px;
-  padding-top:18px;
-  border-top:1px solid #0e1830;
-  text-align:center;
-  font-size:9px;color:#162030;
-  letter-spacing:1px;text-transform:uppercase;
-}
+#msg.error{background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.2);color:#ff7070}
+#msg.success{background:rgba(0,200,100,.08);border:1px solid rgba(0,200,100,.2);color:#00cc88}
+.card-footer{margin-top:22px;padding-top:18px;border-top:1px solid #0e1830;text-align:center;font-size:9px;color:#162030;letter-spacing:1px;text-transform:uppercase}
 </style>
 </head>
 <body>
-
 <div class="card">
-
-  <!-- Logo -->
   <div class="logo">
     <div class="logo-text">DGCA <em>RTR(A)</em> Simulator</div>
     <div class="logo-sub">Radio Telephony Practice</div>
   </div>
-
-  <!-- Plane icon -->
   <div class="plane-wrap">
     <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
       <circle cx="24" cy="24" r="23" stroke="#1a2a4a" stroke-width="1.5"/>
-      <circle cx="24" cy="24" r="23" stroke="#4a8fff" stroke-width="1.5"
-        stroke-dasharray="36 110" stroke-dashoffset="0" opacity=".6"/>
-      <path d="M10 24 L38 24 M30 16 L38 24 L30 32"
-        stroke="#4a8fff" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M18 19.5 L18 14 L22 16 L22 19.5"
-        stroke="#ff6b35" stroke-width="1.5" stroke-linecap="round"/>
-      <path d="M18 28.5 L18 34 L22 32 L22 28.5"
-        stroke="#ff6b35" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="24" cy="24" r="23" stroke="#4a8fff" stroke-width="1.5" stroke-dasharray="36 110" opacity=".6"/>
+      <path d="M10 24L38 24M30 16L38 24L30 32" stroke="#4a8fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M18 19.5L18 14L22 16L22 19.5" stroke="#ff6b35" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M18 28.5L18 34L22 32L22 28.5" stroke="#ff6b35" stroke-width="1.5" stroke-linecap="round"/>
     </svg>
   </div>
-
   <div class="login-title">Welcome,<br><span>Student Login</span></div>
   <div class="login-sub">Enter your credentials to access<br>the RTR Practice Simulator</div>
   <div class="divider"></div>
 
-  <!-- FORM -->
   <div class="form-group">
     <label>Full Name</label>
     <div class="input-wrap">
@@ -233,7 +108,6 @@ body::before{
       <input type="text" id="inp-name" placeholder="Enter your full name" autocomplete="off">
     </div>
   </div>
-
   <div class="form-group">
     <label>User ID</label>
     <div class="input-wrap">
@@ -241,7 +115,6 @@ body::before{
       <input type="text" id="inp-userid" placeholder="e.g. CRW-001" autocomplete="off" style="text-transform:uppercase">
     </div>
   </div>
-
   <div class="form-group">
     <label>Password</label>
     <div class="input-wrap">
@@ -251,125 +124,68 @@ body::before{
   </div>
 
   <button id="login-btn" onclick="doLogin()">
-    <span class="btn-text">Login →</span>
-    <div class="btn-spinner"></div>
+    <div class="btn-inner">
+      <span class="btn-text">Login →</span>
+      <div class="btn-spinner"></div>
+    </div>
   </button>
-
-  <div id="error-msg"></div>
-  <div id="success-msg"></div>
-
-  <div class="card-footer">
-    For Training Use Only &nbsp;·&nbsp; Captain Romeo Whisky
-  </div>
-
+  <div id="msg"></div>
+  <div class="card-footer">For Training Use Only · Captain Romeo Whisky</div>
 </div>
 
-<!-- Students list -->
-<script src="students.js"></script>
-
-<!-- EmailJS -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
 <script>
-/* ── EmailJS config ── */
-const EJS_SERVICE  = "service_w1ep6lz";
-const EJS_TEMPLATE = "ho7fdyj";
-const EJS_KEY      = "28GA_rndKYplQYqPZ";
-emailjs.init(EJS_KEY);
+document.addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
 
-/* ── Allow Enter key to submit ── */
-document.addEventListener('keydown', e => {
-  if(e.key === 'Enter') doLogin();
-});
-
-/* ── LOGIN FUNCTION ── */
 async function doLogin(){
-  const nameInput  = document.getElementById('inp-name').value.trim();
-  const userIdInput= document.getElementById('inp-userid').value.trim().toUpperCase();
-  const passInput  = document.getElementById('inp-password').value.trim();
+  const name     = document.getElementById('inp-name').value.trim();
+  const userId   = document.getElementById('inp-userid').value.trim().toUpperCase();
+  const password = document.getElementById('inp-password').value.trim();
 
-  hideMessages();
+  hideMsg();
+  if(!name||!userId||!password){ showMsg('Please fill in all fields.','error'); return; }
 
-  /* Basic validation */
-  if(!nameInput || !userIdInput || !passInput){
-    showError('Please fill in all fields.');
-    return;
-  }
-
-  /* Show loading */
   setLoading(true);
 
-  /* Small delay for UX */
-  await sleep(600);
-
-  /* Find matching student */
-  const student = STUDENTS.find(s =>
-    s.name.trim().toLowerCase()   === nameInput.toLowerCase() &&
-    s.userId.trim().toUpperCase() === userIdInput &&
-    s.password.trim()             === passInput
-  );
-
-  if(!student){
-    setLoading(false);
-    showError('Invalid credentials. Please check your Name, User ID and Password.');
-    /* Shake the card */
-    document.querySelector('.card').style.animation='none';
-    setTimeout(()=>{ document.querySelector('.card').style.animation=''; },10);
-    return;
-  }
-
-  /* ✅ Correct credentials */
-  showSuccess('Access granted! Redirecting...');
-
-  /* Send login notification email */
-  try{
-    const now = new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'}) + ' IST';
-    await emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
-      student_name:  student.name,
-      student_phone: student.userId,
-      student_email: 'N/A (Password Login)',
-      student_id:    student.userId,
-      login_time:    now
+  try {
+    /* Call server-side API — credentials never exposed to browser */
+    const res = await fetch('/api/login', {
+      method:  'POST',
+      headers: { 'Content-Type':'application/json' },
+      body:    JSON.stringify({ name, userId, password })
     });
-  }catch(e){
-    console.warn('Email alert error:', e);
-    /* Don't block login if email fails */
+    const data = await res.json();
+
+    if(data.success){
+      showMsg('Access granted! Redirecting...','success');
+      /* Store session token — no passwords stored */
+      sessionStorage.setItem('rtr_auth', JSON.stringify({
+        name:     data.name,
+        userId:   data.userId,
+        token:    data.token,
+        loggedIn: true,
+        time:     Date.now()
+      }));
+      setTimeout(()=>{ window.location.href='index.html'; }, 800);
+    } else {
+      setLoading(false);
+      showMsg('Invalid credentials. Please check your Name, User ID and Password.','error');
+    }
+  } catch(e) {
+    setLoading(false);
+    showMsg('Connection error. Please try again.','error');
+    console.error(e);
   }
-
-  /* Store session */
-  sessionStorage.setItem('rtr_auth', JSON.stringify({
-    name:     student.name,
-    userId:   student.userId,
-    loggedIn: true,
-    time:     Date.now()
-  }));
-
-  /* Redirect after short delay */
-  await sleep(800);
-  window.location.href = 'index.html';
 }
 
-/* ── HELPERS ── */
-function showError(msg){
-  const el = document.getElementById('error-msg');
-  el.textContent = msg;
-  el.classList.add('show');
+function showMsg(txt,type){
+  const el=document.getElementById('msg');
+  el.textContent=txt; el.className=type; el.style.display='block';
 }
-function showSuccess(msg){
-  const el = document.getElementById('success-msg');
-  el.textContent = msg;
-  el.classList.add('show');
-}
-function hideMessages(){
-  document.getElementById('error-msg').classList.remove('show');
-  document.getElementById('success-msg').classList.remove('show');
-}
+function hideMsg(){ const el=document.getElementById('msg'); el.style.display='none'; }
 function setLoading(on){
-  const btn = document.getElementById('login-btn');
-  btn.disabled = on;
-  btn.classList.toggle('loading', on);
+  const btn=document.getElementById('login-btn');
+  btn.disabled=on; btn.classList.toggle('loading',on);
 }
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 </script>
 </body>
 </html>
