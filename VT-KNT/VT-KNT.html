@@ -455,75 +455,74 @@ const papers = [
         chartIndex:0,
         qns:"SCENARIO 1a: Transmit the following phrases as per R/T procedure:\n(i) Ignore\n(ii) I repeat for clarity or emphasis\n(iii) I wish to obtain.....\n(iv) Squawk 2000\n(v) Heading 100 degrees:",
         answer:{ transmissions:[
-          { who:"pilot", text:"(i) Altitude 12000  →  ONE TWO THOUSAND FEET" },
-          { who:"pilot", text:"(ii) 118.1  →  ONE ONE EIGHT DECIMAL ONE" },
-          { who:"pilot", text:"(iii) Aerodrome routine meteorological report  →  METAR" },
-          { who:"pilot", text:"(iv) QTE  →  TRUE BEARING from the station  /  QUEBEC TANGO ECHO" },
-          { who:"pilot", text:"(v) Will comply  →  WILCO" }
+          { who:"pilot", text:"(i) Ignor: DISREGARD " },
+          { who:"pilot", text:"(ii) I repeat for clarity or emphasis: I SAY AGAIN " },
+          { who:"pilot", text:"(iii) I wish to obtain: REQUEST" },
+          { who:"pilot", text:"(iv) Squawk 2000: Squawk 2 thousand " },
+          { who:"pilot", text:"(v) Heading 100 degrees: Heading 100" }
         ]}
       },
       {
         chartIndex:0,
         qns:"SCENARIO 1b: You are at Stand 1, You are requesting ATC clearance, push back and start.",
         answer:{ transmissions:[
-          { who:"pilot",    text:"Lucknow Ground, AKASA AIR One Four Two, stand One Zero Five Left, information Bravo, QNH One Zero One Five, IFR to Kolkata, request start-up and ATC clearance." },
-          { who:"atc",      text:"AKASA AIR One Four Two. Cleared to Kolkata via Romeo Four Six Zero, ASARI One Bravo Departure, Flight Level Three One Zero, Squawk Six Two One Five. Start-up approved, Runway Two Seven." },
-          { who:"readback", text:"Cleared to Kolkata via Romeo Four Six Zero, ASARI One Bravo Departure, Flight Level Three One Zero, Squawk Six Two One Five. Start-up approved, Runway Two Seven. AKASA AIR One Four Two." }
+          { who:"pilot",    text:"Bhopal Gnd,VT-KNT, Stand 1, Info H, QNH 1012, IFR to Kolkata, REQ ATC clearance, and Start up " },
+          { who:"atc",      text:"VT-KNT, Cleared to Kolkata via flight, planned route, FL 210, Squak 4312., Pushback and start up approved, facing east ." },
+          { who:"readback", text:"Cleared to Kolkata via Flight planned route, FL210, Squawk 4312 pushback and start up approvd facing east. VT-KNT" }
         ]}
       },
       {
         chartIndex:1,
         qns:"SCENARIO 2a: Taxi Request",
         answer:{ transmissions:[
-          { who:"pilot",    text:"AKASA AIR One Four Two, persons on board One Six Nine, security check completed, request taxi." },
-          { who:"atc",      text:"AKASA AIR One Four Two, taxi via Delta. Hold short of Runway Two Seven." },
-          { who:"readback", text:"Taxi via Delta. Hold short of Runway Two Seven. AKASA AIR One Four Two." }
+          { who:"pilot",    text:"Bhopal Gnd Vt-KNT Info H SCC POB 47 Req taxi." },
+          { who:"atc",      text:"VT- KNT Taxi via D and E, Hold short RWY 30 Contact TWR 118.550." },
+          { who:"readback", text:"Taxi via D and E Hold short RWY 30 Will contact TWR on 118.550 VT-KNT." }
         ]}
       },
       {
         chartIndex:1,
         qns:"SCENARIO 2b: You're holding short of Runway Three Zero on Taxiway E. You see Air India 321 on finals; request line up and departure.",
         answer:{ transmissions:[
-          { who:"pilot",    text:"AKASA AIR One Four Two. Taxiway Delta blocked by unserviceable ambulance. Holding short of Delta, request taxi via Echo to holding point Two Seven." },
-          { who:"atc",      text:"AKASA AIR One Four Two, taxi via Echo approved. Hold short of Runway Two Seven. Contact Tower One Two Two decimal Five." },
-          { who:"readback", text:"Taxi via Echo approved. Hold short of Runway Two Seven. Tower One Two Two decimal Five. AKASA AIR One Four Two." }
+          { who:"pilot",    text:"Bhopal TWR VT-KNT At holding point E RWY 30 AI 321 on finals in sight REQ back track and line up RWY 30 after Air India clears abeam E link. Ready for DEP." },
+          { who:"atc",      text:"VT- KNT Behind Air India 321 on final, line up behind and wait, RWY 30." },
+          { who:"readback", text:"Behind Air India 321 on final Line up behind and wait RWY 30 VT-KNT" }
         ]}
       },
       {
         chartIndex:2,
         qns:"SCENARIO 3: Report your positon over JJB VOR and request higher levek.",
         answer:{ transmissions:[
-          { who:"pilot", text:"STOPPING. STOPPING. STOPPING.\nAKASA AIR One Four Two — vehicle on the Runway." },
-          { who:"atc",   text:"AKASA AIR One Four Two, roger." },
-          { who:"pilot", text:"Lucknow Tower, AKASA AIR One Four Two, under control. Request backtrack and line up Runway Two Seven for another departure." },
-          { who:"atc",   text:"AKASA AIR One Four Two, backtrack approved, line up Runway Two Seven." },
-          { who:"readback", text:"Backtrack approved, line up Runway Two Seven. AKASA AIR One Four Two." },
-          { who:"pilot", text:"AKASA AIR One Four Two, ready for departure Runway Two Seven." },
-          { who:"atc",   text:"AKASA AIR One Four Two, clear take-off, surface wind light and variable." },
-          { who:"readback", text:"Clear take-off. AKASA AIR One Four Two." }
+          { who:"pilot", text:"Nagpur APP VT-KNT Over JJB VOR at 1430 FL210 EST IBUDA at 45 ARIVO next REQ FL230 due light Turbulence." },
+          { who:"atc",   text:"VT-KNT Maintain FL 210 due traffic Report IBUDA." },
+          { who:"readback", text:"FL 210 Will report IBUDA, VT-KNT." }
         ]}
       },
       {
         chartIndex:2,
         qns:"SCENARIO 4: 80 Nms Outbound Juliette Juliette Bravo VOR you experience engine vibrations and decide to divert to Jabalpur.",
         answer:{ transmissions:[
-          { who:"pilot",    text:"Lucknow Approach, AKASA AIR One Four Two, passing Two Thousand Seven Hundred feet, climbing to Flight Level One Eight Zero. Request Flight Level Two Hundred." },
-          { who:"atc",      text:"AKASA AIR One Four Two, unable due traffic. Report reaching Flight Level One Eight Zero." },
-          { who:"readback", text:"Roger, will report reaching Flight Level One Eight Zero. AKASA AIR One Four Two." }
+          { who:"pilot",    text:"PAN PAN x 3 Nagpur Arrival VT-KNT PSN 80 DME, Radial 092 outbound from JJB VOR, FL 210 Experiencing abnormal vibrations. Diverting to Jabalpur. Request descent. POB 47 END 3hrs ETA JJB 1316." },
+          { who:"atc",      text:"VT-KNT Nagpur CTRL Roger PAN PAN Descend to FL120 Cleared direct Jabalpur." },
+          { who:"readback", text:"Descend to FL120 Cleared direct Jabalpur VT-KNT." }
         ]}
       },
       {
         chartIndex:3,
         qns:"SCENARIO 5: Enroute to Jabalpur your Port engine catches fire",
         answer:{ transmissions:[
-          { who:"pilot", text:"Varanasi Control. AKASA AIR One Four Two. Position Bravo Bravo November VOR, time Zero Three Five Six, Flight Level Three One Zero. Estimating Golf Golf Charlie VOR at Zero Four One Zero. TEPAL next." }
+          { who:"pilot", text:"MAYDAY x 3 Nagpur CTRL VT-KNT ATR 72 Switched off port engine due fire. Position 26 DME inbound JJB VOR, Passing FL 160 descending. REQ descent 5000ft and contact Jabalpur TWR for emergency landing. Squawking 7700 POB 47 END 2hrs." },
+          { who:"atc",      text:"VT-KNT Roger MAYDAY, Clear descend to 5000ft on QNH 998 Contact Jabalpur TWR on 118.3." },
+          { who:"readback", text:"	Descend to 5000ft, QNH 998. Contact Jabalpur TWR on 118.3 VT-KNT." }
         ]}
       },
       {
         chartIndex:3,
         qns:"SCENARIO 6: You land at Jabalpur but are not familiar with the aerodrome layout. Ask ATC for taxi instructions and emergency services.",
         answer:{ transmissions:[
-          { who:"pilot", text:"Varanasi Control, AKASA AIR One Four Two, relaying for Victor Golf Charlie — Cessna One Seven Two. Position Five Zero nautical miles west of Gaya, maintaining Three Thousand feet on QNH Nine Nine Eight, VMC, estimating Gaya Zero Four Three One." }
+          { who:"pilot", text:"Jabalpur TWR VT-KNT Landed RWY 24 Approaching A TWY REQ progressive taxi instructions, Unfamiliar with aerodrome layout." },
+          { who:"atc",      text:"VT-KNT Taxi via A to parking stand 2 Follow the follow-me vehicle. Emergency services proceeding to your location.." },
+          { who:"readback", text:"	Taxi via A to stand Follow- me vehicle in sight VT-KNT." }
         ]}
       },
       
