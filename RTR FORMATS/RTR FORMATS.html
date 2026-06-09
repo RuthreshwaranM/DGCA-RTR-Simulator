@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RTR Part 2 — Call Formats</title>
+<script src="../protection.js"></script>
+<style>
+/* ============================================================
+   RTR PART 2 — Call Formats Practice
+   Simple 2-column layout, no charts needed
+   Left: Scenario + Practice | Right: All format info
+============================================================ */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif}
+
+/* ── THEME ── */
+body{
+  --bg:#0a0d1a;
+  --bg2:#0c1020;
+  --bg3:#080b16;
+  --border:#1a2a4a;
+  --text:#c8d8f0;
+  --text2:#8aaad0;
+  --text3:#4a6a8a;
+  --topbar:#060a18;
+  --panel:#0d1428;
+  --hdr:#0e1e3a;
+  --pilot-bg:#08182a;
+  --pilot-bdr:#4a8fff;
+  --pilot-txt:#4a8fff;
+  --atc-bg:#180d00;
+  --atc-bdr:#ff8800;
+  --atc-txt:#ff8800;
+  --rb-bg:#06101c;
+  --rb-bdr:#2a6aaa;
+  --rb-txt:#4a7ab0;
+  --accent:#4a8fff;
+  --accent2:#ff6b35;
+  --green:#00cc88;
+  --amber:#ffaa44;
+  --red:#ff4444;
+  --cat-active:#1a3a6e;
+  --cat-done:#0a2018;
+  --study-bg:#0a1830;
+  --input-bg:#080c18;
+  --input-bdr:#1a2a4a;
+}
+body.light{
+  --bg:#f0f4e8;
+  --bg2:#e8f0da;
+  --bg3:#f8fdf0;
+  --border:#b0c890;
+  --text:#1a2810;
+  --text2:#3a5820;
+  --text3:#6a8850;
+  --topbar:#2a4a18;
+  --panel:#ffffff;
+  --hdr:#e0eccc;
+  --pilot-bg:#e8f4e0;
+  --pilot-bdr:#2a7030;
+  --pilot-txt:#1a5020;
+  --atc-bg:#fff8e8;
+  --atc-bdr:#cc8800;
+  --atc-txt:#8a5000;
+  --rb-bg:#eef8f0;
+  --rb-bdr:#2a7858;
+  --rb-txt:#1a5840;
+  --accent:#1a4a8a;
+  --accent2:#cc4400;
+  --green:#1a7030;
+  --amber:#8a5000;
+  --red:#aa1010;
+  --cat-active:#d0e8ff;
+  --cat-done:#c8f0d8;
+  --study-bg:#f0f8e8;
+  --input-bg:#f8fff0;
+  --input-bdr:#b0c890;
+}
+
+html,body{background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+
+/* ── TOPBAR ── */
+#topbar{
+  height:44px;background:var(--topbar);
+  border-bottom:2px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 12px;gap:6px;flex-shrink:0;
+}
+.logo{font-size:11px;font-weight:800;color:#4a8fff;letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
+.logo em{color:#ff6b35;font-style:normal}
+.vdiv{width:1px;height:18px;background:var(--border);margin:0 4px;flex-shrink:0}
+.back-btn{
+  padding:4px 10px;font-size:10px;font-weight:700;
+  border:1px solid var(--border);background:transparent;
+  color:var(--text3);border-radius:3px;cursor:pointer;
+  letter-spacing:.5px;text-transform:uppercase;
+  text-decoration:none;display:flex;align-items:center;gap:4px;
+}
+.back-btn:hover{background:var(--bg2)}
+.page-title{
+  font-size:11px;font-weight:700;color:var(--text2);
+  letter-spacing:1px;text-transform:uppercase;
+}
+.tright{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+/* Mode toggle */
+#mode-toggle{
+  display:flex;gap:2px;background:var(--bg3);
+  border:1px solid var(--border);border-radius:6px;padding:2px;
+}
+.mode-btn{
+  padding:4px 12px;font-size:10px;font-weight:700;
+  border:none;border-radius:4px;cursor:pointer;
+  letter-spacing:.5px;text-transform:uppercase;
+  background:transparent;color:var(--text3);transition:all .15s;
+}
+.mode-btn.on{background:var(--accent);color:#ffffff}
+
+/* Timer */
+#tclock{font-family:'Courier New',monospace;font-size:18px;font-weight:700;color:#00d4aa;letter-spacing:2px}
+#tclock.w{color:#ffaa00}
+#tclock.d{color:#ff4444;animation:blink .8s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.tbtn{padding:3px 9px;font-size:9px;font-weight:700;border:1px solid var(--border);background:var(--bg3);color:var(--accent);border-radius:3px;cursor:pointer;letter-spacing:.5px;text-transform:uppercase}
+#theme-btn{padding:3px 9px;font-size:9px;font-weight:700;border:1px solid var(--border);background:var(--bg3);color:var(--text3);border-radius:3px;cursor:pointer}
+
+/* ── CATEGORY NAV BAR ── */
+#cat-bar{
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:6px 10px;gap:4px;
+  flex-shrink:0;overflow-x:auto;flex-wrap:nowrap;
+}
+#cat-bar::-webkit-scrollbar{height:3px}
+#cat-bar::-webkit-scrollbar-thumb{background:var(--border)}
+.cat-btn{
+  padding:4px 12px;font-size:10px;font-weight:700;
+  border:1px solid var(--border);background:var(--bg3);
+  color:var(--text3);border-radius:4px;cursor:pointer;
+  white-space:nowrap;transition:all .12s;letter-spacing:.3px;
+  text-transform:uppercase;flex-shrink:0;
+}
+.cat-btn:hover{color:var(--text2);background:var(--bg2)}
+.cat-btn.on{background:var(--cat-active);border-color:var(--accent);color:var(--accent)}
+.cat-btn.dn{background:var(--cat-done);border-color:var(--green);color:var(--green)}
+
+/* ── SCENARIO NAV BAR ── */
+#scen-bar{
+  background:var(--bg3);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:5px 10px;gap:4px;
+  flex-shrink:0;flex-wrap:wrap;
+}
+#scen-title{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-right:6px;white-space:nowrap}
+.snum{
+  width:28px;height:28px;border-radius:4px;
+  border:1px solid var(--border);background:var(--bg2);
+  color:var(--text3);font-size:11px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .12s;flex-shrink:0;
+}
+.snum:hover{filter:brightness(1.1)}
+.snum.on{background:var(--cat-active);border-color:var(--accent);color:var(--accent)}
+.snum.dn{background:var(--cat-done);border-color:var(--green);color:var(--green)}
+#scen-count{margin-left:auto;font-size:10px;color:var(--text3);letter-spacing:1px;white-space:nowrap}
+
+/* ── MAIN LAYOUT ── */
+#main{
+  flex:1;display:grid;
+  grid-template-columns:1fr 340px;
+  min-height:0;
+}
+
+/* ── LEFT: PRACTICE AREA ── */
+#left{
+  display:flex;flex-direction:column;
+  border-right:1px solid var(--border);
+  overflow:hidden;background:var(--bg);
+}
+
+/* Panel header */
+.phead{
+  background:var(--hdr);border-bottom:1px solid var(--border);
+  padding:6px 14px;font-size:9px;font-weight:700;
+  letter-spacing:2px;color:var(--accent);text-transform:uppercase;
+  display:flex;align-items:center;gap:6px;flex-shrink:0;
+}
+.phead::before{content:'';display:inline-block;width:3px;height:10px;background:var(--accent);border-radius:2px}
+.phead-right{margin-left:auto;font-size:9px;color:var(--text3);font-weight:400}
+
+/* Scenario body */
+#scen-body{flex:1;overflow-y:auto;padding:14px}
+
+.scen-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--cat-active);border:1px solid var(--accent);
+  color:var(--accent);font-size:9px;font-weight:700;
+  padding:3px 10px;border-radius:3px;letter-spacing:1px;
+  text-transform:uppercase;margin-bottom:10px;
+}
+.cat-label{font-size:9px;color:var(--amber);font-weight:700;letter-spacing:1px;margin-bottom:12px;text-transform:uppercase}
+
+/* Situation box */
+.situation-box{
+  background:var(--panel);border:1px solid var(--border);
+  border-left:4px solid var(--accent);
+  border-radius:0 8px 8px 0;
+  padding:14px 16px;margin-bottom:14px;
+}
+.situation-lbl{font-size:9px;font-weight:700;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.situation-txt{font-size:14px;font-weight:700;color:var(--text);line-height:1.75;white-space:pre-line}
+
+/* Four Ws reminder */
+.four-ws{
+  display:grid;grid-template-columns:1fr 1fr;gap:6px;
+  margin-bottom:14px;
+}
+.w-item{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:6px;padding:7px 10px;
+  font-size:10px;color:var(--text3);
+}
+.w-item strong{color:var(--amber);display:block;font-size:9px;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px}
+
+/* ── VOICE CONTROLS (topbar) ── */
+.voice-select{
+  padding:3px 7px;font-size:10px;font-weight:600;
+  border:1px solid var(--border);background:var(--bg3);
+  color:var(--text2);border-radius:4px;cursor:pointer;
+  outline:none;max-width:130px;
+}
+.voice-select option{background:var(--bg)}
+.speed-btns{display:flex;gap:2px}
+.spd-btn{
+  padding:3px 7px;font-size:10px;font-weight:700;
+  border:1px solid var(--border);background:var(--bg3);
+  color:var(--text3);border-radius:3px;cursor:pointer;
+  letter-spacing:.3px;transition:all .12s;
+}
+.spd-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ── PRACTICE MODE — CONVERSATION FLOW ── */
+#practice-area{}
+#conv-flow{display:flex;flex-direction:column;gap:10px}
+
+/* Each step card */
+.step-card{
+  border-radius:8px;border:1px solid var(--border);
+  overflow:hidden;transition:all .2s;opacity:.45;
+  transform:translateY(4px);
+}
+.step-card.active{opacity:1;transform:translateY(0);border-color:var(--accent)}
+.step-card.done{opacity:.7;transform:translateY(0)}
+.step-card.future{opacity:.25}
+
+/* ATC step */
+.step-atc .step-head{
+  background:var(--atc-bg);border-bottom:1px solid var(--atc-bdr);
+  padding:7px 12px;display:flex;align-items:center;gap:8px;
+}
+.step-atc .step-body{
+  background:var(--atc-bg);padding:10px 14px;
+  font-size:13px;font-weight:600;color:var(--text);
+  white-space:pre-line;line-height:1.7;
+}
+/* Pilot/Readback step */
+.step-pilot .step-head,.step-readback .step-head{
+  background:var(--pilot-bg);border-bottom:1px solid var(--pilot-bdr);
+  padding:7px 12px;display:flex;align-items:center;gap:8px;
+}
+.step-readback .step-head{
+  background:var(--rb-bg);border-bottom-color:var(--rb-bdr);
+}
+.step-pilot .step-body,.step-readback .step-body{
+  background:var(--pilot-bg);padding:10px 14px;
+}
+.step-readback .step-body{background:var(--rb-bg)}
+
+.step-lbl{
+  font-size:9px;font-weight:800;letter-spacing:1.5px;
+  text-transform:uppercase;
+}
+.step-atc .step-lbl{color:var(--atc-txt)}
+.step-pilot .step-lbl{color:var(--pilot-bdr)}
+.step-readback .step-lbl{color:var(--rb-txt)}
+
+/* Play button */
+.play-btn{
+  margin-left:auto;padding:4px 11px;font-size:10px;font-weight:700;
+  border:1px solid var(--atc-bdr);background:rgba(255,136,0,.1);
+  color:var(--atc-bdr);border-radius:4px;cursor:pointer;
+  letter-spacing:.5px;transition:all .15s;display:flex;align-items:center;gap:5px;
+  white-space:nowrap;
+}
+.play-btn:hover{background:rgba(255,136,0,.22)}
+.play-btn.speaking{background:rgba(255,136,0,.25);animation:pulse .7s infinite alternate}
+@keyframes pulse{from{opacity:.8}to{opacity:1}}
+
+/* Your turn block */
+.your-turn{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  flex-wrap:wrap;
+}
+.mic-icon{font-size:20px}
+.your-turn-txt{font-size:12px;font-weight:600;color:var(--text2);flex:1}
+.hint-btn{
+  padding:4px 11px;font-size:10px;font-weight:700;
+  border:1px solid var(--border);background:transparent;
+  color:var(--text3);border-radius:4px;cursor:pointer;
+  letter-spacing:.5px;transition:all .15s;
+}
+.hint-btn:hover{background:var(--bg2);color:var(--text)}
+.cont-btn{
+  padding:5px 14px;font-size:10px;font-weight:700;
+  border:none;background:var(--accent);color:#fff;
+  border-radius:4px;cursor:pointer;letter-spacing:.5px;
+  transition:all .15s;
+}
+.cont-btn:hover{filter:brightness(1.1)}
+
+/* Hint reveal text */
+.hint-reveal{
+  display:none;padding:8px 14px 10px;
+  font-size:12px;font-weight:600;color:var(--text);
+  white-space:pre-line;line-height:1.7;
+  border-top:1px dashed var(--border);
+  background:rgba(74,143,255,.06);
+}
+.hint-reveal.vis{display:block}
+
+/* Done tick */
+.done-tick{
+  margin-left:auto;width:20px;height:20px;background:var(--green);
+  color:#fff;border-radius:50%;font-size:11px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ── ANSWER BOX (kept for compat, not used) ── */
+#answer-box{display:none}
+#answer-box.vis{display:block}
+.ans-hdr{font-size:9px;font-weight:700;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ans-hdr::before{content:'';display:inline-block;width:3px;height:9px;background:var(--green);border-radius:2px}
+
+/* Action bar */
+#study-area{display:none}
+#study-area.vis{display:block}
+.study-block{
+  background:var(--study-bg);border:1px solid var(--border);
+  border-radius:8px;padding:14px;margin-bottom:10px;
+}
+.study-block-lbl{font-size:9px;font-weight:700;color:var(--amber);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+
+/* Tx blocks used in study + answer reveal */
+.tx{padding:10px 13px;border-radius:6px;font-size:13px;font-weight:600;line-height:1.65;margin-bottom:8px;white-space:pre-line;position:relative}
+.tx-who{font-size:9px;font-weight:800;letter-spacing:1.5px;margin-bottom:4px;text-transform:uppercase;display:flex;align-items:center;gap:4px}
+.tx.pilot{background:var(--pilot-bg);border-left:3px solid var(--pilot-bdr)}
+.tx.pilot .tx-who{color:var(--pilot-bdr)}
+.tx.atc{background:var(--atc-bg);border-left:3px solid var(--atc-bdr)}
+.tx.atc .tx-who{color:var(--atc-txt)}
+.tx.readback{background:var(--rb-bg);border-left:3px solid var(--rb-bdr)}
+.tx.readback .tx-who{color:var(--rb-txt)}
+.tx.note{background:var(--bg2);border-left:3px solid var(--amber);font-size:11px;color:var(--amber)}
+.tx.note .tx-who{color:var(--amber)}
+
+/* Play button inside tx (study mode) */
+.tx-play{
+  float:right;margin-top:-2px;margin-left:8px;
+  padding:3px 9px;font-size:10px;font-weight:700;
+  border-radius:4px;cursor:pointer;letter-spacing:.3px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--text3);transition:all .12s;
+}
+.tx.atc .tx-play{border-color:var(--atc-bdr);color:var(--atc-txt);background:rgba(255,136,0,.07)}
+.tx.atc .tx-play:hover{background:rgba(255,136,0,.18)}
+.tx.pilot .tx-play,.tx.readback .tx-play{border-color:var(--pilot-bdr);color:var(--pilot-bdr);background:rgba(74,143,255,.07)}
+.tx.pilot .tx-play:hover,.tx.readback .tx-play:hover{background:rgba(74,143,255,.18)}
+.tx-play.speaking{animation:pulse .7s infinite alternate}
+
+/* Play all button */
+.play-all-btn{
+  width:100%;padding:9px;font-size:11px;font-weight:700;
+  border:1px solid var(--green);background:rgba(0,204,136,.07);
+  color:var(--green);border-radius:6px;cursor:pointer;
+  letter-spacing:1px;text-transform:uppercase;
+  transition:all .15s;margin-bottom:12px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.play-all-btn:hover{background:rgba(0,204,136,.15)}
+.play-all-btn.playing{background:rgba(0,204,136,.2)}
+
+/* Action bar */
+#action-bar{
+  display:flex;gap:8px;padding:9px 14px;
+  border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0;
+}
+.abtn{padding:7px 15px;font-size:10px;font-weight:700;border-radius:4px;cursor:pointer;letter-spacing:.5px;text-transform:uppercase;transition:all .12s}
+.abtn-p{border:1px solid var(--border);background:transparent;color:var(--text3)}.abtn-p:hover{background:var(--bg)}
+.abtn-n{border:none;background:var(--accent);color:#ffffff}.abtn-n:hover{filter:brightness(1.1)}
+.abtn-d{border:1px solid var(--green);background:rgba(0,204,136,.08);color:var(--green);margin-left:auto}.abtn-d:hover{background:rgba(0,204,136,.15)}
+.abtn-c{border:1px solid var(--border);background:transparent;color:var(--text3)}.abtn-c:hover{background:var(--bg)}
+
+/* ── RIGHT: FORMAT REFERENCE ── */
+#right{
+  display:flex;flex-direction:column;
+  overflow:hidden;background:var(--panel);
+}
+#right-body{flex:1;overflow-y:auto;padding:12px}
+
+/* Four Ws card */
+.four-ws-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:12px;margin-bottom:12px;
+}
+.four-ws-title{font-size:9px;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+.w-row{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.w-row:last-child{border-bottom:none}
+.w-num{min-width:18px;height:18px;background:var(--accent);color:#fff;border-radius:50%;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.w-txt{font-size:11px;color:var(--text);font-weight:600}
+
+/* Format reference card */
+.ref-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:12px;margin-bottom:10px;
+}
+.ref-title{font-size:9px;font-weight:700;color:var(--amber);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.ref-tx{padding:6px 10px;border-radius:4px;font-size:11px;font-weight:600;margin-bottom:5px;line-height:1.5;white-space:pre-line}
+.ref-tx.pilot{background:var(--pilot-bg);border-left:2px solid var(--pilot-bdr);color:var(--text)}
+.ref-tx.atc{background:var(--atc-bg);border-left:2px solid var(--atc-bdr);color:var(--text)}
+.ref-tx.readback{background:var(--rb-bg);border-left:2px solid var(--rb-bdr);color:var(--text)}
+.ref-lbl{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.ref-lbl.p{color:var(--pilot-bdr)}
+.ref-lbl.a{color:var(--atc-txt)}
+.ref-lbl.r{color:var(--rb-txt)}
+
+/* Scrollbars */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg3)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── EXAM MODE BUTTON ── */
+.mode-btn.exam-on{background:#cc4400;color:#fff}
+
+/* ── EXAM OVERLAY ── */
+#exam-overlay{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,.85);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+}
+#exam-overlay.vis{display:flex}
+
+/* Exam Start Card */
+#exam-start-card{
+  background:var(--panel);border:2px solid var(--accent);
+  border-radius:12px;padding:32px 36px;max-width:480px;width:90%;
+  text-align:center;
+}
+.exam-card-title{font-size:22px;font-weight:800;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.exam-card-sub{font-size:12px;color:var(--text2);margin-bottom:24px;line-height:1.6}
+.exam-config{display:flex;gap:10px;justify-content:center;margin-bottom:24px;flex-wrap:wrap}
+.exam-config-item{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:10px 16px;
+  font-size:11px;color:var(--text2);text-align:center;min-width:80px;
+}
+.exam-config-item strong{display:block;font-size:20px;font-weight:800;color:var(--accent);margin-bottom:2px}
+.exam-start-btn{
+  padding:12px 32px;font-size:13px;font-weight:800;
+  border:none;background:var(--accent);color:#fff;
+  border-radius:8px;cursor:pointer;letter-spacing:1px;
+  text-transform:uppercase;transition:all .15s;
+}
+.exam-start-btn:hover{filter:brightness(1.1)}
+.exam-cancel-btn{
+  padding:8px 20px;font-size:11px;font-weight:700;
+  border:1px solid var(--border);background:transparent;
+  color:var(--text3);border-radius:6px;cursor:pointer;
+  margin-top:10px;letter-spacing:.5px;
+}
+.exam-cancel-btn:hover{background:var(--bg2)}
+
+/* Exam Running Card */
+#exam-run-card{
+  background:var(--panel);border:2px solid var(--amber);
+  border-radius:12px;padding:24px 28px;max-width:560px;width:92%;
+}
+.exam-progress{font-size:10px;font-weight:700;color:var(--amber);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.exam-q-num{font-size:32px;font-weight:800;color:var(--text);margin-bottom:4px}
+.exam-q-num span{color:var(--text3);font-size:18px;font-weight:400}
+.exam-situation{
+  background:var(--bg2);border:1px solid var(--border);
+  border-left:4px solid var(--amber);
+  border-radius:0 8px 8px 0;
+  padding:12px 14px;margin:12px 0;
+  font-size:13px;font-weight:600;color:var(--text);
+  line-height:1.75;white-space:pre-line;
+}
+.exam-timer{
+  font-family:'Courier New',monospace;font-size:28px;font-weight:800;
+  color:var(--green);letter-spacing:3px;text-align:center;margin:10px 0;
+}
+.exam-timer.warn{color:var(--amber)}
+.exam-timer.danger{color:var(--red);animation:blink .8s infinite}
+.exam-hint-zone{margin-top:12px;text-align:center}
+.exam-hint-btn{
+  padding:6px 18px;font-size:11px;font-weight:700;
+  border:1px solid var(--border);background:transparent;
+  color:var(--text3);border-radius:6px;cursor:pointer;
+  letter-spacing:.5px;transition:all .12s;
+}
+.exam-hint-btn:hover{background:var(--bg2);color:var(--text)}
+.exam-hint-reveal{
+  display:none;margin-top:12px;padding:10px 14px;
+  background:rgba(74,143,255,.07);border:1px dashed var(--border);
+  border-radius:6px;font-size:12px;font-weight:600;
+  color:var(--text);white-space:pre-line;line-height:1.7;
+  text-align:left;
+}
+.exam-hint-reveal.vis{display:block}
+.exam-actions{display:flex;gap:8px;margin-top:14px;justify-content:center}
+.exam-next-btn{
+  padding:10px 28px;font-size:12px;font-weight:800;
+  border:none;background:var(--green);color:#fff;
+  border-radius:6px;cursor:pointer;letter-spacing:1px;
+  text-transform:uppercase;transition:all .12s;
+}
+.exam-next-btn:hover{filter:brightness(1.1)}
+.exam-abort-btn{
+  padding:8px 16px;font-size:11px;font-weight:700;
+  border:1px solid var(--red);background:transparent;
+  color:var(--red);border-radius:6px;cursor:pointer;
+  letter-spacing:.5px;
+}
+.exam-abort-btn:hover{background:rgba(255,68,68,.1)}
+
+/* Exam Results Card */
+#exam-results-card{
+  background:var(--panel);border:2px solid var(--green);
+  border-radius:12px;padding:28px 32px;max-width:600px;width:94%;
+  max-height:90vh;overflow-y:auto;
+}
+.exam-results-title{font-size:18px;font-weight:800;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;text-align:center}
+.exam-score-row{display:flex;gap:16px;justify-content:center;margin:16px 0;flex-wrap:wrap}
+.exam-score-box{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:12px 20px;text-align:center;min-width:90px;
+}
+.exam-score-box strong{display:block;font-size:26px;font-weight:800;margin-bottom:4px}
+.exam-score-box span{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3)}
+.exam-score-box.green strong{color:var(--green)}
+.exam-score-box.amber strong{color:var(--amber)}
+.exam-score-box.blue strong{color:var(--accent)}
+
+.exam-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:11px}
+.exam-table th{
+  background:var(--hdr);padding:7px 10px;text-align:left;
+  font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text3);border-bottom:1px solid var(--border);
+}
+.exam-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.05);color:var(--text);vertical-align:top}
+.exam-table tr:last-child td{border-bottom:none}
+.exam-table .hint-used{color:var(--amber);font-weight:700}
+.exam-table .no-hint{color:var(--green);font-weight:700}
+.exam-table .cat-cell{color:var(--text3);font-size:10px}
+.exam-table .time-cell{font-family:'Courier New',monospace;color:var(--accent)}
+
+.exam-close-btn{
+  display:block;margin:16px auto 0;
+  padding:10px 32px;font-size:12px;font-weight:800;
+  border:none;background:var(--accent);color:#fff;
+  border-radius:6px;cursor:pointer;letter-spacing:1px;
+  text-transform:uppercase;
+}
+.exam-close-btn:hover{filter:brightness(1.1)}
+.exam-retry-btn{
+  display:block;margin:8px auto 0;
+  padding:8px 24px;font-size:11px;font-weight:700;
+  border:1px solid var(--green);background:transparent;color:var(--green);
+  border-radius:6px;cursor:pointer;letter-spacing:.5px;
+}
+.exam-retry-btn:hover{background:rgba(0,204,136,.1)}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <a class="back-btn" href="../index.html">← Back</a>
+  <div class="vdiv"></div>
+  <div class="logo">DGCA <em>RTR</em> Part 2</div>
+  <div class="vdiv"></div>
+  <div class="page-title">Call Formats Practice</div>
+  <div class="tright">
+    <div id="mode-toggle">
+      <button class="mode-btn on" id="btn-practice" onclick="setMode('practice')">🎯 Practice</button>
+      <button class="mode-btn" id="btn-study" onclick="setMode('study')">📖 Study</button>
+      <button class="mode-btn" id="btn-exam" onclick="openExamSetup()">🎓 Exam</button>
+    </div>
+    <div class="vdiv"></div>
+    <select class="voice-select" id="voice-select" onchange="setVoice(this.value)" title="ATC Voice"></select>
+    <div class="speed-btns">
+      <button class="spd-btn" onclick="setSpeed(0.8)" data-s="0.8">0.8×</button>
+      <button class="spd-btn on" onclick="setSpeed(1.0)" data-s="1">1×</button>
+      <button class="spd-btn" onclick="setSpeed(1.2)" data-s="1.2">1.2×</button>
+    </div>
+    <div class="vdiv"></div>
+    <span id="tclock">30:00</span>
+    <button class="tbtn" onclick="startT()">▶</button>
+    <button class="tbtn" onclick="pauseT()">⏸</button>
+    <button class="tbtn" onclick="resetT()">↺</button>
+    <div class="vdiv"></div>
+    <button id="theme-btn" onclick="toggleTheme()">☀</button>
+  </div>
+</div>
+
+<!-- CATEGORY BAR -->
+<div id="cat-bar"></div>
+
+<!-- SCENARIO NUMBER BAR -->
+<div id="scen-bar">
+  <span id="scen-title">SCENARIO</span>
+  <div id="scen-nums"></div>
+  <span id="scen-count"></span>
+</div>
+
+<!-- MAIN GRID -->
+<div id="main">
+
+  <!-- LEFT: PRACTICE / STUDY -->
+  <div id="left">
+    <div class="phead">
+      <span id="left-head-txt">Practice Mode</span>
+      <span class="phead-right" id="left-head-right"></span>
+    </div>
+    <div id="scen-body">
+
+      <div class="scen-badge" id="scen-badge">Scenario 1</div>
+      <div class="cat-label" id="cat-label"></div>
+
+      <!-- Situation -->
+      <div class="situation-box">
+        <div class="situation-lbl">Situation</div>
+        <div class="situation-txt" id="situation-txt">Select a scenario above to begin.</div>
+      </div>
+
+      <!-- Four Ws quick ref -->
+      <div class="four-ws" id="four-ws-mini">
+        <div class="w-item"><strong>W1 — Whom</strong>Who are you calling?</div>
+        <div class="w-item"><strong>W2 — Who</strong>Who are you?</div>
+        <div class="w-item"><strong>W3 — Where</strong>Where are you?</div>
+        <div class="w-item"><strong>W4 — What</strong>What do you want?</div>
+      </div>
+
+      <!-- PRACTICE MODE -->
+      <div id="practice-area">
+        <div id="conv-flow"></div>
+      </div>
+
+      <!-- STUDY MODE -->
+      <div id="study-area">
+        <div id="study-content"></div>
+      </div>
+
+    </div>
+    <div id="action-bar">
+      <button class="abtn abtn-p" onclick="prevS()">◀ Prev</button>
+      <button class="abtn abtn-n" onclick="nextS()">Next ▶</button>
+      <button class="abtn abtn-d" onclick="markDone()">✓ Done</button>
+    </div>
+  </div>
+
+  <!-- RIGHT: FORMAT REFERENCE -->
+  <div id="right">
+    <div class="phead">Format Reference</div>
+    <div id="right-body">
+
+      <!-- Four Ws -->
+      <div class="four-ws-card">
+        <div class="four-ws-title">Four W's — Every Call</div>
+        <div class="w-row"><div class="w-num">1</div><div class="w-txt">WHOM are you calling?</div></div>
+        <div class="w-row"><div class="w-num">2</div><div class="w-txt">WHO are you?</div></div>
+        <div class="w-row"><div class="w-num">3</div><div class="w-txt">WHERE are you?</div></div>
+        <div class="w-row"><div class="w-num">4</div><div class="w-txt">WHAT do you want?</div></div>
+      </div>
+
+      <!-- Dynamic reference card for current scenario -->
+      <div id="ref-card-wrap"></div>
+
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- EXAM OVERLAY -->
+<div id="exam-overlay">
+  <!-- START CARD -->
+  <div id="exam-start-card">
+    <div class="exam-card-title">🎓 Exam Simulation</div>
+    <div class="exam-card-sub">5 random scenarios drawn from different categories.<br>Each scenario has a 3-minute time limit.<br>Hints are available — but tracked in your results.</div>
+    <div class="exam-config">
+      <div class="exam-config-item"><strong>5</strong>Scenarios</div>
+      <div class="exam-config-item"><strong>3:00</strong>Per scenario</div>
+      <div class="exam-config-item"><strong>ATC</strong>Phonetics</div>
+    </div>
+    <button class="exam-start-btn" onclick="startExam()">▶ Begin Exam</button><br>
+    <button class="exam-cancel-btn" onclick="closeExamOverlay()">Cancel</button>
+  </div>
+
+  <!-- RUNNING CARD -->
+  <div id="exam-run-card" style="display:none">
+    <div class="exam-progress" id="exam-progress-lbl">Scenario 1 of 5</div>
+    <div class="exam-q-num" id="exam-q-num">1 <span>/ 5</span></div>
+    <div class="exam-situation" id="exam-situation-txt"></div>
+    <div class="exam-timer" id="exam-timer">03:00</div>
+    <div class="exam-hint-zone">
+      <button class="exam-hint-btn" id="exam-hint-btn" onclick="examShowHint()">💡 Show Hint</button>
+      <div class="exam-hint-reveal" id="exam-hint-reveal"></div>
+    </div>
+    <div class="exam-actions">
+      <button class="exam-next-btn" onclick="examNext()">✓ Done — Next Scenario</button>
+      <button class="exam-abort-btn" onclick="examAbort()">✕ End Exam</button>
+    </div>
+  </div>
+
+  <!-- RESULTS CARD -->
+  <div id="exam-results-card" style="display:none">
+    <div class="exam-results-title">📋 Exam Results</div>
+    <div class="exam-score-row" id="exam-score-row"></div>
+    <table class="exam-table" id="exam-results-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Category</th>
+          <th>Scenario</th>
+          <th>Time Taken</th>
+          <th>Hint Used</th>
+        </tr>
+      </thead>
+      <tbody id="exam-results-tbody"></tbody>
+    </table>
+    <button class="exam-retry-btn" onclick="openExamSetup()">↺ Try Again</button>
+    <button class="exam-close-btn" onclick="closeExamOverlay()">✓ Done</button>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   RTR PART 2 — VOICE PRACTICE ENGINE
+   Web Speech API — no external service needed
+================================================================ */
+
+/* ── SPEECH ENGINE ── */
+let voices = [];
+let selectedVoice = null;
+let speechRate = 1.0;
+let currentSpeakBtn = null;
+
+function loadVoices(){
+  voices = window.speechSynthesis.getVoices();
+  const sel = document.getElementById('voice-select');
+  if(!sel) return;
+  // Filter English voices
+  const engVoices = voices.filter(v => v.lang.startsWith('en'));
+  sel.innerHTML = engVoices.map((v,i) =>
+    `<option value="${i}">${v.name.replace('Microsoft ','').replace(' Desktop','').replace(' Online (Natural)','')}</option>`
+  ).join('');
+  // Auto-pick best voice: prefer male/neural/natural sounding
+  const preferred = engVoices.find(v =>
+    /david|mark|guy|james|aaron|rishi/i.test(v.name)
+  ) || engVoices.find(v =>
+    /neural|natural|online/i.test(v.name)
+  ) || engVoices[0];
+  if(preferred){
+    selectedVoice = preferred;
+    const idx = engVoices.indexOf(preferred);
+    sel.value = idx;
+  }
+  // Store eng voices for setVoice
+  sel._engVoices = engVoices;
+}
+
+window.speechSynthesis.onvoiceschanged = loadVoices;
+// Also try immediately (some browsers have voices ready)
+setTimeout(loadVoices, 200);
+
+function setVoice(idx){
+  const sel = document.getElementById('voice-select');
+  if(sel._engVoices) selectedVoice = sel._engVoices[idx];
+}
+
+function setSpeed(s){
+  speechRate = s;
+  document.querySelectorAll('.spd-btn').forEach(b => {
+    b.classList.toggle('on', parseFloat(b.dataset.s) === s);
+  });
+}
+
+function speakText(text, btn, onDone){
+  window.speechSynthesis.cancel();
+  if(currentSpeakBtn && currentSpeakBtn !== btn){
+    currentSpeakBtn.textContent = '▶ Play';
+    currentSpeakBtn.classList.remove('speaking');
+  }
+  // Replace newlines with pause (comma + space)
+  const spoken = text.replace(/\n/g, ', ');
+  const utt = new SpeechSynthesisUtterance(spoken);
+  if(selectedVoice) utt.voice = selectedVoice;
+  utt.rate = speechRate;
+  utt.pitch = 0.95;
+  if(btn){
+    btn.textContent = '⏹ Stop';
+    btn.classList.add('speaking');
+    currentSpeakBtn = btn;
+  }
+  utt.onend = () => {
+    if(btn){ btn.textContent = '▶ Play'; btn.classList.remove('speaking'); }
+    if(currentSpeakBtn === btn) currentSpeakBtn = null;
+    if(onDone) onDone();
+  };
+  utt.onerror = () => {
+    if(btn){ btn.textContent = '▶ Play'; btn.classList.remove('speaking'); }
+    if(onDone) onDone();
+  };
+  window.speechSynthesis.speak(utt);
+}
+
+function stopSpeech(){
+  window.speechSynthesis.cancel();
+  if(currentSpeakBtn){
+    currentSpeakBtn.textContent = '▶ Play';
+    currentSpeakBtn.classList.remove('speaking');
+    currentSpeakBtn = null;
+  }
+}
+
+/* ================================================================
+   RTR PART 2 — CALL FORMATS DATA
+================================================================ */
+
+const CATEGORIES = [
+
+  {
+    name: "Radio Check",
+    scenarios: [
+      {
+        situation: "You are VT-ABC at Stand 15, Delhi (DPN).\nRequest a radio check on frequency 118.7.",
+        transmissions: [
+          { who:"pilot",    text:"DPN Ground,\nVT-ABC,\nStand 15,\nRequest Radio Check on frequency 118.7." },
+          { who:"atc",      text:"VT-ABC,\nDPN Ground,\nRead you 4." },
+          { who:"readback", text:"Read you 4.\nVT-ABC." }
+        ],
+        notes:"Readability scale: 1 (Unreadable) to 5 (Perfectly readable). R4 = Readable."
+      }
+    ]
+  },
+
+  {
+    name: "Time Check",
+    scenarios: [
+      {
+        situation: "You are AIC 810 (Heavy) at VABB.\nRequest a time check from Ground.",
+        transmissions: [
+          { who:"pilot",    text:"VABB Ground,\nAIC 810 Heavy,\nRequest Time Check." },
+          { who:"atc",      text:"AIC 810,\nVABB Ground,\nTime Zero Seven One Five and a half." },
+          { who:"readback", text:"Time Zero Seven One Five and a half.\nAIC 810." }
+        ],
+        notes:"Use HEAVY in callsign if aircraft MTOW > 136,000 kg. Time always in UTC."
+      }
+    ]
+  },
+
+  {
+    name: "Departure Info",
+    scenarios: [
+      {
+        situation: "You are IFly 150 at Stand 15, VECC.\nRequest departure information from Ground.",
+        transmissions: [
+          { who:"pilot",    text:"VECC Ground,\nIFly 150,\nStand 15,\nRequest Departure Information." },
+          { who:"atc",      text:"Runway 11,\nWind 160 degrees 07 knots,\nQNH 1010,\nTemperature 21,\nVisibility 4500." },
+          { who:"readback", text:"Runway 11,\nQNH 1010.\nIFly 150." },
+          { who:"atc",      text:"QNH correct." },
+          { who:"readback", text:"Roger.\nIFly 150." }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: "Pushback",
+    scenarios: [
+      {
+        situation: "You are VT-ABC at Stand 27, DPN.\nRequest pushback from Ground.",
+        transmissions: [
+          { who:"pilot",    text:"DPN Ground,\nVT-ABC,\nStand 27,\nRequest Pushback." },
+          { who:"atc",      text:"VT-ABC,\nPushback approved." },
+          { who:"readback", text:"Pushback approved.\nVT-ABC." }
+        ]
+      },
+      {
+        situation: "You are VT-ABC at Stand 27, DPN.\nRequest pushback — ATC gives you a delay due B747 taxiing behind.",
+        transmissions: [
+          { who:"pilot",    text:"DPN Ground,\nVT-ABC,\nStand 27,\nRequest Pushback." },
+          { who:"atc",      text:"VT-ABC,\nStandby. Expect one minute delay\ndue B747 taxiing behind." },
+          { who:"readback", text:"Standby. Expect one minute delay\ndue B747 taxiing behind.\nVT-ABC." }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: "Start Up",
+    scenarios: [
+      {
+        situation: "You are AIC 150 at Stand 10, DPN.\nSecurity check complete. POB 150. ATIS Information Bravo.\nRequest start up from Ground.",
+        transmissions: [
+          { who:"pilot",    text:"DPN Ground,\nAIC 150,\nStand 10,\nSecurity check complete, POB 150,\nInformation Bravo,\nRequest Start Up." },
+          { who:"atc",      text:"AIC 150,\nStart up approved." },
+          { who:"readback", text:"Start up approved.\nAIC 150." }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: "Pushback & Start Up",
+    scenarios: [
+      {
+        situation: "You are VT-ABC at Stand 10, BBB.\nSecurity check complete. POB 150. ATIS Information Bravo.\nRequest pushback and start up.",
+        transmissions: [
+          { who:"pilot",    text:"BBB Ground,\nVT-ABC,\nStand 10,\nSecurity check complete, POB 150,\nInformation Bravo,\nRequest Pushback and Start Up." },
+          { who:"atc",      text:"VT-ABC,\nPushback approved facing North\non completion of pushback.\nStart up approved." },
+          { who:"readback", text:"Pushback approved facing North\non completion of pushback.\nStart up approved.\nVT-ABC." }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: "Taxi",
+    scenarios: [
+      {
+        situation: "You are VT-ABC at DPN.\nInformation Bravo. Request taxi from Ground.",
+        transmissions: [
+          { who:"pilot",    text:"DPN Ground,\nVT-ABC,\nRequest Taxi,\nInformation Bravo." },
+          { who:"atc",      text:"VT-ABC,\nTaxi to holding point Delta\nvia Taxiway Charlie." },
+          { who:"readback", text:"Taxi to holding point Delta\nvia Taxiway Charlie.\nVT-ABC." }
+        ]
+      },
+      {
+        situation: "You are VT-ABC at VECC.\nInformation Delta. Request taxi. ATC gives way to B747.",
+        transmissions: [
+          { who:"pilot",    text:"VECC Ground,\nVT-ABC,\nRequest Taxi,\nInformation Delta." },
+          { who:"atc",      text:"VT-ABC,\nTaxi to holding point Runway 28.\nGive way to B747 passing left to right." },
+          { who:"readback", text:"Taxi to holding point Runway 28.\nGiving way to B747.\nVT-ABC." }
+        ]
+      },
+      {
+        situation: "ATC asks you to expedite taxi. Traffic behind on Runway 24.\nReport runway vacated.",
+        transmissions: [
+          { who:"atc",      text:"VT-ABC,\nExpedite taxi.\nTraffic behind Runway 24.\nReport Runway vacated." },
+          { who:"readback", text:"Expediting.\nWill report Runway vacated.\nVT-ABC." },
+          { who:"pilot",    text:"DPN Ground,\nVT-ABC,\nRunway vacated." }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: "ATC Clearance",
+    scenarios: [
+      {
+        situation: "You are VT-ABC at DPN.\nRequest ATC clearance to Kolkata, FL360.",
+        transmissions: [
+          { who:"pilot",    text:"DPN Ground,\nVT-ABC,\nRequest ATC Clearance to Kolkata,\nFlight Level 360." },
+          { who:"atc",      text:"VT-ABC,\nCleared to Kolkata via Whiskey 13,\nFlight Level 360,\nAfter departure Runway 28,\nTurn left, climb on Radial 150,\nReport passing Flight Level 150." },
+          { who:"readback", text:"Cleared to Kolkata via Whiskey 13,\nFlight Level 360,\nAfter departure Runway 28,\nTurn left, climb on Radial 150,\nWill report passing Flight Level 150.\nVT-ABC." }
+        ],
+        notes:"ATC Clearance elements: Destination → Route → Level → Departure instruction → Report/Squawk"
+      },
+      {
+        situation: "You are VT-ABC at VABB.\nRequest ATC clearance to Delhi, FL320.",
+        transmissions: [
+          { who:"pilot",    text:"VABB Ground,\nVT-ABC,\nRequest ATC Clearance to Delhi,\nFlight Level 320." },
+          { who:"atc",      text:"VT-ABC,\nCleared to Delhi via Whiskey 10,\nFlight Level 320,\nAfter departure Runway 27,\nTurn left, climb on track,\nReport reaching Flight Level 100." },
+          { who:"readback", text:"Cleared to Delhi via Whiskey 10,\nFlight Level 320,\nAfter departure Runway 27,\nTurn left, climb on track,\nWill report reaching Flight Level 100.\nVT-ABC." }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: "Line Up & Take Off",
+    scenarios: [
+      {
+        situation: "You are VT-ABC holding short Runway 09 at DPN.\nRequest line up on Runway 09.",
+        transmissions: [
+          { who:"pilot",    text:"DPN Tower,\nVT-ABC,\nHolding short Runway 09,\nRequest enter and line up Runway 09." },
+          { who:"atc",      text:"VT-ABC,\nCleared to enter,\nLine up Runway 09." },
+          { who:"readback", text:"Lined up Runway 09.\nVT-ABC." },
+          { who:"atc",      text:"VT-ABC,\nCleared for take off Runway 09,\nSurface wind 240 degrees 5 knots." },
+          { who:"readback", text:"Cleared for take off Runway 09.\nVT-ABC." }
+        ]
+      },
+      {
+        situation: "You are VT-ABC lined up Runway 28 at DPN.\nReady for immediate departure (quick take off to avoid delay).",
+        transmissions: [
+          { who:"pilot",    text:"DPN Tower,\nVT-ABC,\nLined up Runway 28,\nReady for immediate departure." },
+          { who:"atc",      text:"VT-ABC,\nCleared for immediate departure\nRunway 28." },
+          { who:"readback", text:"Cleared for immediate departure\nRunway 28.\nVT-ABC." }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: "Stopping / Obstruction",
+    scenarios: [
+      {
+        situation: "You are VT-ABC on Taxiway C at DPN.\nYou observe a fire truck on Taxiway D. Take action.",
+        transmissions: [
+          { who:"pilot", text:"DPN Ground,\nVT-ABC,\nOn Taxiway Charlie,\nObserved fire truck on Taxiway Delta.\nStopping slowly." }
+        ]
+      },
+      {
+        situation: "You are VT-ABC lined up Runway 27 at DPN.\nYou want to cancel departure due birds on runway.\nRequest taxi back and bird scaring team.",
+        transmissions: [
+          { who:"pilot", text:"DPN Tower,\nVT-ABC,\nLined up Runway 27,\nCancelling departure due birds on runway.\nTaxi back to apron.\nRequest bird scaring team." }
+        ]
+      },
+      {
+        situation: "You are VT-ABC on Runway 27 at DPN.\nAborting take off due Engine No.1 failure.\nRequest taxi instructions to apron.",
+        transmissions: [
+          { who:"pilot", text:"DPN Tower,\nVT-ABC,\nOn Runway 27,\nAborting take off due Engine No.1 failure.\nRequest taxi instructions to apron." }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: "Traffic Circuit",
+    scenarios: [
+      {
+        situation: "You are VT-ABC on upwind Runway 09 at DPN.\nReport position to Tower.",
+        transmissions: [
+          { who:"pilot",    text:"DPN Tower,\nVT-ABC,\nOn upwind Runway 09." },
+          { who:"atc",      text:"VT-ABC,\nReport crosswind Runway 09." },
+          { who:"readback", text:"Wilco.\nVT-ABC." }
+        ]
+      },
+      {
+        situation: "You are VT-ABC on short final Runway 28.\nRequest landing clearance.",
+        transmissions: [
+          { who:"pilot",    text:"DPN Tower,\nVT-ABC,\nShort final,\nContinuing approach." },
+          { who:"atc",      text:"VT-ABC,\nRunway 28 cleared to land,\nWind 250 degrees 10 knots." },
+          { who:"readback", text:"Cleared to land Runway 28.\nVT-ABC." }
+        ]
+      },
+      {
+        situation: "You are VT-ABC on finals. Landing gear is not down.\nRequest low pass for visual inspection.",
+        transmissions: [
+          { who:"pilot",    text:"DPN Tower,\nVT-ABC,\nRequest low pass,\nUnsafe gear indication." },
+          { who:"atc",      text:"VT-ABC,\nLow pass approved." },
+          { who:"readback", text:"Low pass approved.\nVT-ABC." }
+        ]
+      },
+      {
+        situation: "You are VT-ABC going around.",
+        transmissions: [
+          { who:"pilot",    text:"DPN Tower,\nVT-ABC,\nGoing around." },
+          { who:"atc",      text:"VT-ABC,\nGo around,\nClimb straight ahead to 3000 feet." },
+          { who:"readback", text:"Going around,\nClimbing straight ahead to 3000 feet.\nVT-ABC." }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: "After Landing",
+    scenarios: [
+      {
+        situation: "You are VT-ABC. Just landed Runway 27 at DPN.\nRequest taxi to stand from Tower.",
+        transmissions: [
+          { who:"pilot",    text:"DPN Tower,\nVT-ABC,\nRunway 27,\nRequest taxi to stand." },
+          { who:"atc",      text:"VT-ABC,\nTake first right when vacated.\nContact Ground 118.350." },
+          { who:"readback", text:"First right.\nWilco 118.350.\nVT-ABC." },
+          { who:"pilot",    text:"DPN Ground,\nVT-ABC on 118.350,\nRunway vacated." }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: "Position Report",
+    scenarios: [
+      {
+        situation: "You are AIC 2738 at FL360 on V78.\nPosition at LKN at 1205 UTC.\nEstimating BBN 1235, next GGC 1255.\nGive position report to VIDP Control.",
+        transmissions: [
+          { who:"pilot", text:"VIDP Control,\nAIC 2738,\nPosition Lucknow at One Two Zero Five,\nFlight Level Three Six Zero,\nEstimating Bravo Bravo November at One Two Three Five,\nNext Golf Golf Charlie at One Two Five Five." }
+        ],
+        notes:"Position report: Station → A/C ID → Position → Time → Level → Next fix ETA → Following fix"
+      }
+    ]
+  },
+
+  {
+    name: "Deviation / Wx",
+    scenarios: [
+      {
+        situation: "You are AI 150 on A465, FL320 at Gudum at 1100.\nWeather deviation required. Will deviate 15 NM right.\nFly offset 20 mins, rejoin at Busav.\nEst abeam Sadap 1120, Busav 1130.",
+        transmissions: [
+          { who:"pilot", text:"VABB Control,\nAI 150,\nPosition Gudum at One One Zero Zero,\nAlpha 465, Flight Level Three Two Zero.\nWeather deviation required due weather ahead.\nWill deviate 15 NM right of Alpha 465.\nWill fly offset for 20 minutes and rejoin at Busav.\nEstimate abeam Sadap One One Two Zero.\nEstimate Busav One One Three Zero.\nRequest clearance." }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: "Request Descent",
+    scenarios: [
+      {
+        situation: "You are AIC 2738 at Gaya at 1255, V78, FL360.\nRequest descent clearance from VIDP Control.",
+        transmissions: [
+          { who:"pilot",    text:"VIDP Control,\nAIC 2738,\nPosition Gaya at One Two Five Five,\nVictor 78, Flight Level Three Six Zero.\nRequest descent clearance." },
+          { who:"atc",      text:"AIC 2738,\nDescend to Flight Level Two Four Zero.\nReport passing Flight Level Three One Zero." },
+          { who:"readback", text:"Descending to Flight Level Two Four Zero.\nWill report passing Flight Level Three One Zero.\nAIC 2738." }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: "MAYDAY",
+    scenarios: [
+      {
+        situation: "You are AI 2447 on VABP Control.\nPassenger oxygen masks deployed. Pressurisation failure.\nRequest descent to FL100 and diversion to nearest aerodrome.\n(Position, FL, POB, Heading, Endurance — use your paper data)",
+        transmissions: [
+          { who:"pilot", text:"MAYDAY. MAYDAY. MAYDAY.\nVABP Control,\nAI 2447,\nPassenger oxygen masks deployed,\nPressurisation failure.\nRequest descent to Flight Level One Hundred\nand diversion to nearest aerodrome.\nPosition [your position],\nFlight Level [your FL],\nPersons on board [POB],\nHeading [HDG],\nEndurance [END]." }
+        ],
+        notes:"MAYDAY elements: MAYDAY×3 → Station → Callsign → Nature of emergency → Intention → Position → FL → POB → Heading → Endurance"
+      }
+    ]
+  },
+
+  {
+    name: "PAN PAN",
+    scenarios: [
+      {
+        situation: "You are AI 144 on VABB Tower.\nExperiencing vibration on Engine No.2.\nRequest return to destination.",
+        transmissions: [
+          { who:"pilot", text:"PAN PAN. PAN PAN. PAN PAN.\nVABB Tower,\nAI 144,\nExperiencing vibration on Engine No.2.\nRequest return to destination.\nPosition [your position],\nFlight Level [your FL],\nPersons on board [POB],\nHeading [HDG],\nEndurance [END]." }
+        ],
+        notes:"PAN PAN = Urgency (less than MAYDAY). Same elements as MAYDAY but situation is not immediately life-threatening."
+      },
+      {
+        situation: "You are AI 144 on VABB Tower.\nOne passenger suspected heart attack.\nRequest immediate landing or divert to alternate.\nRequest medical assistance on arrival.\n(Position: 20NM north of DPN, 0530Z, HDG 150, FL200)",
+        transmissions: [
+          { who:"pilot", text:"PAN PAN. PAN PAN. PAN PAN.\nDPN Control,\nVT-ABC,\nOne passenger suspected heart attack.\nRequest immediate landing or diversion to alternate.\nRequest medical assistance on arrival.\nPosition 20 NM north of Delhi at Zero Five Three Zero,\nHeading 150, Flight Level Two Hundred,\nPersons on board [POB],\nEndurance [END]." }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: "Relay Message",
+    scenarios: [
+      {
+        situation: "You are VT-CAB. Another aircraft VT-ABC calls you to relay to DPN ACC.\nVT-ABC position: 15NM north of DPN, passing FL80, HDG 120, POB 120, Endurance 0900.",
+        transmissions: [
+          { who:"atc",      text:"VT-CAB,\nVT-ABC,\nPass your message,\nWill relay to DPN ACC." },
+          { who:"pilot",    text:"VT-ABC,\nVT-CAB,\nWe are 15 NM north of Delhi,\nPassing Flight Level 80,\nHeading 120,\nPersons on board 120,\nEndurance Zero Nine Zero Zero." },
+          { who:"pilot",    text:"MAYDAY / PAN PAN.\nDPN ACC,\nVT-CAB,\nRelaying for VT-ABC.\n[State the problem and intention of VT-ABC]\nHis position 15 NM north of Delhi,\nPassing Flight Level 80,\nHeading 120,\nPersons on board 120,\nEndurance Zero One Zero Zero." }
+        ],
+        notes:"When relaying: first receive the full message, then transmit to ATC with 'Relaying for [callsign]'"
+      }
+    ]
+  },
+
+  {
+    name: "Bird Strike / Activity",
+    scenarios: [
+      {
+        situation: "You are VT-ABC on DPN ACC after departure.\nSuspected bird strike on departure. Operations normal.\nWill continue to destination as per flight plan.",
+        transmissions: [
+          { who:"pilot", text:"DPN ACC,\nVT-ABC,\nPosition [position], Time [time], Route [route], Level [FL].\nSuspected bird strike on departure.\nOperations normal.\nWill continue to destination as per flight plan." }
+        ]
+      },
+      {
+        situation: "You are AI 144 holding position at Runway 26, VABB.\nRequest bird scaring team.",
+        transmissions: [
+          { who:"pilot",    text:"VABB Tower,\nAI 144,\nHolding position Runway 26.\nRequest bird scaring team." },
+          { who:"atc",      text:"AI 144,\nBird scaring team on the way.\nStandby." },
+          { who:"readback", text:"Standby.\nAI 144." }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: "Diversion",
+    scenarios: [
+      {
+        situation: "You are AI 111 on DPN ACC.\nRequest diversion to Lucknow (LKN) due runway closed at destination\nand parking space not available.",
+        transmissions: [
+          { who:"pilot", text:"DPN ACC,\nAI 111,\nPosition [position], Time [time], Route [route], Level [FL].\nRequest diversion to Lucknow\ndue runway closed and parking space not available\nat destination." }
+        ]
+      }
+    ]
+  },
+
+  {
+    name: "RVSM",
+    scenarios: [
+      {
+        situation: "You are VT-ABC on DPN ACC.\nPosition at UKBAK at 1000 on W13N, FL380.\nUnable RVSM due equipment.\nRequest descent to FL280.",
+        transmissions: [
+          { who:"pilot",    text:"DPN ACC,\nVT-ABC,\nPosition UKBAK at One Zero Zero Zero,\nWhiskey 13 North, Flight Level Three Eight Zero.\nUnable RVSM due equipment failure.\nRequest descent to Flight Level Two Eight Zero." },
+          { who:"atc",      text:"VT-ABC,\nDescend to Flight Level Two Eight Zero.\nReport leaving Flight Level Three Eight Zero." },
+          { who:"readback", text:"Descending to Flight Level Two Eight Zero.\nWill report leaving Flight Level Three Eight Zero.\nVT-ABC." }
+        ],
+        notes:"RVSM = Reduced Vertical Separation Minima. Normal separation above FL290 is 1000ft. Without RVSM equipment, separation becomes 2000ft."
+      }
+    ]
+  },
+
+  {
+    name: "ILS Approach",
+    scenarios: [
+      {
+        situation: "You are AI 150 (B787 Heavy) on DPN Approach.\n25 DME on Radial 245 from DPN, IFR, FL125.\nEstimating DPN at 1500. ATIS Information Bravo.",
+        transmissions: [
+          { who:"pilot",    text:"DPN Approach,\nAI 150 Bravo 787 Heavy,\n25 DME Radial 245 Delhi,\nInstrument Flight Rules, Flight Level One Two Five,\nEstimating Delhi at One Five Zero Zero,\nInformation Bravo." },
+          { who:"atc",      text:"AI 150,\nDPN Approach,\nRadar identified.\nDescend to 4000 feet,\nQNH 1013.\nExpect ILS approach Runway 28." },
+          { who:"readback", text:"Descending to 4000 feet,\nQNH 1013.\nExpect ILS Runway 28.\nAI 150." }
+        ]
+      }
+    ]
+  }
+
+];
+
+/* ================================================================
+   APP STATE
+================================================================ */
+let currentCat  = 0;
+let currentScen = 0;
+let currentMode = 'practice';
+let isDark      = true;
+const done = CATEGORIES.map(c => new Set());
+let tSec=1800, tOn=false, tInt=null;
+
+/* ── INIT ── */
+function init(){
+  buildCatBar();
+  loadCategory(0);
+  updT();
+}
+
+/* ── THEME ── */
+function toggleTheme(){
+  isDark=!isDark;
+  document.body.classList.toggle('light',!isDark);
+  document.getElementById('theme-btn').textContent=isDark?'☀':'🌙';
+}
+
+/* ── MODE ── */
+function setMode(m){
+  stopSpeech();
+  currentMode=m;
+  document.getElementById('btn-practice').classList.toggle('on',m==='practice');
+  document.getElementById('btn-study').classList.toggle('on',m==='study');
+  document.getElementById('left-head-txt').textContent=m==='practice'?'Practice Mode':'Study Mode';
+  document.getElementById('practice-area').style.display=m==='practice'?'block':'none';
+  document.getElementById('study-area').style.display=m==='study'?'block':'none';
+  document.getElementById('study-area').classList.toggle('vis',m==='study');
+  document.getElementById('four-ws-mini').style.display=m==='practice'?'grid':'none';
+  if(m==='study') buildStudyContent();
+  else buildConvFlow();
+}
+
+/* ── CATEGORY BAR ── */
+function buildCatBar(){
+  const bar=document.getElementById('cat-bar');
+  bar.innerHTML=CATEGORIES.map((c,i)=>
+    `<div class="cat-btn${i===0?' on':''}" onclick="loadCategory(${i})">${c.name}</div>`
+  ).join('');
+}
+
+function loadCategory(i){
+  stopSpeech();
+  currentCat=i; currentScen=0;
+  document.querySelectorAll('.cat-btn').forEach((b,j)=>b.classList.toggle('on',j===i));
+  buildScenNums();
+  loadScenario(0);
+}
+
+/* ── SCENARIO NAV ── */
+function buildScenNums(){
+  const cat=CATEGORIES[currentCat];
+  document.getElementById('scen-title').textContent=`${cat.name.toUpperCase()} —`;
+  document.getElementById('scen-nums').innerHTML=
+    cat.scenarios.map((s,i)=>{
+      const d=done[currentCat].has(i);
+      return `<div class="snum${i===currentScen?' on':''}${d?' dn':''}" onclick="loadScenario(${i})">${i+1}</div>`;
+    }).join('');
+  document.getElementById('scen-count').textContent=
+    `${currentScen+1} / ${cat.scenarios.length}`;
+}
+
+function loadScenario(i){
+  stopSpeech();
+  currentScen=i;
+  const cat=CATEGORIES[currentCat];
+  const s=cat.scenarios[i];
+  document.querySelectorAll('.snum').forEach((b,j)=>b.classList.toggle('on',j===i));
+  document.getElementById('scen-count').textContent=`${i+1} / ${cat.scenarios.length}`;
+  document.getElementById('scen-badge').textContent=`Scenario ${i+1}`;
+  document.getElementById('cat-label').textContent=cat.name;
+  document.getElementById('situation-txt').textContent=s.situation;
+  buildRefCard(s, cat.name);
+  if(currentMode==='study') buildStudyContent();
+  else buildConvFlow();
+}
+
+/* ================================================================
+   PRACTICE MODE — CONVERSATION FLOW
+================================================================ */
+function buildConvFlow(){
+  const s = CATEGORIES[currentCat].scenarios[currentScen];
+  const flow = document.getElementById('conv-flow');
+  if(!flow) return;
+
+  const labelMap = {
+    pilot:    ['step-pilot',    '✈ PILOT — YOUR TURN'],
+    atc:      ['step-atc',      '📻 ATC'],
+    readback: ['step-readback', '↺ READBACK — YOUR TURN']
+  };
+
+  let html = '';
+  s.transmissions.forEach((t, idx) => {
+    const [cls, lbl] = labelMap[t.who] || ['step-pilot','PILOT — YOUR TURN'];
+    const isFirst = idx === 0;
+    const cardState = isFirst ? 'active' : 'future';
+    const isPilotTurn = t.who === 'pilot' || t.who === 'readback';
+    const escapedText = t.text.replace(/`/g,'&#96;').replace(/'/g,'&#39;');
+
+    if(!isPilotTurn){
+      // ATC card — show text + play button
+      html += `
+      <div class="step-card ${cls} ${cardState}" id="step-${idx}">
+        <div class="step-head">
+          <span class="step-lbl">${lbl}</span>
+          <button class="play-btn" id="playbtn-${idx}" onclick="playStep(${idx}, '${escapedText}')">▶ Play</button>
+        </div>
+        <div class="step-body">${t.text.replace(/\n/g,'<br>')}</div>
+      </div>`;
+    } else {
+      // Pilot/Readback card — your turn + hint
+      html += `
+      <div class="step-card ${cls} ${cardState}" id="step-${idx}">
+        <div class="step-head">
+          <span class="step-lbl">${lbl}</span>
+          ${isFirst ? `<button class="play-btn" id="playbtn-${idx}" onclick="playStep(${idx}, '${escapedText}')">▶ Hear Example</button>` : ''}
+        </div>
+        <div class="your-turn">
+          <span class="mic-icon">🎤</span>
+          <span class="your-turn-txt">Speak your transmission now</span>
+          <button class="hint-btn" onclick="toggleHint(${idx})">💡 Show Hint</button>
+          <button class="cont-btn" onclick="stepDone(${idx})">✓ Continue</button>
+        </div>
+        <div class="hint-reveal" id="hint-${idx}">${t.text.replace(/\n/g,'<br>')}</div>
+      </div>`;
+    }
+  });
+
+  if(s.notes){
+    html += `<div class="tx note"><div class="tx-who">📝 Note</div>${s.notes}</div>`;
+  }
+
+  flow.innerHTML = html;
+}
+
+function playStep(idx, text){
+  // Decode HTML entities back
+  const decoded = text.replace(/&#96;/g,'`').replace(/&#39;/g,"'");
+  const btn = document.getElementById(`playbtn-${idx}`);
+  // Toggle off if already speaking this
+  if(btn && btn.classList.contains('speaking')){
+    stopSpeech();
+    return;
+  }
+  speakText(decoded, btn, null);
+}
+
+function toggleHint(idx){
+  const hint = document.getElementById(`hint-${idx}`);
+  if(!hint) return;
+  const vis = hint.classList.toggle('vis');
+  // Find the hint button in this step and update label
+  const card = document.getElementById(`step-${idx}`);
+  if(card){
+    const hb = card.querySelector('.hint-btn');
+    if(hb) hb.textContent = vis ? '🙈 Hide Hint' : '💡 Show Hint';
+  }
+}
+
+function stepDone(idx){
+  stopSpeech();
+  const card = document.getElementById(`step-${idx}`);
+  if(card){
+    card.classList.remove('active');
+    card.classList.add('done');
+    // Add done tick to header
+    const head = card.querySelector('.step-head');
+    if(head && !head.querySelector('.done-tick')){
+      const tick = document.createElement('div');
+      tick.className = 'done-tick';
+      tick.textContent = '✓';
+      head.appendChild(tick);
+    }
+  }
+  // Activate next step
+  const nextCard = document.getElementById(`step-${idx+1}`);
+  if(nextCard){
+    nextCard.classList.remove('future');
+    nextCard.classList.add('active');
+    nextCard.scrollIntoView({behavior:'smooth', block:'nearest'});
+    // Auto-play if it's an ATC step
+    const isAtc = nextCard.classList.contains('step-atc');
+    if(isAtc){
+      setTimeout(()=>{
+        const btn = document.getElementById(`playbtn-${idx+1}`);
+        const s = CATEGORIES[currentCat].scenarios[currentScen];
+        if(btn && s.transmissions[idx+1]){
+          speakText(s.transmissions[idx+1].text, btn, null);
+        }
+      }, 400);
+    }
+  }
+}
+
+/* ================================================================
+   STUDY MODE — FULL EXCHANGE WITH PLAY BUTTONS
+================================================================ */
+function buildStudyContent(){
+  const s = CATEGORIES[currentCat].scenarios[currentScen];
+  const map = {
+    pilot:    ['pilot',    '✈ Pilot'],
+    atc:      ['atc',      '📻 ATC'],
+    readback: ['readback', '↺ Readback']
+  };
+
+  let html = `<div class="study-block">
+    <div class="study-block-lbl">Full Exchange</div>
+    <button class="play-all-btn" id="play-all-btn" onclick="playAll()">▶ Play Full Exchange</button>`;
+
+  s.transmissions.forEach((t, idx) => {
+    const [cls, lbl] = map[t.who] || ['pilot','Pilot'];
+    const escapedText = t.text.replace(/`/g,'&#96;').replace(/'/g,'&#39;');
+    html += `<div class="tx ${cls}">
+      <div class="tx-who">
+        ${lbl}
+        <button class="tx-play" id="stbtn-${idx}" onclick="playStudyTx(${idx}, '${escapedText}')">▶ Play</button>
+      </div>
+      ${t.text.replace(/\n/g,'<br>')}
+    </div>`;
+  });
+
+  if(s.notes){
+    html += `<div class="tx note"><div class="tx-who">📝 Note</div>${s.notes}</div>`;
+  }
+
+  html += '</div>';
+  document.getElementById('study-content').innerHTML = html;
+}
+
+function playStudyTx(idx, text){
+  const decoded = text.replace(/&#96;/g,'`').replace(/&#39;/g,"'");
+  const btn = document.getElementById(`stbtn-${idx}`);
+  if(btn && btn.classList.contains('speaking')){
+    stopSpeech();
+    return;
+  }
+  speakText(decoded, btn, null);
+}
+
+let playAllIdx = 0;
+let playAllActive = false;
+
+function playAll(){
+  const s = CATEGORIES[currentCat].scenarios[currentScen];
+  const btn = document.getElementById('play-all-btn');
+  if(playAllActive){
+    stopSpeech();
+    playAllActive = false;
+    if(btn){ btn.textContent = '▶ Play Full Exchange'; btn.classList.remove('playing'); }
+    return;
+  }
+  playAllActive = true;
+  if(btn){ btn.textContent = '⏹ Stop'; btn.classList.add('playing'); }
+  playAllIdx = 0;
+  playNextInSequence(s, btn);
+}
+
+function playNextInSequence(s, allBtn){
+  if(!playAllActive || playAllIdx >= s.transmissions.length){
+    playAllActive = false;
+    if(allBtn){ allBtn.textContent = '▶ Play Full Exchange'; allBtn.classList.remove('playing'); }
+    return;
+  }
+  const t = s.transmissions[playAllIdx];
+  const stepBtn = document.getElementById(`stbtn-${playAllIdx}`);
+  playAllIdx++;
+  speakText(t.text, stepBtn, ()=>{
+    // 1.2 second gap between transmissions
+    setTimeout(()=> playNextInSequence(s, allBtn), 1200);
+  });
+}
+
+/* ── RIGHT PANEL REF CARD ── */
+function buildRefCard(s, catName){
+  const map={
+    pilot:    ['pilot','p','✈ Pilot'],
+    atc:      ['atc','a','📻 ATC'],
+    readback: ['readback','r','↺ Readback']
+  };
+  let html=`<div class="ref-card">
+    <div class="ref-title">${catName} — Quick Reference</div>`;
+  s.transmissions.forEach(t=>{
+    const[cls,lc,lbl]=map[t.who]||['pilot','p','Pilot'];
+    html+=`<div class="ref-tx ${cls}">
+      <div class="ref-lbl ${lc}">${lbl}</div>
+      ${t.text}
+    </div>`;
+  });
+  html+='</div>';
+  document.getElementById('ref-card-wrap').innerHTML=html;
+}
+
+/* ── ACTIONS ── */
+function markDone(){
+  done[currentCat].add(currentScen);
+  buildScenNums();
+  nextS();
+}
+function prevS(){
+  if(currentScen>0) loadScenario(currentScen-1);
+  else if(currentCat>0){ loadCategory(currentCat-1); }
+}
+function nextS(){
+  const cat=CATEGORIES[currentCat];
+  if(currentScen<cat.scenarios.length-1) loadScenario(currentScen+1);
+  else if(currentCat<CATEGORIES.length-1){ loadCategory(currentCat+1); }
+}
+
+/* ── TIMER ── */
+function updT(){
+  const m=Math.floor(tSec/60),s=tSec%60;
+  const el=document.getElementById('tclock');
+  el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className=tSec<=300?'d':tSec<=600?'w':'';
+}
+function startT(){ if(tOn)return; tOn=true; tInt=setInterval(()=>{ if(tSec>0){tSec--;updT();}else{clearInterval(tInt);tOn=false;}},1000); }
+function pauseT(){ clearInterval(tInt); tOn=false; }
+function resetT(){ pauseT(); tSec=1800; updT(); }
+
+/* ================================================================
+   PHONETIC ENGINE — ATC-STYLE TTS CONVERSION
+================================================================ */
+const NATO = {
+  A:'Alpha',B:'Bravo',C:'Charlie',D:'Delta',E:'Echo',F:'Foxtrot',
+  G:'Golf',H:'Hotel',I:'India',J:'Juliet',K:'Kilo',L:'Lima',
+  M:'Mike',N:'November',O:'Oscar',P:'Papa',Q:'Quebec',R:'Romeo',
+  S:'Sierra',T:'Tango',U:'Uniform',V:'Victor',W:'Whiskey',X:'X-ray',
+  Y:'Yankee',Z:'Zulu'
+};
+const DIGITS = ['Zero','One','Two','Three','Four','Five','Six','Seven','Eight','Nine'];
+
+function digitByDigit(str){
+  // Speak each digit individually: "28" → "Two Eight"
+  return str.split('').map(c => /\d/.test(c) ? DIGITS[+c] : c).join(' ');
+}
+
+function toPhonetic(text){
+  let out = text;
+
+  // MAYDAY / PAN PAN — leave as is
+  // Flight Level: FL360 or "Flight Level 360"
+  out = out.replace(/FL\s*(\d+)/gi, (m,n) => 'Flight Level ' + n.split('').map(c=>DIGITS[+c]).join(' '));
+  out = out.replace(/Flight Level\s+(\d+)/gi, (m,n) => 'Flight Level ' + n.split('').map(c=>DIGITS[+c]).join(' '));
+
+  // Runway number: Runway 28 → Runway Two Eight
+  out = out.replace(/Runway\s+(\d+)/gi, (m,n) => 'Runway ' + n.split('').map(c=>DIGITS[+c]).join(' '));
+
+  // QNH: QNH 1013 → Q N H One Zero One Three
+  out = out.replace(/QNH\s*(\d+)/gi, (m,n) => 'Q N H ' + n.split('').map(c=>DIGITS[+c]).join(' '));
+
+  // Frequencies: 118.7 → One One Eight Decimal Seven
+  out = out.replace(/\b(\d{3})\.(\d{1,3})\b/g, (m,a,b) =>
+    a.split('').map(c=>DIGITS[+c]).join(' ') + ' Decimal ' + b.split('').map(c=>DIGITS[+c]).join(' ')
+  );
+
+  // Callsigns: VT-ABC → Victor Tango Alpha Bravo Charlie
+  // Pattern: 2 letters, dash, 2-5 letters/numbers
+  out = out.replace(/\b([A-Z]{2})-([A-Z0-9]{2,5})\b/g, (m,prefix,suffix) => {
+    const p = prefix.split('').map(c => NATO[c]||c).join(' ');
+    const s = suffix.split('').map(c => NATO[c]||DIGITS[+c]||c).join(' ');
+    return p + ' ' + s;
+  });
+
+  // Abbreviations: POB → P O B, HDG → H D G, ATIS → A T I S
+  // Only ALL-CAPS 2-4 letter standalone words (not already expanded)
+  out = out.replace(/\b([A-Z]{2,4})\b/g, (m,w) => {
+    // Skip known full words
+    const skip=/^(ATC|IFR|VFR|UTC|NM|DME|ILS|AIC|RTR|ATIS|RVSM|MAYDAY)$/;
+    if(skip.test(w)) return w;
+    // If all caps and short, spell out
+    if(/^[A-Z]{2,4}$/.test(w)) return w.split('').map(c=>NATO[c]||c).join(' ');
+    return w;
+  });
+
+  // Remaining standalone numbers (time, altitude, etc): 1013 → One Zero One Three
+  out = out.replace(/\b(\d{2,4})\b/g, (m,n) =>
+    n.split('').map(c=>DIGITS[+c]).join(' ')
+  );
+
+  // Single digits: 5 → Five (only if standalone)
+  out = out.replace(/\b(\d)\b/g, (m,n) => DIGITS[+n]);
+
+  return out;
+}
+
+/* Override speakText to run phonetic conversion first */
+const _speakTextRaw = speakText;
+function speakTextPhonetic(text, btn, onDone){
+  const phonetic = toPhonetic(text.replace(/\n/g,', '));
+  window.speechSynthesis.cancel();
+  if(currentSpeakBtn && currentSpeakBtn !== btn){
+    currentSpeakBtn.textContent = '▶ Play';
+    currentSpeakBtn.classList.remove('speaking');
+  }
+  const utt = new SpeechSynthesisUtterance(phonetic);
+  if(selectedVoice) utt.voice = selectedVoice;
+  utt.rate = speechRate;
+  utt.pitch = 0.95;
+  if(btn){
+    btn.textContent = '⏹ Stop';
+    btn.classList.add('speaking');
+    currentSpeakBtn = btn;
+  }
+  utt.onend = () => {
+    if(btn){ btn.textContent = '▶ Play'; btn.classList.remove('speaking'); }
+    if(currentSpeakBtn === btn) currentSpeakBtn = null;
+    if(onDone) onDone();
+  };
+  utt.onerror = () => {
+    if(btn){ btn.textContent = '▶ Play'; btn.classList.remove('speaking'); }
+    if(onDone) onDone();
+  };
+  window.speechSynthesis.speak(utt);
+}
+// Redirect all speakText calls to phonetic version
+// We reassign via a trampoline since the original callers reference speakText by name
+// and JS function declarations are hoisted — we reassign the variable after hoist
+{
+  const _orig = speakText;
+  // Can't reassign a function declaration in strict mode, so we patch the call sites
+  // by overriding window.speakText and rewriting the inline calls via the play functions
+}
+// Direct approach: override playStep, playStudyTx, playNextInSequence, and stepDone
+// to use speakTextPhonetic instead of speakText
+const _playStepOrig = window.playStep;
+window.playStep = function(idx, text){
+  const decoded = text.replace(/&#96;/g,'`').replace(/&#39;/g,"'");
+  const btn = document.getElementById(`playbtn-${idx}`);
+  if(btn && btn.classList.contains('speaking')){ stopSpeech(); return; }
+  speakTextPhonetic(decoded, btn, null);
+};
+window.playStudyTx = function(idx, text){
+  const decoded = text.replace(/&#96;/g,'`').replace(/&#39;/g,"'");
+  const btn = document.getElementById(`stbtn-${idx}`);
+  if(btn && btn.classList.contains('speaking')){ stopSpeech(); return; }
+  speakTextPhonetic(decoded, btn, null);
+};
+// Patch playNextInSequence for play-all
+window.playNextInSequence = function(s, allBtn){
+  if(!playAllActive || playAllIdx >= s.transmissions.length){
+    playAllActive = false;
+    if(allBtn){ allBtn.textContent = '▶ Play Full Exchange'; allBtn.classList.remove('playing'); }
+    return;
+  }
+  const t = s.transmissions[playAllIdx];
+  const stepBtn = document.getElementById(`stbtn-${playAllIdx}`);
+  playAllIdx++;
+  speakTextPhonetic(t.text, stepBtn, ()=>{
+    setTimeout(()=> playNextInSequence(s, allBtn), 1200);
+  });
+};
+// Patch stepDone auto-play
+const _stepDoneOrig = window.stepDone;
+window.stepDone = function(idx){
+  stopSpeech();
+  const card = document.getElementById(`step-${idx}`);
+  if(card){
+    card.classList.remove('active');
+    card.classList.add('done');
+    const head = card.querySelector('.step-head');
+    if(head && !head.querySelector('.done-tick')){
+      const tick = document.createElement('div');
+      tick.className = 'done-tick'; tick.textContent = '✓';
+      head.appendChild(tick);
+    }
+  }
+  const nextCard = document.getElementById(`step-${idx+1}`);
+  if(nextCard){
+    nextCard.classList.remove('future');
+    nextCard.classList.add('active');
+    nextCard.scrollIntoView({behavior:'smooth', block:'nearest'});
+    const isAtc = nextCard.classList.contains('step-atc');
+    if(isAtc){
+      setTimeout(()=>{
+        const btn = document.getElementById(`playbtn-${idx+1}`);
+        const s = CATEGORIES[currentCat].scenarios[currentScen];
+        if(btn && s.transmissions[idx+1]){
+          speakTextPhonetic(s.transmissions[idx+1].text, btn, null);
+        }
+      }, 400);
+    }
+  }
+};
+
+/* ================================================================
+   EXAM SIMULATION MODE
+================================================================ */
+let examQueue    = [];  // [{catIdx, scenIdx}]
+let examCurrent  = 0;   // current question index (0-based)
+let examResults  = [];  // [{cat, situation, hintUsed, timeSec}]
+let examTimerInt = null;
+let examTimeSec  = 0;
+let examHintUsed = false;
+let examScenStart= 0;
+
+function openExamSetup(){
+  stopSpeech();
+  document.getElementById('exam-start-card').style.display='';
+  document.getElementById('exam-run-card').style.display='none';
+  document.getElementById('exam-results-card').style.display='none';
+  document.getElementById('exam-overlay').classList.add('vis');
+  // Highlight exam button
+  document.getElementById('btn-exam').classList.add('exam-on');
+}
+
+function closeExamOverlay(){
+  document.getElementById('exam-overlay').classList.remove('vis');
+  document.getElementById('btn-exam').classList.remove('exam-on');
+  clearInterval(examTimerInt);
+}
+
+function startExam(){
+  // Build a shuffled pool, pick 5 distinct scenarios
+  const pool = [];
+  CATEGORIES.forEach((cat, ci) => {
+    cat.scenarios.forEach((sc, si) => pool.push({ci, si}));
+  });
+  // Shuffle
+  for(let i=pool.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [pool[i],pool[j]]=[pool[j],pool[i]];
+  }
+  examQueue   = pool.slice(0,5);
+  examResults = [];
+  examCurrent = 0;
+  document.getElementById('exam-start-card').style.display='none';
+  document.getElementById('exam-run-card').style.display='';
+  showExamQuestion();
+}
+
+function showExamQuestion(){
+  if(examCurrent >= examQueue.length){
+    showExamResults();
+    return;
+  }
+  const {ci, si} = examQueue[examCurrent];
+  const cat = CATEGORIES[ci];
+  const scen = cat.scenarios[si];
+  examHintUsed = false;
+  examScenStart = Date.now();
+
+  // Update UI
+  document.getElementById('exam-progress-lbl').textContent = `Scenario ${examCurrent+1} of ${examQueue.length}`;
+  document.getElementById('exam-q-num').innerHTML = `${examCurrent+1} <span>/ ${examQueue.length}</span>`;
+  document.getElementById('exam-situation-txt').textContent = scen.situation;
+
+  // Build hint text (all transmissions joined)
+  const hintLines = scen.transmissions.map((t,i) => {
+    const who = t.who==='pilot'?'✈ PILOT':t.who==='atc'?'📻 ATC':'↺ READBACK';
+    return `${who}:\n${t.text}`;
+  }).join('\n\n');
+  document.getElementById('exam-hint-reveal').textContent = hintLines;
+  document.getElementById('exam-hint-reveal').classList.remove('vis');
+  document.getElementById('exam-hint-btn').textContent = '💡 Show Hint';
+
+  // Timer: 3 min per scenario
+  clearInterval(examTimerInt);
+  examTimeSec = 180;
+  updateExamClock();
+  examTimerInt = setInterval(()=>{
+    examTimeSec--;
+    updateExamClock();
+    if(examTimeSec <= 0){
+      clearInterval(examTimerInt);
+      // Auto-advance
+      recordExamResult(180);
+      examCurrent++;
+      showExamQuestion();
+    }
+  }, 1000);
+}
+
+function updateExamClock(){
+  const m=Math.floor(examTimeSec/60), s=examTimeSec%60;
+  const el=document.getElementById('exam-timer');
+  el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className='exam-timer'+(examTimeSec<=30?' danger':examTimeSec<=60?' warn':'');
+}
+
+function examShowHint(){
+  const rev = document.getElementById('exam-hint-reveal');
+  const btn = document.getElementById('exam-hint-btn');
+  if(!rev.classList.contains('vis')){
+    rev.classList.add('vis');
+    btn.textContent = '🙈 Hide Hint';
+    examHintUsed = true;
+  } else {
+    rev.classList.remove('vis');
+    btn.textContent = '💡 Show Hint';
+  }
+}
+
+function recordExamResult(overrideSec){
+  const elapsed = overrideSec !== undefined ? overrideSec : Math.round((Date.now()-examScenStart)/1000);
+  const {ci,si} = examQueue[examCurrent];
+  const cat = CATEGORIES[ci];
+  const scen = cat.scenarios[si];
+  // Situation: first line only
+  const sitShort = scen.situation.split('\n')[0];
+  examResults.push({
+    num: examCurrent+1,
+    cat: cat.name,
+    sit: sitShort,
+    hintUsed: examHintUsed,
+    timeSec: Math.min(elapsed, 180)
+  });
+}
+
+function examNext(){
+  clearInterval(examTimerInt);
+  recordExamResult();
+  examCurrent++;
+  if(examCurrent >= examQueue.length){
+    showExamResults();
+  } else {
+    showExamQuestion();
+  }
+}
+
+function examAbort(){
+  clearInterval(examTimerInt);
+  // Record current if not already
+  if(examResults.length < examCurrent+1) recordExamResult();
+  showExamResults();
+}
+
+function fmtTime(sec){
+  const m=Math.floor(sec/60), s=sec%60;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function showExamResults(){
+  clearInterval(examTimerInt);
+  document.getElementById('exam-run-card').style.display='none';
+  document.getElementById('exam-results-card').style.display='';
+
+  const total      = examResults.length;
+  const hintsUsed  = examResults.filter(r=>r.hintUsed).length;
+  const noHint     = total - hintsUsed;
+  const totalSec   = examResults.reduce((a,r)=>a+r.timeSec,0);
+
+  // Score boxes
+  document.getElementById('exam-score-row').innerHTML = `
+    <div class="exam-score-box green"><strong>${total}</strong><span>Scenarios Done</span></div>
+    <div class="exam-score-box amber"><strong>${hintsUsed}</strong><span>Hints Used</span></div>
+    <div class="exam-score-box blue"><strong>${noHint}</strong><span>No Hint</span></div>
+    <div class="exam-score-box green"><strong>${fmtTime(totalSec)}</strong><span>Total Time</span></div>
+  `;
+
+  // Detailed table
+  const tbody = document.getElementById('exam-results-tbody');
+  tbody.innerHTML = examResults.map(r=>`
+    <tr>
+      <td><strong>${r.num}</strong></td>
+      <td class="cat-cell">${r.cat}</td>
+      <td>${r.sit}</td>
+      <td class="time-cell">${fmtTime(r.timeSec)}</td>
+      <td class="${r.hintUsed?'hint-used':'no-hint'}">${r.hintUsed?'💡 Yes':'✓ No'}</td>
+    </tr>
+  `).join('');
+}
+
+init();
+</script>
+</body>
+</html>
