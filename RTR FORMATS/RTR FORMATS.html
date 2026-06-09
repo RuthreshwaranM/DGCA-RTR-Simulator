@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="../protection.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RTR Part 2 — Call Formats</title>
@@ -1907,4 +1908,11 @@ function showExamResults(){
 init();
 </script>
 </body>
+<script>
+(function(){
+  const a=sessionStorage.getItem('rtr_auth');
+  if(!a){window.location.replace('../login.html');return;}
+  try{const d=JSON.parse(a);if(!d.loggedIn||Date.now()-d.time>14400000){sessionStorage.removeItem('rtr_auth');window.location.replace('../login.html');}}catch(e){window.location.replace('../login.html');}
+})();
+</script>
 </html>
