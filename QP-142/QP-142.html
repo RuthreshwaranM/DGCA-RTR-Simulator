@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../protection.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DGCA RTR(A) Practical Exam Simulator PRAJYOT S RT</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #c8d4b0;
+  color: #1a2410;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ══════════════ TOP BAR ══════════════ */
+#topbar {
+  background: #3a5020;
+  border-bottom: 3px solid #2a3c14;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  height: 40px;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.logo-text {
+  font-size: 12px; font-weight: 800;
+  color: #e8f0d0; letter-spacing: 2px; text-transform: uppercase;
+}
+.logo-text span { color: #f0d060; }
+.tdiv { width:1px; height:18px; background:#5a7a38; margin:0 4px; }
+.paper-tab {
+  padding: 5px 12px; font-size: 10px; font-weight: 700;
+  color: #a8c880; cursor: pointer; border: 1px solid transparent;
+  border-radius: 3px; letter-spacing: 0.5px; text-transform: uppercase;
+  transition: all 0.15s;
+}
+.paper-tab:hover { color: #e0f0b8; background: #4a6828; }
+.paper-tab.active { color: #ffffff; background: #5a7a30; border-color: #8aaa50; }
+.topbar-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
+#timer-display {
+  font-family: 'Courier New', monospace; font-size: 18px; font-weight: 700;
+  color: #f0e860; letter-spacing: 3px; min-width: 72px;
+}
+#timer-display.warn  { color: #ffa820; }
+#timer-display.danger{ color: #ff4444; animation: blink 0.8s infinite; }
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
+.tbtn {
+  padding: 3px 9px; font-size: 9px; font-weight: 700;
+  border: 1px solid #8aaa50; background: #4a6828; color: #d8f0a0;
+  border-radius: 3px; cursor: pointer; letter-spacing: 0.5px; text-transform: uppercase;
+}
+.tbtn:hover { background: #5a7a38; }
+#train-badge { font-size: 8px; color: #7a9a50; letter-spacing: 1px; text-transform: uppercase; }
+
+/* ══════════════ MAIN 4-QUADRANT GRID ══════════════ */
+#grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 55% 45%;
+  grid-template-rows: 48% 52%;
+  min-height: 0;
+  gap: 0;
+}
+
+/* ─── shared panel ─── */
+.panel {
+  display: flex; flex-direction: column;
+  border: 2px solid #8aaa58; overflow: hidden;
+}
+.panel-title {
+  background: #6a8a40;
+  padding: 7px 14px;
+  font-size: 12px; font-weight: 800; letter-spacing: 2px;
+  color: #ffffff; text-transform: uppercase; text-align: center;
+  border-bottom: 2px solid #4a6a28; flex-shrink: 0;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+/* ══════════════ TL: CHART ══════════════ */
+#panel-chart {
+  grid-column:1; grid-row:1; background:#e8eedd;
+}
+#chart-tabs {
+  display:flex; gap:2px; padding:5px 8px 0;
+  background:#d8e4c4; border-bottom:2px solid #8aaa58; flex-shrink:0;
+}
+.ctab {
+  padding:4px 12px; font-size:10px; font-weight:700;
+  color:#5a7a38; cursor:pointer; border:1px solid transparent;
+  border-bottom:none; border-radius:3px 3px 0 0; transition:all 0.12s;
+  background:#c8d8b0;
+}
+.ctab:hover { color:#2a4010; background:#d0ddb8; }
+.ctab.active { color:#1a2c08; background:#e8eedd; border-color:#8aaa58; font-weight:800; }
+#chart-viewer {
+  flex:1; display:flex; align-items:center; justify-content:center;
+  overflow:hidden; background:#dde8cc;
+}
+#chart-viewer img { max-width:100%; max-height:100%; object-fit:contain; }
+.no-chart-msg {
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  color:#8aaa68;
+}
+.no-chart-msg p { font-size:10px; letter-spacing:1px; color:#7a9a58; }
+
+/* ══════════════ TR: FLIGHT INFO ══════════════ */
+#panel-info {
+  grid-column:2; grid-row:1; background:#eef4e4;
+}
+#fi-body {
+  flex:1; display:grid; grid-template-columns:1fr 1fr;
+  padding:8px 12px; gap:4px 16px; overflow:hidden;
+  align-content: space-around;
+}
+.fi-row {
+  display:flex; flex-direction:column;
+  border-bottom:1px solid #c0d0a0; padding:3px 0;
+}
+.fi-lbl {
+  font-family:'Arial Black', Arial, sans-serif;font-size:10px; font-weight:900; letter-spacing:0.1px;
+  color:#3a5a20; text-transform:uppercase;
+}
+.fi-val {
+  font-family:'Arial Black', Arial, sans-serif;
+  font-size:12px;
+  font-weight:900;
+  color:#000000;
+  margin-top:0.1px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+}
+.fi-val.green  { color:#1a5008; }
+.fi-val.amber  { color:#5a3800; }
+.fi-val.blue   { color:#0a3858; }
+.fi-val.red    { color:#6a0808; }
+.fi-val.purple { color:#3a1858; }
+.fi-val.orange { color:#5a2c00; }
+
+/* ══════════════ BL: QUESTIONS ══════════════ */
+#panel-qns {
+  grid-column:1; grid-row:2; background:#eaf0dc;
+}
+#scen-nav {
+  display:flex; align-items:center; gap:5px;
+  padding:6px 10px; background:#d8e4c4;
+  border-bottom:2px solid #8aaa58; flex-shrink:0; flex-wrap:wrap;
+}
+.snum {
+  width:28px; height:28px; border-radius:3px;
+  border:1px solid #9ab870; background:#c8d8b0;
+  color:#4a6a28; font-size:10px; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:all 0.12s;
+}
+.snum:hover { background:#b8cc98; color:#2a4a18; }
+.snum.active { background:#5a7a30; border-color:#3a5a18; color:#ffffff; }
+.snum.done   { background:#d8f0c8; border-color:#5aaa38; color:#2a6010; }
+#q-counter { margin-left:auto; font-size:9px; color:#6a8a48; letter-spacing:1px; font-weight:700; }
+
+#qns-body { flex:1; overflow-y:auto; padding:10px 12px; }
+.q-badge {
+  display:inline-block; background:#6a8a40; border:1px solid #4a6a28;
+  color:#ffffff; font-size:9px; font-weight:700; padding:2px 8px;
+  border-radius:3px; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px;
+}
+.q-text {
+  font-size:13px; color:#0a1804; line-height:1.8; font-weight:800;
+  background:#f4f8ec; border:1px solid #b0c890;
+  border-left:4px solid #5a8030; border-radius:0 5px 5px 0;
+  padding:10px 12px; margin-bottom:10px; white-space:pre-line;
+  text-shadow: 0 0 1px rgba(10,24,4,0.15);
+}
+#reveal-btn {
+  padding:6px 14px; font-size:10px; font-weight:700;
+  border:1px solid #5a8a38; background:#6a9a40; color:#ffffff;
+  border-radius:3px; cursor:pointer; letter-spacing:1px; text-transform:uppercase;
+  transition:all 0.15s; margin-bottom:10px;
+}
+#reveal-btn:hover { background:#5a8838; border-color:#3a6820; }
+#answer-box { display:none; }
+#answer-box.vis { display:block; }
+.ans-hdr { font-size:8px; font-weight:700; color:#3a6820; letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; }
+.tx { padding:7px 10px; border-radius:3px; font-size:12px; font-weight:800; line-height:1.6; margin-bottom:6px; color:#0a180a; }
+.tx-who { font-size:9px; font-weight:900; letter-spacing:1px; margin-bottom:2px; text-transform:uppercase; }
+.tx.pilot    { background:#e0ecd0; border-left:3px solid #5a8a30; }
+.tx.pilot .tx-who { color:#3a6820; }
+.tx.atc      { background:#f8eed8; border-left:3px solid #c08020; }
+.tx.atc .tx-who   { color:#8a5800; }
+.tx.readback { background:#e8f4e0; border-left:3px solid #4a7a50; }
+.tx.readback .tx-who { color:#2a5a30; }
+
+#qns-actions {
+  display:flex; gap:6px; padding:8px 10px;
+  border-top:2px solid #8aaa58; background:#d8e4c4; flex-shrink:0;
+}
+.abtn {
+  padding:6px 14px; font-size:9px; font-weight:700;
+  border-radius:3px; cursor:pointer; letter-spacing:0.5px; text-transform:uppercase; transition:all 0.12s;
+}
+.abtn-prev { border:1px solid #8aaa58; background:#c0d0a0; color:#3a5020; }
+.abtn-prev:hover { background:#b0c090; }
+.abtn-next { border:1px solid #4a6a28; background:#5a7a30; color:#ffffff; }
+.abtn-next:hover { background:#4a6828; }
+.abtn-done { border:1px solid #3a7020; background:#4a8828; color:#ffffff; margin-left:auto; }
+.abtn-done:hover { background:#3a7020; }
+
+/* ══════════════ BR: FREQ LEFT | ATIS RIGHT ══════════════ */
+#panel-br {
+  grid-column:2; grid-row:2; background:#eef4e4;
+  display:grid; grid-template-columns:1fr 1fr; overflow:hidden;
+}
+
+/* shared sub-panel */
+.br-sub {
+  display:flex; flex-direction:column; overflow:hidden;
+}
+#br-freq { border-right:2px solid #8aaa58; }
+
+.br-sub-title {
+  background: #6a8a40;
+  padding:6px 12px; font-size:10px; font-weight:800;
+  letter-spacing:2px; color:#ffffff; text-transform:uppercase;
+  text-align:center; border-bottom:2px solid #4a6a28; flex-shrink:0;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+/* Freq table */
+#freq-scroll { flex:1; overflow-y:auto; padding:6px 10px; background:#f0f6e8; }
+.freq-group {
+  font-size:12px; font-weight:900; letter-spacing:1.5px;
+  color:#5a3a10; text-transform:uppercase;
+  padding:6px 0 2px; border-top:1px solid #b8cc98; margin-top:4px;
+}
+.freq-group:first-child { border-top:none; margin-top:0; padding-top:2px; }
+.freq-row {
+  display:flex; justify-content:space-between; align-items:baseline;
+  padding:4px 0; border-bottom:1px solid #ccd8b0;
+}
+.freq-row:last-child { border-bottom:none; }
+.freq-lbl {
+  font-size:11px; font-weight:900; color:#2a4a20;
+  text-transform:uppercase; letter-spacing:0.5px;
+}
+.freq-val {
+  font-size:17px; font-weight:900; color:#0a2804;
+  font-family:'Courier New',monospace; letter-spacing:1px;
+  text-shadow: 0 0 1px rgba(10,40,4,0.2);
+}
+
+/* ATIS / METAR */
+#atis-scroll { flex:1; overflow-y:auto; padding:6px 10px; background:#f0f6e8; }
+.atis-label {
+  font-size:12px; font-weight:900; letter-spacing:1.5px;
+  color:#2a5a18; text-transform:uppercase;
+  padding:5px 0 2px; border-top:1px solid #b8cc98; margin-top:4px;
+}
+.atis-label:first-child { border-top:none; margin-top:0; padding-top:2px; }
+#metar-text {
+  font-family:'Arial Black',monospace; font-size:12px; font-weight:900;
+  color:#0a1c06; line-height:1.8; word-break:break-word;
+  text-shadow: 0 0 1px rgba(10,28,6,0.2);
+}
+.notam-label {
+  font-size:10px; font-weight:800; letter-spacing:1.5px;
+  color:#7a4a08; text-transform:uppercase;
+  padding:5px 0 2px; border-top:1px solid #b8cc98; margin-top:4px;
+}
+#notam-text {
+  font-size:12px; font-weight:900; color:#4a2200; line-height:1.8; white-space:pre-line;
+  text-shadow: 0 0 1px rgba(74,34,0,0.2);
+}
+
+/* scrollbars */
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:#d8e4c4; }
+::-webkit-scrollbar-thumb { background:#8aaa58; border-radius:3px; }
+
+/* ══════════════ VOICE CONTROLS ══════════════ */
+.voice-select{padding:3px 6px;font-size:10px;font-weight:600;border:1px solid #8aaa50;background:#4a6828;color:#d8f0a0;border-radius:3px;cursor:pointer;outline:none;max-width:120px}
+.voice-select option{background:#3a5020}
+.speed-btns{display:flex;gap:2px}
+.spd-btn{padding:3px 7px;font-size:10px;font-weight:700;border:1px solid #8aaa50;background:#4a6828;color:#a8c880;border-radius:3px;cursor:pointer;transition:all .12s}
+.spd-btn.on{background:#8aaa38;color:#fff;border-color:#aac850}
+
+/* ══════════════ CONVERSATION FLOW ══════════════ */
+#conv-flow{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.step-card{border-radius:6px;border:1px solid #9ab870;overflow:hidden;transition:all .2s;opacity:.4;transform:translateY(3px)}
+.step-card.active{opacity:1;transform:translateY(0);border-color:#5a8a30;box-shadow:0 1px 6px rgba(90,138,48,.25)}
+.step-card.done{opacity:.65;transform:translateY(0)}
+.step-card.future{opacity:.18}
+.step-atc .step-head{background:#f8eed8;border-bottom:1px solid #c08020;padding:6px 10px;display:flex;align-items:center;gap:6px}
+.step-atc .step-body{background:#f8eed8;padding:9px 12px;font-size:12px;font-weight:800;color:#2a1800;line-height:1.65}
+.step-pilot .step-head,.step-readback .step-head{background:#e0ecd0;border-bottom:1px solid #5a8a30;padding:6px 10px;display:flex;align-items:center;gap:6px}
+.step-readback .step-head{background:#e8f4e0;border-bottom-color:#4a7a50}
+.step-pilot .step-body,.step-readback .step-body{background:#e0ecd0;padding:9px 12px}
+.step-readback .step-body{background:#e8f4e0}
+.step-lbl{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+.step-atc .step-lbl{color:#8a5800}
+.step-pilot .step-lbl{color:#3a6820}
+.step-readback .step-lbl{color:#2a5a30}
+.play-btn{margin-left:auto;padding:3px 10px;font-size:10px;font-weight:700;border:1px solid #c08020;background:rgba(192,128,32,.12);color:#8a5800;border-radius:3px;cursor:pointer;letter-spacing:.3px;transition:all .15s;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.play-btn:hover{background:rgba(192,128,32,.25)}
+.play-btn.speaking{background:rgba(192,128,32,.3);animation:spulse .7s infinite alternate}
+@keyframes spulse{from{opacity:.8}to{opacity:1}}
+.your-turn{display:flex;align-items:center;gap:8px;padding:8px 12px;flex-wrap:wrap}
+.mic-icon{font-size:18px}
+.your-turn-txt{font-size:11px;font-weight:700;color:#3a5a20;flex:1}
+.hint-btn{padding:3px 10px;font-size:10px;font-weight:700;border:1px solid #9ab870;background:transparent;color:#5a7a38;border-radius:3px;cursor:pointer;transition:all .15s}
+.hint-btn:hover{background:#d8e4c4}
+.cont-btn{padding:4px 12px;font-size:10px;font-weight:700;border:none;background:#5a7a30;color:#fff;border-radius:3px;cursor:pointer;transition:all .15s}
+.cont-btn:hover{background:#4a6a28}
+.hint-reveal{display:none;padding:7px 12px 9px;font-size:12px;font-weight:700;color:#1a2c08;line-height:1.65;border-top:1px dashed #9ab870;background:rgba(90,120,48,.07)}
+.hint-reveal.vis{display:block}
+.done-tick{margin-left:auto;width:18px;height:18px;background:#4a8828;color:#fff;border-radius:50%;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center}
+@keyframes pilotPulse{0%{box-shadow:0 0 0 0 rgba(90,138,48,.6)}70%{box-shadow:0 0 0 10px rgba(90,138,48,0)}100%{box-shadow:0 0 0 0 rgba(90,138,48,0)}}
+.step-card.pilot-pulse{animation:pilotPulse 0.9s ease 3;}
+.ans-only .tx{padding:7px 10px;border-radius:3px;font-size:12px;font-weight:800;line-height:1.6;margin-bottom:6px;color:#0a180a}
+.ans-only .tx-who{font-size:9px;font-weight:900;letter-spacing:1px;margin-bottom:2px;text-transform:uppercase}
+.ans-only .tx.pilot{background:#e0ecd0;border-left:3px solid #5a8a30}
+.ans-only .tx.pilot .tx-who{color:#3a6820}
+.ans-only .tx.atc{background:#f8eed8;border-left:3px solid #c08020}
+.ans-only .tx.atc .tx-who{color:#8a5800}
+.ans-only .tx.readback{background:#e8f4e0;border-left:3px solid #4a7a50}
+.ans-only .tx.readback .tx-who{color:#2a5a30}
+.ans-play{float:right;margin-top:-2px;margin-left:6px;padding:2px 8px;font-size:10px;font-weight:700;border-radius:3px;cursor:pointer;border:1px solid #c08020;background:rgba(192,128,32,.08);color:#8a5800;transition:all .12s}
+.ans-play:hover{background:rgba(192,128,32,.2)}
+.ans-play.speaking{animation:spulse .7s infinite alternate}
+</style>
+</head>
+<body>
+<script>
+(function(){
+  const a=sessionStorage.getItem('rtr_auth');
+  if(!a){window.location.replace('../login.html');return;}
+  try{const d=JSON.parse(a);if(!d.loggedIn||Date.now()-d.time>14400000){sessionStorage.removeItem('rtr_auth');window.location.replace('../login.html');}}catch(e){window.location.replace('../login.html');}
+})();
+</script>
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="logo-text">DGCA <span>RTR(A)</span> Simulator PRAJYOT S RT</div>
+  <div class="tdiv"></div>
+  <div id="paper-tabs-wrap" style="display:flex;gap:4px;"></div>
+  <div class="topbar-right">
+    <select class="voice-select" id="voice-select" onchange="setVoice(this.value)" title="ATC Voice"></select>
+    <div class="speed-btns">
+      <button class="spd-btn" onclick="setSpeed(0.8)" data-s="0.8">0.8×</button>
+      <button class="spd-btn on" onclick="setSpeed(1.0)" data-s="1">1×</button>
+      <button class="spd-btn" onclick="setSpeed(1.2)" data-s="1.2">1.2×</button>
+    </div>
+    <div class="tdiv"></div>
+    <span id="timer-display">30:00</span>
+    <button class="tbtn" onclick="startTimer()">▶ START</button>
+    <button class="tbtn" onclick="pauseTimer()">⏸ PAUSE</button>
+    <button class="tbtn" onclick="resetTimer()">↺ RESET</button>
+    <div class="tdiv"></div>
+    <span id="train-badge">ONLY FOR PRAJYOT STUDENTS</span>
+  </div>
+</div>
+
+<!-- 4-QUADRANT GRID -->
+<div id="grid">
+
+  <!-- TL: CHART -->
+  <div class="panel" id="panel-chart">
+    <div class="panel-title">Charts &amp; Maps</div>
+    <div id="chart-tabs"></div>
+    <div id="chart-viewer">
+      <div class="no-chart-msg">
+        <svg width="50" height="50" viewBox="0 0 56 56" fill="none"><rect x="3" y="3" width="50" height="50" rx="5" stroke="#1e2e4a" stroke-width="1.5"/><path d="M10 42 L10 26 L22 14 L34 24 L46 10" stroke="#1e2e4a" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="46" cy="10" r="4" fill="#ff6b35" opacity="0.3"/><circle cx="10" cy="42" r="3" fill="#4a8fff" opacity="0.3"/></svg>
+        <p>PLACE IMAGE FILES IN SAME FOLDER AS HTML</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TR: FLIGHT INFO -->
+  <div class="panel" id="panel-info">
+    <div class="panel-title">Flight Info</div>
+    <div id="fi-body">
+      <!-- left column -->
+      <div class="fi-row"><span class="fi-lbl">A/C Ident</span><span class="fi-val blue"   id="fi-ident">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">DEP</span>      <span class="fi-val green"   id="fi-dep">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">ATS Route</span><span class="fi-val amber"   id="fi-route">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">RWY in Use</span><span class="fi-val"        id="fi-rwy">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">Flight Level</span><span class="fi-val amber" id="fi-fl">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">POB</span>      <span class="fi-val"          id="fi-pob">—</span></div>
+      <!-- right column -->
+      <div class="fi-row"><span class="fi-lbl">Type of A/C</span><span class="fi-val"       id="fi-type">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">DEST</span>     <span class="fi-val green"    id="fi-dest">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">Stand No</span> <span class="fi-val"          id="fi-stand">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">Taxiway</span>  <span class="fi-val"          id="fi-twy">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">Alternate</span><span class="fi-val purple"   id="fi-alt">—</span></div>
+      <div class="fi-row"><span class="fi-lbl">Squawk</span>   <span class="fi-val red"      id="fi-squawk">—</span></div>
+    </div>
+  </div>
+
+  <!-- BL: QUESTIONS -->
+  <div class="panel" id="panel-qns">
+    <div class="panel-title">
+      Questions
+      <span id="q-counter" style="font-size:9px;color:#2a4a7a;font-weight:400;letter-spacing:1px;margin-left:12px;"></span>
+    </div>
+    <div id="scen-nav"></div>
+    <div id="qns-body">
+      <div class="q-badge" id="q-badge">Scenario 1</div>
+      <div class="q-text" id="q-text">Select a scenario above to begin.</div>
+      <div id="conv-flow"></div>
+    </div>
+    <div id="qns-actions">
+      <button class="abtn abtn-prev" onclick="prevS()">◀ Prev</button>
+      <button class="abtn abtn-next" onclick="nextS()">Next ▶</button>
+      <button class="abtn abtn-done" onclick="markDone()">✓ Mark Done</button>
+    </div>
+  </div>
+
+  <!-- BR: FREQ | ATIS -->
+  <div class="panel" id="panel-br">
+
+    <div class="br-sub" id="br-freq">
+      <div class="br-sub-title">Frequencies in Use</div>
+      <div id="freq-scroll"></div>
+    </div>
+
+    <div class="br-sub" id="br-atis">
+      <div class="br-sub-title">ATIS / METAR Info</div>
+      <div id="atis-scroll">
+        <div class="atis-label">METAR</div>
+        <div id="metar-text">—</div>
+        <div class="notam-label">NOTAM</div>
+        <div id="notam-text">—</div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /grid -->
+
+<script>
+/* ── SPACEBAR SHORTCUT ── */
+document.addEventListener('keydown', function(e){
+  if(e.code !== 'Space') return;
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+  e.preventDefault();
+
+  const s = papers[cp].scenarios[cs];
+  const txs = s.answer.transmissions;
+
+  // Pilot-only scenario (phrase cards) — advance through them
+  const activeCard = document.querySelector('.step-card.active');
+  if(!activeCard){
+    const btns = document.querySelectorAll('.ans-play');
+    for(let btn of btns){
+      if(!btn.closest('.tx').dataset.played){
+        const idx = parseInt(btn.id.replace('apbtn-',''));
+        playAnsOnly(idx);
+        btn.closest('.tx').dataset.played = '1';
+        break;
+      }
+    }
+    return;
+  }
+
+  const idx = parseInt(activeCard.id.replace('step-',''));
+  const isAtc = activeCard.classList.contains('step-atc');
+  const playBtn = document.getElementById(`playbtn-${idx}`);
+  const isSpeaking = playBtn && playBtn.classList.contains('speaking');
+
+  if(isAtc){
+    // ATC card: Space toggles play/stop only — no auto-advance
+    if(isSpeaking){
+      stopSpeech();
+    } else {
+      playStep(idx);
+    }
+  } else {
+    // Pilot/Readback card: Space = Continue (mark done, next ATC auto-plays)
+    stepDone(idx);
+  }
+});
+/* ================================================================
+   SPEECH ENGINE — Web Speech API (phonetic conversion built in)
+================================================================ */
+const PHON_ALPHA = {A:'Alpha',B:'Bravo',C:'Charlie',D:'Delta',E:'Echo',F:'Foxtrot',G:'Golf',H:'Hotel',I:'India',J:'Juliet',K:'Kilo',L:'Lima',M:'Mike',N:'November',O:'Oscar',P:'Papa',Q:'Quebec',R:'Romeo',S:'Sierra',T:'Tango',U:'Uniform',V:'Victor',W:'Whiskey',X:'X-ray',Y:'Yankee',Z:'Zulu'};
+const PHON_NUMS = {'0':'Zero','1':'One','2':'Two','3':'Three','4':'Four','5':'Five','6':'Six','7':'Seven','8':'Eight','9':'Niner'};
+
+function toPhonetic(text){
+  return text.split('\n').map(line=>{
+    // FL numbers
+    line=line.replace(/\bFL\s*(\d+)\b/g,(m,n)=>'Flight Level '+n.split('').map(d=>PHON_NUMS[d]).join(' '));
+    // Runway digit-by-digit
+    line=line.replace(/\bRunway\s+(\d{1,2}[LRC]?)\b/gi,(m,n)=>{
+      const d=n.replace(/[LRC]/i,'').split('').map(c=>PHON_NUMS[c]).join(' ');
+      const s=n.match(/[LRC]/i)?(' '+(n.match(/[LRC]/i)[0].toUpperCase()==='L'?'Left':n.match(/[LRC]/i)[0].toUpperCase()==='R'?'Right':'Centre')):'';
+      return 'Runway '+d+s;
+    });
+    // QNH
+    line=line.replace(/\bQNH\s+(\d+)\b/g,(m,n)=>'Q N H '+n.split('').map(d=>PHON_NUMS[d]).join(' '));
+    // Frequencies
+    line=line.replace(/\b(\d{3})\.(\d+)\b/g,(m,a,b)=>a.split('').map(d=>PHON_NUMS[d]).join(' ')+' Decimal '+b.split('').map(d=>PHON_NUMS[d]).join(' '));
+    // VT-XXX callsigns
+    line=line.replace(/\b([A-Z]{2})-([A-Z]{3})\b/g,(m,p,s)=>p.split('').map(c=>PHON_ALPHA[c]||c).join(' ')+' '+s.split('').map(c=>PHON_ALPHA[c]||c).join(' '));
+    // Squawk codes
+    line=line.replace(/[Ss]quawk\s+(\d{4})/g,(m,n)=>'Squawk '+n.split('').map(d=>PHON_NUMS[d]).join(' '));
+    return line;
+  }).join('\n');
+}
+
+let voices=[], selectedVoice=null, speechRate=1.0, currentSpeakBtn=null;
+
+function loadVoices(){
+  voices=window.speechSynthesis.getVoices();
+  const sel=document.getElementById('voice-select');
+  if(!sel) return;
+  const eng=voices.filter(v=>v.lang.startsWith('en'));
+  if(!eng.length) return;
+  sel.innerHTML=eng.map((v,i)=>`<option value="${i}">${v.name.replace('Microsoft ','').replace(' Desktop','').substring(0,22)}</option>`).join('');
+  const pref=eng.find(v=>/david|mark|guy|james/i.test(v.name))||eng.find(v=>/neural|natural/i.test(v.name))||eng[0];
+  if(pref){ selectedVoice=pref; sel.value=eng.indexOf(pref); }
+  sel._eng=eng;
+}
+window.speechSynthesis.onvoiceschanged=loadVoices;
+setTimeout(loadVoices,300);
+
+function setVoice(idx){ const sel=document.getElementById('voice-select'); if(sel._eng) selectedVoice=sel._eng[parseInt(idx)]; }
+function setSpeed(s){ speechRate=s; document.querySelectorAll('.spd-btn').forEach(b=>b.classList.toggle('on',parseFloat(b.dataset.s)===s)); }
+
+function speakText(rawText,btn,onDone){
+  window.speechSynthesis.cancel();
+  if(currentSpeakBtn&&currentSpeakBtn!==btn){ currentSpeakBtn.textContent=currentSpeakBtn._orig||'▶ Play'; currentSpeakBtn.classList.remove('speaking'); }
+  const spoken=toPhonetic(rawText).replace(/\n/g,', ');
+  const utt=new SpeechSynthesisUtterance(spoken);
+  if(selectedVoice) utt.voice=selectedVoice;
+  utt.rate=speechRate; utt.pitch=0.95;
+  if(btn){ btn._orig=btn._orig||btn.textContent; btn.textContent='⏹ Stop'; btn.classList.add('speaking'); currentSpeakBtn=btn; }
+  utt.onend=()=>{ resetBtn(btn); if(onDone) onDone(); };
+  utt.onerror=()=>{ resetBtn(btn); if(onDone) onDone(); };
+  window.speechSynthesis.speak(utt);
+}
+function resetBtn(btn){ if(btn){ btn.textContent=btn._orig||'▶ Play'; btn.classList.remove('speaking'); } if(currentSpeakBtn===btn) currentSpeakBtn=null; }
+function stopSpeech(){ window.speechSynthesis.cancel(); if(currentSpeakBtn){ resetBtn(currentSpeakBtn); } }
+
+/* ================================================================
+   EXAM DATA
+================================================================ */
+const papers = [
+  /* ============================================================ PAPER 1 ============================================================ */
+  {
+    title:"QP-142",
+    acIdent:"QP-142",    acType:"B737-800",
+    dep:"VILK (Lucknow)", dest:"VECC (Kolkata)",
+    flightLevel:"FL310", pob:"169", squawk:"6215",
+    route:"R640",        runway:"27", taxiway:"D, E",
+    stand:"105L",        alternate:"VEBN (Varanasi)",
+
+    charts:[
+      { label:"Aerodrome ", src:"CHART1.png" },
+      { label:"Route Chart",     src:"CHART2.png"     }
+    ],
+
+    atcFreqs:[
+      { group:"VILK(Lucknow)", rows:[
+        { lbl:"Ground:",   freq:"118.6"  },
+        { lbl:"Control Tower",   freq:"122.50"  },
+        { lbl:"Approach",    freq:"121.7 " }
+      ]},
+      { group:"VECC(Kolkata)", rows:[
+        { lbl:"Approach",   freq:"119.30"  },
+        { lbl:"Control",  freq:"126.40" }
+      ]},
+      { group:"VEBN (Varanasi) (Altn)", rows:[
+        { lbl:"Control",   freq:"126.2"  },
+        { lbl:"Approach",  freq:"124.3 "  }
+      ]}
+    ],
+
+    metar:"VILK 291530Z, WIND CALM, VIS 4000M NW, FEW025, SCT120, TEMP 26, DEW PT 17, QNH 1012 HPA.",
+    notam:"• Taxiway B closed. PAPI RWY 27 Unserviceable.",
+
+    scenarios:[
+      {
+        chartIndex:0,
+        qns:"SCENARIO 1a: Transmit the following phrases as per R/T procedure:\n(i) Altitude 12000: \n(ii) 118.1: \n(iii) Aerodrome routine meteorological report:\n(iv) QTE: \n(v) Will comply: ",
+        answer:{ transmissions:[
+          { who:"pilot", text:"(i) Altitude 12000: One Two Thousand feet" },
+          { who:"pilot", text:"(ii) 118.1: One One Eight Decimal One " },
+          { who:"pilot", text:"(iii) Aerodrome routine meteorological report: METAR  " },
+          { who:"pilot", text:"(iv) QTE: True Bearing (from the station) or Quebec Tango Echo " },
+          { who:"pilot", text:"(v) Will comply: WILCO " }
+        ]}
+      },
+      {
+        chartIndex:0,
+        qns:"SCENARIO 1b: Request start up and ATC clearance.",
+        answer:{ transmissions:[
+          { who:"pilot",    text:"LKN Gnd Akasa Air 142 On stand 105L, SCC POB Info B REQ S/U" },
+          { who:"atc",      text:"	Akasa Air 1 4 1 Cleared to Kolkata via R460, ASARI One Bravo Departure, FL310, Squawk 6215, Start up approved, Runway 2 7" },
+          { who:"readback", text:"Cleared to Kolkata via R460, ASARI one Bravo Departure, FL310, Squawk 6215, S/U Apprvd, RWY 27 Akasa Air 142" }
+        ]}
+      },
+      {
+        chartIndex:0,
+        qns:"SCENARIO 2a: Request taxi clearance.",
+        answer:{ transmissions:[
+          { who:"pilot",    text:"LKN Gnd Akasa Air 142 POB 169, SCC Req Taxi" },
+          { who:"atc",      text:"Akasa Air 1 4 2 Taxi via D, Hold short of Runway 2 7" },
+          { who:"readback", text:"Taxi via D, Hold short of RWY 27 Akasa Air 142" }
+        ]}
+      },
+      {
+        chartIndex:0,
+        qns:"SCENARIO 2b: Y Taxiway obstructed by unserviceable ambulance.",
+        answer:{ transmissions:[
+          { who:"pilot",    text:"Akasa air 142 TWY D blocked by unserviceable ambulance. Holding short of Delta, request taxi via Echo to holding point Two Seven." },
+          { who:"atc",      text:"Akasa Air 142 Taxi via E approved, Hold short of Runway 2 7, Contact Tower 122.5" },
+          { who:"readback", text:"Taxi via Echo approvd Hold short of RWY 27, Will contact TWR 122.5 Akasa air 142" }
+        ]}
+      },
+      {
+        chartIndex:0,
+        qns:"SCENARIO 3: Follow me car observed on Runway during take-off roll.",
+        answer:{ transmissions:[
+          { who:"pilot", text:"Lucknow Tower Akasa Air 142 Vehicle on Runway under control, Request backtrack and line-up Runway 2 7 for another Departure" },
+          { who:"atc",   text:"Akasa Air 1 4 2 Backtrack approved, Line up Runway 27" },
+          { who:"pilot", text:"Backtrack Apprvd, Line up RWY 27 Akasa Air 142" },
+          { who:"pilot", text:"LKN Gnd Akasa Air 142 Ready for dep RWY27" },
+          { who:"atc",   text:"Akasa Air 142 Clear take-off, Surface wind light and variable" },
+          { who:"pilot", text:"Clear take-off Akasa Air 142" }
+        ]}
+      },
+      {
+        chartIndex:1,
+        qns:"SCENARIO 4: You have departed Lucknow. Passing 2700ft, cleared to level 18000 Feet- Request higher level 20000 feet. ",
+        answer:{ transmissions:[
+          { who:"pilot", text:"LKN APP Akasa Air 142 Passing 2700ft Climbing to FL 180 REQ FL200" },
+          { who:"atc",   text:"Akasa air 142 Unable due traffic, Report reaching FL180" },
+          { who:"pilot", text:"Roger, Will report reaching FL180 Akasa air142" }
+        ]}
+      },
+      {
+        chartIndex:1,
+        qns:"SCENARIO 5 a):  Report crossing Bravo Bravo November VOR on R460. ",
+        answer:{ transmissions:[
+          { who:"pilot", text:"Varanasi CTRL Akasa Air 142 Position Bravo Bravo November VOR, Time 0356, FL310, EST GGC VOR 0410 TEPAL next." }
+        ]}
+      },
+      {
+        chartIndex:1,
+        qns:"SCENARIO 5 b): Relay information for VGC to Varanasi Control. ",
+        answer:{ transmissions:[
+          { who:"atc",   text:"Akasa air 142 VGC Cessna 172 How do you read me?" },
+          { who:"pilot", text:"VGC C172 Akasa air 142 Read you 5" },
+          { who:"atc",   text:"Akasa Air 142 VGC Cessna 172 Request Relay message to Varanasi Control Positon 50 Miles west of Gaya, Maintaining 3000 feet on QNH 998, VMC, Estimating Gaya 0431" },
+          { who:"pilot", text:"Positon 50 NM west of Gaya, Maintaining 3000 ft on QNH 998, VMC, EST Gaya 0431, will relay your msg to Varanasi CTRL Akasa Air 142" },
+          { who:"pilot", text:"Varanasi CTRL Akasa Air 142 Relaying for VGC C172, His positon 50NM west of Gaya, Maintaining 3000ft on QNH 998, VMC, EST Gaya 0431" }
+        ]}
+      },
+      {
+        chartIndex:1,
+        qns:"SCENARIO 6 a): You are approaching Gaya. Aircraft port engine shut down due fire.",
+        answer:{ transmissions:[
+          { who:"pilot", text:"MAYDAY x 3 Varanasi CTRL Akasa Air 142 Port engine shut down due fire warning, Positon 45 DME on radial 110 from BBN VOR. REQ descend to FL 200. Intend Emergency landing at Varanasi. POB 169 END 3hrs" },
+          { who:"atc",   text:"Akasa Air 142 Varanasi Control Roger MAYDAY FL200 approved" },
+          { who:"pilot", text:"FL 200 Apprvd Akasa Air 142" }
+        ]}
+      },{
+        chartIndex:1,
+        qns:"SCENARIO 6 b): Fire alarm goes off. You decided to continue as per flight plan",
+        answer:{ transmissions:[
+          { who:"pilot", text:"Varanasi CTRL Akasa air 142 Fire alarm has gone off, All parameters normal. Will continue as per flight plan. Revised estimates GGC VOR 0432. TEPAL 47 ETA Kolkata 0512 Passing FL260 for FL310." }
+        ]}
+      },
+    ]
+  },
+
+  /* ============================================================ PAPER 2 ============================================================ */
+  {
+    title:"VT-KNT",
+    acIdent:"VT-KNT", acType:"ATR 72",
+    dep:"VABP (Bhopal)", dest:"VECC (Kolkata)",
+    flightLevel:"FL 210", pob:"47", squawk:"4312",
+    route:"A 791", runway:"32", taxiway:"D, E",
+    stand:"1", alternate:"VAJB (Jabalpur)",
+    charts:[
+      { label:"Aerodrome — BHO", src:"bhopal_aerodrome.jpg" },
+      { label:"Route Chart",     src:"route_chart_4_p2.jpg" },
+      { label:"Aerodrome — JLR", src:"jabalpur_aerodrome.jpg" }
+    ],
+    atcFreqs:[
+      { group:"VABP — Bhopal", rows:[{ lbl:"Ground", freq:"118.05" },{ lbl:"Tower", freq:"118.550" }]},
+      { group:"Nagpur", rows:[{ lbl:"Arrival", freq:"125.1" }]},
+      { group:"VECC — Kolkata", rows:[{ lbl:"Control", freq:"126.40" }]},
+      { group:"VAJB — Jabalpur (Altn)", rows:[{ lbl:"Tower", freq:"118.3" }]}
+    ],
+    metar:"VABP 091230Z WIND 300/10KT VIS 6000M NSW FEW020 SCT100 TEMP 22 DEWPT 14 QNH 1012 HPA",
+    notam:"NIL",
+    scenarios:[
+      {
+        chartIndex:0,
+        qns:"SCENARIO 1a: Transmit the following phrases as per R/T procedure:\n(i) Ignore\n(ii) I repeat for clarity or emphasis\n(iii) I wish to obtain...\n(iv) Squawk 2000\n(v) Heading 100 degrees",
+        answer:{ transmissions:[
+          { who:"pilot", text:"(i) Ignore  →  DISREGARD" },
+          { who:"pilot", text:"(ii) I repeat for clarity or emphasis  →  I SAY AGAIN" },
+          { who:"pilot", text:"(iii) I wish to obtain...  →  REQUEST" },
+          { who:"pilot", text:"(iv) Squawk 2000  →  SQUAWK TWO THOUSAND" },
+          { who:"pilot", text:"(v) Heading 100 degrees  →  HEADING ONE ZERO ZERO" }
+        ]}
+      },
+      {
+        chartIndex:0,
+        qns:"SCENARIO 1b: At Stand 1, request ATC clearance, push back and start.\n(ATIS: Information Hotel, QNH 1012)",
+        answer:{ transmissions:[
+          { who:"pilot",    text:"Bhopal Ground, Victor Tango Kilo November Tango, stand One, information Hotel, QNH One Zero One Two, IFR to Kolkata, request ATC clearance and start up." },
+          { who:"atc",      text:"Victor Tango Kilo November Tango, cleared to Kolkata via flight planned route, Flight Level Two One Zero, squawk Four Three One Two. Pushback and start approved facing East." },
+          { who:"readback", text:"Cleared to Kolkata via flight planned route, Flight Level Two One Zero, squawk Four Three One Two, pushback and start approved facing East. Victor Tango Kilo November Tango." }
+        ]}
+      },
+      {
+        chartIndex:0,
+        qns:"SCENARIO 2a: Request Taxi Clearance.",
+        answer:{ transmissions:[
+          { who:"pilot",    text:"Bhopal Ground, Victor Tango Kilo November Tango, information Hotel, security check completed, persons on board Four Seven, request taxi." },
+          { who:"atc",      text:"Victor November Tango, taxi via Delta and Echo, hold short Runway Three Zero. Contact Tower One One Eight decimal Five Five Zero." },
+          { who:"readback", text:"Taxi via Delta and Echo, hold short Runway Three Zero. Tower One One Eight decimal Five Five Zero. Victor November Tango." }
+        ]}
+      },
+      {
+        chartIndex:0,
+        qns:"SCENARIO 2b: Holding short of Runway 30 on Taxiway E. Air India 321 is on finals. Request line-up and departure.",
+        answer:{ transmissions:[
+          { who:"pilot",    text:"Bhopal Tower, Victor November Tango at holding point Echo, Runway Three Zero. Air India Three Two One on finals in sight. Request backtrack and line up Runway Three Zero after Air India clears abeam Echo link. Ready for departure." },
+          { who:"atc",      text:"Victor November Tango, behind Air India Three Two One on final, line up behind and wait, Runway Three Zero." },
+          { who:"readback", text:"Behind Air India Three Two One on final, line up behind and wait Runway Three Zero. Victor November Tango." }
+        ]}
+      },
+      {
+        chartIndex:1,
+        qns:"SCENARIO 3: Report position over JJB VOR, request FL230 due light turbulence.\n(Time: 1430, FL210, next: IBUDA at 45, ARIVO next)",
+        answer:{ transmissions:[
+          { who:"pilot",    text:"Nagpur Approach, Victor Tango Kilo November Tango, over Juliette Juliette Bravo VOR at One Four Three Zero, Flight Level Two One Zero, estimating IBUDA at Four Five, ARIVO next. Request Flight Level Two Three Zero due light turbulence." },
+          { who:"atc",      text:"Victor Tango Kilo November Tango, maintain Flight Level Two One Zero due traffic, report IBUDA." },
+          { who:"readback", text:"Flight Level Two One Zero, will report IBUDA. Victor Tango Kilo November Tango." }
+        ]}
+      },
+      {
+        chartIndex:1,
+        qns:"SCENARIO 4: 80 NM outbound JJB VOR — abnormal engine vibrations. Declare urgency and divert to Jabalpur.\n(Position: 80 DME R092 JJB VOR, FL210, POB 47, Endurance 3 hrs, ETA JJB 1316)",
+        answer:{ transmissions:[
+          { who:"pilot",    text:"PAN PAN. PAN PAN. PAN PAN.\nNagpur Arrival, Victor Tango Kilo November Tango, position Eight Zero DME, radial Zero Nine Two outbound from Juliette Juliette Bravo VOR, Flight Level Two One Zero. Experiencing abnormal vibrations. Diverting to Jabalpur. Request descent. Persons on board Four Seven. Fuel endurance Three Hours. ETA JJB One Three One Six." },
+          { who:"atc",      text:"Victor Tango Kilo November Tango, Nagpur Control, roger PAN PAN. Descend to Flight Level One Two Zero. Cleared direct Jabalpur." },
+          { who:"readback", text:"Descend to Flight Level One Two Zero. Cleared direct Jabalpur. Victor Tango Kilo November Tango." }
+        ]}
+      }
+    ]
+  }
+];
+
+/* ================================================================
+   STATE
+================================================================ */
+let cp=0, cs=0;
+const done=papers.map(()=>new Set());
+let timerSec=1800, timerOn=false, timerInt=null;
+
+/* ================================================================
+   INIT
+================================================================ */
+function init(){ buildPaperTabs(); loadPaper(0); }
+
+function buildPaperTabs(){
+  document.getElementById('paper-tabs-wrap').innerHTML=
+    papers.map((p,i)=>`<div class="paper-tab${i===0?' active':''}" onclick="loadPaper(${i})">${p.title}</div>`).join('');
+}
+
+function loadPaper(i){
+  stopSpeech(); cp=i; cs=0;
+  document.querySelectorAll('.paper-tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  const p=papers[i];
+  document.getElementById('fi-ident').textContent  = p.acIdent||'—';
+  document.getElementById('fi-type').textContent   = p.acType||'—';
+  document.getElementById('fi-dep').textContent    = p.dep||'—';
+  document.getElementById('fi-dest').textContent   = p.dest||'—';
+  document.getElementById('fi-alt').textContent    = p.alternate||'—';
+  document.getElementById('fi-route').textContent  = p.route||'—';
+  document.getElementById('fi-fl').textContent     = p.flightLevel||'—';
+  document.getElementById('fi-pob').textContent    = p.pob||'—';
+  document.getElementById('fi-squawk').textContent = p.squawk||'—';
+  document.getElementById('fi-rwy').textContent    = p.runway||'—';
+  document.getElementById('fi-twy').textContent    = p.taxiway||'—';
+  document.getElementById('fi-stand').textContent  = p.stand||'—';
+  document.getElementById('freq-scroll').innerHTML=
+    p.atcFreqs.map(g=>`<div class="freq-group">${g.group}</div>`+g.rows.map(r=>`<div class="freq-row"><span class="freq-lbl">${r.lbl}</span><span class="freq-val">${r.freq}</span></div>`).join('')).join('');
+  document.getElementById('metar-text').textContent=p.metar;
+  document.getElementById('notam-text').textContent=p.notam;
+  buildScenNav(); loadScenario(0); resetTimer();
+}
+
+/* ================================================================
+   CHART
+================================================================ */
+function buildChartTabs(chartIdx){
+  const p=papers[cp];
+  document.getElementById('chart-tabs').innerHTML=
+    p.charts.map((c,i)=>`<div class="ctab${i===chartIdx?' active':''}" onclick="switchChart(${i})">${c.label}</div>`).join('');
+  showChart(chartIdx);
+}
+function switchChart(i){ document.querySelectorAll('.ctab').forEach((t,j)=>t.classList.toggle('active',j===i)); showChart(i); }
+function showChart(i){
+  const p=papers[cp], c=p.charts[i], v=document.getElementById('chart-viewer');
+  if(c&&c.src){ v.innerHTML=`<img src="${c.src}" alt="${c.label}" onerror="this.outerHTML='<div class=no-chart-msg><p>IMAGE NOT FOUND: ${c.src}</p><p style=font-size:9px>Place file in same folder as this HTML</p></div>'">`; }
+  else { v.innerHTML=`<div class="no-chart-msg"><p>NO CHART ASSIGNED</p></div>`; }
+}
+
+/* ================================================================
+   SCENARIOS
+================================================================ */
+function buildScenNav(){
+  const p=papers[cp];
+  document.getElementById('scen-nav').innerHTML=p.scenarios.map((s,i)=>{
+    const d=done[cp].has(i);
+    return `<div class="snum${i===cs?' active':''}${d?' done':''}" onclick="loadScenario(${i})">${i+1}</div>`;
+  }).join('');
+  document.getElementById('q-counter').textContent=`${cs+1} / ${p.scenarios.length}`;
+}
+
+function loadScenario(i){
+  stopSpeech(); cs=i;
+  const s=papers[cp].scenarios[i];
+  document.querySelectorAll('.snum').forEach((b,j)=>b.classList.toggle('active',j===i));
+  document.getElementById('q-counter').textContent=`${i+1} / ${papers[cp].scenarios.length}`;
+  document.getElementById('q-badge').textContent=`Scenario ${i+1}`;
+  document.getElementById('q-text').textContent=s.qns;
+  buildChartTabs(s.chartIndex??0);
+  buildConvFlow(s);
+}
+
+/* ================================================================
+   CONVERSATION FLOW — voice-based practice
+================================================================ */
+function buildConvFlow(s){
+  const flow=document.getElementById('conv-flow');
+  const txs=s.answer.transmissions;
+
+  // Check if this is a pilot-only scenario (no ATC lines) — e.g. phrase translation
+  const hasMix=txs.some(t=>t.who==='atc'||t.who==='readback');
+
+  if(!hasMix){
+    // Pilot-only: show all with individual play buttons (no step-through needed)
+    let html=`<div class="ans-hdr" style="margin-top:8px;font-size:8px;font-weight:700;color:#3a6820;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Model Answer</div><div class="ans-only">`;
+    txs.forEach((t,idx)=>{
+      const map={pilot:['pilot','✈ Pilot'],atc:['atc','📻 ATC'],readback:['readback','↺ Readback']};
+      const[cls,lbl]=map[t.who]||['pilot','Pilot'];
+      html+=`<div class="tx ${cls}">
+        <div class="tx-who">${lbl}
+          <button class="ans-play" id="apbtn-${idx}" onclick="playAnsOnly(${idx})">▶ Play</button>
+        </div>
+        ${t.text.replace(/\n/g,'<br>')}
+      </div>`;
+    });
+    html+='</div>';
+    flow.innerHTML=html;
+    return;
+  }
+
+  // Full conversation: step-by-step
+  const labelMap={
+    pilot:   ['step-pilot',   '✈ PILOT — YOUR TURN'],
+    atc:     ['step-atc',     '📻 ATC'],
+    readback:['step-readback','↺ READBACK — YOUR TURN']
+  };
+  let html='';
+  txs.forEach((t,idx)=>{
+    const[cls,lbl]=labelMap[t.who]||['step-pilot','YOUR TURN'];
+    const isFirst=idx===0;
+    const state=isFirst?'active':'future';
+    const isPilot=t.who==='pilot'||t.who==='readback';
+    if(!isPilot){
+      html+=`<div class="step-card ${cls} ${state}" id="step-${idx}">
+        <div class="step-head">
+          <span class="step-lbl">${lbl}</span>
+          <button class="play-btn" id="playbtn-${idx}" onclick="playStep(${idx})">▶ Play</button>
+          <span style="font-size:9px;color:#8a6820;margin-left:6px;letter-spacing:.5px">or press Space</span>
+        </div>
+        <div class="step-body">${t.text.replace(/\n/g,'<br>')}</div>
+      </div>`;
+    } else {
+      html+=`<div class="step-card ${cls} ${state}" id="step-${idx}">
+        <div class="step-head"><span class="step-lbl">${lbl}</span></div>
+        <div class="your-turn">
+          <span class="mic-icon">🎤</span>
+          <span class="your-turn-txt">Speak your transmission</span>
+          <button class="hint-btn" onclick="toggleHint(${idx})">💡 Hint</button>
+          <button class="cont-btn" onclick="stepDone(${idx})">✓ Continue</button>
+        </div>
+        <div class="hint-reveal" id="hint-${idx}">${t.text.replace(/\n/g,'<br>')}</div>
+      </div>`;
+    }
+  });
+  flow.innerHTML=html;
+
+  // Auto-play first ATC step; when done, highlight next pilot card
+  if(txs[0]&&txs[0].who==='atc'){
+    setTimeout(()=>{ const btn=document.getElementById('playbtn-0'); if(btn) speakText(txs[0].text,btn,()=>atcDoneActivateNext(0)); },400);
+  }
+}
+
+function playStep(idx){
+  const s=papers[cp].scenarios[cs];
+  const btn=document.getElementById(`playbtn-${idx}`);
+  if(btn&&btn.classList.contains('speaking')){ stopSpeech(); return; }
+  speakText(s.answer.transmissions[idx].text,btn,()=>atcDoneActivateNext(idx));
+}
+
+/* Called when an ATC card finishes speaking — auto-marks it done,
+   then activates + pulses the next pilot/readback card */
+function atcDoneActivateNext(idx){
+  const atcCard=document.getElementById(`step-${idx}`);
+  if(atcCard){
+    atcCard.classList.remove('active'); atcCard.classList.add('done');
+    const head=atcCard.querySelector('.step-head');
+    if(head&&!head.querySelector('.done-tick')){ const t=document.createElement('div'); t.className='done-tick'; t.textContent='✓'; head.appendChild(t); }
+  }
+  const next=document.getElementById(`step-${idx+1}`);
+  if(next){
+    next.classList.remove('future'); next.classList.add('active');
+    next.scrollIntoView({behavior:'smooth',block:'nearest'});
+    // Pulse to draw attention — it's the pilot's turn
+    setTimeout(()=>{ next.classList.add('pilot-pulse'); setTimeout(()=>next.classList.remove('pilot-pulse'),3000); },100);
+  }
+}
+
+function playAnsOnly(idx){
+  const s=papers[cp].scenarios[cs];
+  const btn=document.getElementById(`apbtn-${idx}`);
+  if(btn&&btn.classList.contains('speaking')){ stopSpeech(); return; }
+  speakText(s.answer.transmissions[idx].text,btn,null);
+}
+
+function toggleHint(idx){
+  const h=document.getElementById(`hint-${idx}`);
+  if(!h) return;
+  const vis=h.classList.toggle('vis');
+  const card=document.getElementById(`step-${idx}`);
+  if(card){ const hb=card.querySelector('.hint-btn'); if(hb) hb.textContent=vis?'🙈 Hide':'💡 Hint'; }
+}
+
+function stepDone(idx){
+  stopSpeech();
+  const card=document.getElementById(`step-${idx}`);
+  if(card){
+    card.classList.remove('active'); card.classList.add('done');
+    const head=card.querySelector('.step-head');
+    if(head&&!head.querySelector('.done-tick')){ const t=document.createElement('div'); t.className='done-tick'; t.textContent='✓'; head.appendChild(t); }
+  }
+  const next=document.getElementById(`step-${idx+1}`);
+  if(next){
+    next.classList.remove('future'); next.classList.add('active');
+    next.scrollIntoView({behavior:'smooth',block:'nearest'});
+    if(next.classList.contains('step-atc')){
+      setTimeout(()=>{
+        const s=papers[cp].scenarios[cs];
+        const t=s.answer.transmissions[idx+1];
+        if(t){ const btn=document.getElementById(`playbtn-${idx+1}`); speakText(t.text,btn,()=>atcDoneActivateNext(idx+1)); }
+      },400);
+    }
+  }
+}
+
+function markDone(){ done[cp].add(cs); buildScenNav(); nextS(); }
+function prevS(){ if(cs>0) loadScenario(cs-1); }
+function nextS(){ if(cs<papers[cp].scenarios.length-1) loadScenario(cs+1); }
+
+/* ================================================================
+   TIMER
+================================================================ */
+function updTimer(){ const m=Math.floor(timerSec/60),s=timerSec%60,el=document.getElementById('timer-display'); el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; el.className=timerSec<=300?'danger':timerSec<=600?'warn':''; }
+function startTimer(){ if(timerOn)return; timerOn=true; timerInt=setInterval(()=>{ if(timerSec>0){timerSec--;updTimer();}else{clearInterval(timerInt);timerOn=false;}},1000); }
+function pauseTimer(){ clearInterval(timerInt); timerOn=false; }
+function resetTimer(){ pauseTimer(); timerSec=1800; updTimer(); }
+
+init();
+</script>
+</body>
+</html>
