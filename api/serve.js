@@ -17,7 +17,7 @@ const PAPERS = [
   { name: "VT-ITM",  id: "VT-ITM"  },
   { name: "SEJ-993", id: "SEJ-993" },
   { name: "IGO-153", id: "IGO-153" },
-  { name: "Qp-142", id: "QP-142" },
+  { name: "QP-142", id: "QP-142" },
 ];
 
 /* ── PAPER DATA ─────────────────────────────────────────────────
