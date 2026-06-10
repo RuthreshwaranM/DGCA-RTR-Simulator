@@ -12,6 +12,7 @@
    ============================================================ */
 
 const PAPERS = [
+  { name: "RTR PART 1 NOTES",  folder: "PART 1 NOTES",  file: "PART 1 NOTES.html"  },
   { name: "RTR FORMATS PRACTICE",  folder: "RTR FORMATS",  file: "RTR FORMATS.html"  },
   { name: "VT-KNT",  folder: "VT-KNT",  file: "VT-KNT.html"  },
   { name: "QP-142",  folder: "QP-142",  file: "QP-142.html"  },
