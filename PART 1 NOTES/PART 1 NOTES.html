@@ -1,788 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../protection.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RTR(A) Study Cockpit v2</title>
+
+<!--
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║        RTR(A) STUDY COCKPIT v2 — EDIT GUIDE                    ║
+  ╠══════════════════════════════════════════════════════════════════╣
+  ║  HOW TO ADD A NEW MODULE:                                        ║
+  ║  1. Add entry to MODULES array (bottom of script section 1)      ║
+  ║  2. Create buildXxx() function in section 4                      ║
+  ║  3. Nav, progress, quiz score, completion badge all auto-update  ║
+  ║                                                                  ║
+  ║  HOW TO EDIT FLASHCARDS:                                         ║
+  ║  card('QUESTION', 'ANSWER', 'TAG')                               ║
+  ║                                                                  ║
+  ║  HOW TO EDIT QUIZ QUESTIONS:                                     ║
+  ║  { q:'text', opts:['A','B','C','D'], ans:0, exp:'...' }          ║
+  ║  ans = index of correct option (0-based)                         ║
+  ║                                                                  ║
+  ║  NEW FEATURES:                                                   ║
+  ║  1. Rapid Fire — timed 12s/question from all modules             ║
+  ║  2. Notes Panel — sticky mnemonic notes per module               ║
+  ║  3. Missed Questions — wrong answers saved + reviewable          ║
+  ║  4. localStorage — progress, score, mistakes persist             ║
+  ║  5. Phonetic Drill — type-the-word timed flash test              ║
+  ║  6. Search — highlight matching content across all modules       ║
+  ║  7. Module Badge — COMPLETE only after quiz ≥ 70%                ║
+  ╚══════════════════════════════════════════════════════════════════╝
+-->
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --panel:#0D1117;--surface:#111820;--card:#151E28;--border:#1E2A3A;
-  --amber:#F5A623;--green:#00D97E;--red:#FF4444;--blue:#4A9EFF;
-  --text:#C8D8E8;--muted:#5A7A9A;--dim:#2A3A4A;
+/* ============================================================
+   COLOUR PALETTE
+   ============================================================ */
+:root {
+  --bg:       #0D1117;
+  --surface:  #111820;
+  --card:     #151E28;
+  --border:   #1E2A3A;
+  --dim:      #2A3A4A;
+  --amber:    #F5A623;
+  --green:    #00D97E;
+  --red:      #FF4444;
+  --blue:     #4A9EFF;
+  --purple:   #A78BFA;
+  --text:     #C8D8E8;
+  --muted:    #5A7A9A;
 }
-body{font-family:'IBM Plex Mono',monospace;background:transparent;color:var(--text);font-size:13px}
-#app{display:grid;grid-template-columns:220px 1fr;min-height:640px;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--panel)}
-#nav{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-#nav-header{padding:12px 14px 10px;border-bottom:1px solid var(--border)}
-.freq-display{font-family:'VT323',monospace;font-size:26px;color:var(--amber);letter-spacing:2px;line-height:1}
-.freq-label{font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:2px}
-#nav-items{flex:1;overflow-y:auto;padding:6px}
-#nav-items::-webkit-scrollbar{width:3px}
-#nav-items::-webkit-scrollbar-track{background:transparent}
-#nav-items::-webkit-scrollbar-thumb{background:var(--dim)}
-.nav-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:4px;cursor:pointer;transition:background .15s;margin-bottom:2px;border:1px solid transparent}
-.nav-item:hover{background:var(--card);border-color:var(--border)}
-.nav-item.active{background:var(--card);border-color:var(--amber);color:var(--amber)}
-.nav-num{font-family:'VT323',monospace;font-size:16px;min-width:22px;color:var(--muted)}
-.nav-item.active .nav-num{color:var(--amber)}
-.nav-title{font-size:11px;line-height:1.3;color:var(--text)}
-.nav-item.active .nav-title{color:var(--amber)}
-.nav-dot{width:6px;height:6px;border-radius:50%;background:var(--dim);margin-left:auto;flex-shrink:0}
-.nav-dot.done{background:var(--green)}
-#content{background:var(--panel);overflow-y:auto;display:flex;flex-direction:column}
-#content::-webkit-scrollbar{width:4px}
-#content::-webkit-scrollbar-track{background:transparent}
-#content::-webkit-scrollbar-thumb{background:var(--dim)}
-#content-header{padding:14px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.ch-title{font-family:'VT323',monospace;font-size:22px;color:var(--amber);letter-spacing:1px}
-.ch-sub{font-size:10px;color:var(--muted);letter-spacing:1px}
-#progress-bar{height:2px;background:var(--dim)}
-#progress-fill{height:100%;background:var(--amber);transition:width .3s}
-#cards-area{padding:14px 18px;flex:1}
-.section-label{font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
-.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-bottom:14px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px;cursor:pointer;transition:border-color .15s}
-.card:hover{border-color:var(--blue)}
-.card.flipped{border-color:var(--green)}
-.card-q{font-size:12px;color:var(--text);line-height:1.5;margin-bottom:6px}
-.card-a{font-size:12px;color:var(--green);line-height:1.5;display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--dim)}
-.card.flipped .card-a{display:block}
-.card-tag{font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px}
-.table-wrap{overflow-x:auto;margin-bottom:14px}
-table{width:100%;border-collapse:collapse;font-size:11px}
-th{background:var(--dim);color:var(--amber);font-family:'VT323',monospace;font-size:14px;padding:8px 10px;text-align:left;letter-spacing:1px}
-td{padding:6px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
-tr:hover td{background:var(--card)}
-.tag{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-family:'IBM Plex Mono',monospace;letter-spacing:.5px}
-.tag-amber{background:#2A1E00;color:var(--amber);border:1px solid #3A2800}
-.tag-green{background:#001A0E;color:var(--green);border:1px solid #002E18}
-.tag-red{background:#2A0000;color:var(--red);border:1px solid #440000}
-.tag-blue{background:#001530;color:var(--blue);border:1px solid #00244A}
-.quiz-wrap{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:14px}
-.quiz-q{font-size:13px;color:var(--text);margin-bottom:12px;line-height:1.6}
-.quiz-opts{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text);cursor:pointer;text-align:left;transition:border-color .15s;line-height:1.4}
-.opt-btn:hover{border-color:var(--blue)}
-.opt-btn.correct{border-color:var(--green);color:var(--green);background:#001A0E}
-.opt-btn.wrong{border-color:var(--red);color:var(--red);background:#2A0000}
-.quiz-feedback{font-size:11px;margin-top:10px;padding:8px;border-radius:4px;display:none}
-.quiz-feedback.show{display:block}
-.quiz-feedback.ok{background:#001A0E;color:var(--green);border:1px solid #002E18}
-.quiz-feedback.bad{background:#2A0000;color:var(--red);border:1px solid #440000}
-.btn{background:transparent;border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer;transition:border-color .15s}
-.btn:hover{border-color:var(--amber);color:var(--amber)}
-.btn-primary{border-color:var(--amber);color:var(--amber)}
-.info-box{border-left:2px solid var(--amber);padding:8px 12px;background:var(--card);margin-bottom:10px;border-radius:0 4px 4px 0}
-.info-box.green{border-left-color:var(--green)}
-.info-box.red{border-left-color:var(--red)}
-.info-box.blue{border-left-color:var(--blue)}
-.info-title{font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px}
-.info-body{font-size:12px;color:var(--text);line-height:1.6}
-.mnem{font-family:'VT323',monospace;font-size:18px;color:var(--amber);letter-spacing:2px}
-#quiz-score{font-family:'VT323',monospace;font-size:16px;color:var(--green);padding:6px 10px;background:var(--card);border:1px solid var(--border);border-radius:4px}
-.phonetic-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
-.p-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;text-align:center}
-.p-letter{font-family:'VT323',monospace;font-size:28px;color:var(--amber)}
-.p-word{font-size:11px;color:var(--text)}
-.p-pron{font-size:10px;color:var(--muted)}
-.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.stat{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:10px;text-align:center}
-.stat-val{font-family:'VT323',monospace;font-size:24px;color:var(--amber)}
-.stat-lbl{font-size:10px;color:var(--muted);letter-spacing:1px}
-#done-banner{display:none;background:var(--card);border:1px solid var(--green);border-radius:6px;padding:14px;text-align:center;margin-bottom:14px}
-#done-banner.show{display:block}
-.done-t{font-family:'VT323',monospace;font-size:22px;color:var(--green);letter-spacing:2px}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Courier New', Courier, monospace;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.7;
+}
+
+/* ============================================================
+   APP SHELL
+   ============================================================ */
+#app {
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+#sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#freq-box {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+#freq-num {
+  font-size: 28px;
+  color: var(--amber);
+  letter-spacing: 3px;
+  font-weight: bold;
+}
+#freq-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  margin-top: 2px;
+}
+
+/* Search bar in sidebar */
+#sidebar-search-wrap {
+  padding: 8px 8px 4px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+#sidebar-search {
+  width: 100%;
+  padding: 6px 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 11px;
+}
+#sidebar-search:focus { outline: none; border-color: var(--amber); }
+#search-results {
+  max-height: 160px;
+  overflow-y: auto;
+  display: none;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  margin-top: -1px;
+}
+.search-result-item {
+  padding: 6px 10px;
+  font-size: 10px;
+  color: var(--text);
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+.search-result-item:hover { background: var(--dim); color: var(--amber); }
+.search-result-item .sr-module { color: var(--muted); font-size: 9px; letter-spacing: 1px; }
+
+#nav-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 6px 2px;
+}
+#nav-list::-webkit-scrollbar { width: 3px; }
+#nav-list::-webkit-scrollbar-thumb { background: var(--dim); }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.nav-item:hover { background: var(--card); border-color: var(--border); }
+.nav-item.active { background: var(--card); border-color: var(--amber); }
+
+.nav-num { font-size: 14px; color: var(--muted); min-width: 22px; }
+.nav-item.active .nav-num { color: var(--amber); }
+.nav-text { font-size: 11px; color: var(--text); line-height: 1.3; flex: 1; }
+.nav-item.active .nav-text { color: var(--amber); }
+
+/* Completion indicator dot in nav */
+.nav-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--dim);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+.nav-dot.visited { background: var(--muted); }
+.nav-dot.done    { background: var(--green); }
+
+/* Sidebar action buttons */
+.sidebar-btn {
+  margin: 4px 8px;
+  padding: 7px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 1px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+  width: calc(100% - 16px);
+}
+.sidebar-btn:hover { background: rgba(245,166,35,0.08); border-color: var(--amber); color: var(--amber); }
+.sidebar-btn.amber { border-color: var(--amber); color: var(--amber); }
+.sidebar-btn.green { border-color: var(--green); color: var(--green); }
+.sidebar-btn.green:hover { background: rgba(0,217,126,0.08); }
+.sidebar-btn.red   { border-color: var(--red); color: var(--red); }
+.sidebar-btn.red:hover   { background: rgba(255,68,68,0.08); }
+.sidebar-btn.purple { border-color: var(--purple); color: var(--purple); }
+.sidebar-btn.purple:hover { background: rgba(167,139,250,0.08); }
+
+/* ============================================================
+   MAIN AREA
+   ============================================================ */
+#main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+#topbar {
+  padding: 12px 20px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 10;
+  gap: 12px;
+}
+#mod-title { font-size: 20px; color: var(--amber); letter-spacing: 1px; }
+#mod-sub   { font-size: 10px; color: var(--muted); letter-spacing: 1px; margin-top: 2px; }
+
+#topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+#score-badge {
+  font-size: 14px;
+  color: var(--green);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 5px 10px;
+  min-width: 70px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Module completion badge */
+#mod-badge {
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+  display: none;
+}
+#mod-badge.complete { display: inline-block; background: rgba(0,217,126,0.12); color: var(--green); border: 1px solid rgba(0,217,126,0.3); }
+#mod-badge.incomplete { display: inline-block; background: rgba(245,166,35,0.1); color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
+
+#progress-bar  { height: 2px; background: var(--dim); flex-shrink: 0; }
+#progress-fill { height: 100%; background: var(--amber); width: 0%; transition: width 0.4s; }
+
+#content {
+  padding: 18px 20px 40px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Highlight class for search */
+.search-hl { background: rgba(245,166,35,0.25); border-radius: 2px; color: var(--amber); }
+
+/* ============================================================
+   SECTION LABELS
+   ============================================================ */
+.sec-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  margin: 16px 0 10px;
+  text-transform: uppercase;
+}
+.sec-label:first-child { margin-top: 0; }
+
+/* ============================================================
+   STICKY NOTES PANEL (per module)
+   ============================================================ */
+#notes-panel {
+  background: rgba(167,139,250,0.06);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-radius: 6px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  display: none;
+}
+#notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(167,139,250,0.15);
+}
+#notes-header-title {
+  font-size: 10px;
+  color: var(--purple);
+  letter-spacing: 1.5px;
+}
+#notes-toggle-icon { font-size: 11px; color: var(--purple); }
+#notes-body {
+  padding: 10px 12px;
+  display: none;
+}
+#notes-body.open { display: block; }
+.exam-note {
+  padding: 6px 0;
+  font-size: 11px;
+  color: var(--text);
+  line-height: 1.7;
+  border-bottom: 1px solid rgba(167,139,250,0.1);
+}
+.exam-note:last-child { border-bottom: none; }
+.exam-note strong { color: var(--purple); }
+
+/* ============================================================
+   FLASHCARDS
+   ============================================================ */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  user-select: none;
+}
+.card:hover  { border-color: var(--blue); }
+.card.flipped { border-color: var(--green); }
+.card-tag { font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
+.card-q   { font-size: 14px; color: var(--text); line-height: 1.6; font-weight: 600; }
+.card-a   { display: none; font-size: 14px; color: var(--green); line-height: 1.6; font-weight: 500; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--dim); }
+.card.flipped .card-a { display: block; }
+
+/* ============================================================
+   NOTE / INFO BOXES
+   ============================================================ */
+.note {
+  border-left: 3px solid var(--amber);
+  padding: 10px 14px;
+  background: var(--card);
+  margin-bottom: 10px;
+  border-radius: 0 5px 5px 0;
+}
+.note.green  { border-left-color: var(--green);  }
+.note.red    { border-left-color: var(--red);    }
+.note.blue   { border-left-color: var(--blue);   }
+.note.purple { border-left-color: var(--purple); }
+.note-title { font-size: 10px; color: var(--muted); letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; }
+.note-body  { font-size: 14px; color: var(--text); line-height: 1.8; font-weight: 500; }
+.note-body strong        { color: var(--amber); font-weight: bold; }
+.note.green .note-body strong  { color: var(--green); }
+.note.red   .note-body strong  { color: var(--red);   }
+.note.blue  .note-body strong  { color: var(--blue);  }
+.note.purple .note-body strong { color: var(--purple); }
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+.tbl-wrap {
+  overflow-x: auto;
+  margin-bottom: 14px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+}
+table { width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 500; }
+th    { background: var(--dim); color: var(--amber); padding: 8px 10px; text-align: left; letter-spacing: 1px; font-size: 11px; text-transform: uppercase; }
+td    { padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; line-height: 1.5; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--card); }
+
+.tag { display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 10px; letter-spacing: 0.5px; }
+.tag-amber  { background: #2A1E00; color: var(--amber);  border: 1px solid #3A2800; }
+.tag-green  { background: #001A0E; color: var(--green);  border: 1px solid #002E18; }
+.tag-red    { background: #2A0000; color: var(--red);    border: 1px solid #440000; }
+.tag-blue   { background: #001530; color: var(--blue);   border: 1px solid #00244A; }
+.tag-purple { background: #1A0030; color: var(--purple); border: 1px solid #2E0050; }
+
+/* ============================================================
+   PHONETIC / NUMBER GRID
+   ============================================================ */
+.p-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.p-card { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 8px 6px; text-align: center; }
+.p-big   { font-size: 26px; color: var(--amber); line-height: 1; }
+.p-small { font-size: 11px; color: var(--text); margin-top: 3px; }
+.p-muted { font-size: 10px; color: var(--muted); }
+
+/* ============================================================
+   QUIZ
+   ============================================================ */
+.quiz-block {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.quiz-q     { font-size: 13px; color: var(--text); line-height: 1.6; margin-bottom: 12px; }
+.quiz-opts  { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.opt-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.5;
+  transition: border-color 0.15s, background 0.15s;
+}
+.opt-btn:hover:not(:disabled) { border-color: var(--blue); }
+.opt-btn.correct { border-color: var(--green); color: var(--green); background: #001A0E; }
+.opt-btn.wrong   { border-color: var(--red);   color: var(--red);   background: #2A0000; }
+.opt-btn:disabled { cursor: default; }
+
+.quiz-feedback { font-size: 11px; line-height: 1.6; margin-top: 10px; padding: 8px 10px; border-radius: 4px; display: none; }
+.quiz-feedback.show-ok  { display: block; background: #001A0E; color: var(--green); border: 1px solid #002E18; }
+.quiz-feedback.show-bad { display: block; background: #2A0000; color: var(--red);   border: 1px solid #440000; }
+
+.btn { background: transparent; border: 1px solid var(--border); color: var(--text); font-family: inherit; font-size: 11px; padding: 7px 16px; border-radius: 4px; cursor: pointer; margin-top: 10px; transition: border-color 0.15s, color 0.15s; letter-spacing: 0.5px; }
+.btn:hover       { border-color: var(--amber); color: var(--amber); }
+.btn.btn-primary { border-color: var(--amber); color: var(--amber); }
+.btn.btn-green   { border-color: var(--green); color: var(--green); }
+.btn.btn-red     { border-color: var(--red); color: var(--red); }
+
+/* ============================================================
+   RAPID FIRE
+   ============================================================ */
+#rf-panel { display: none; }
+#rf-timer-bar   { height: 4px; background: var(--dim); border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
+#rf-timer-fill  { height: 100%; background: var(--amber); width: 100%; transition: width 1s linear; }
+#rf-stats       { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.rf-stat        { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 10px; text-align: center; }
+.rf-val         { font-size: 22px; color: var(--amber); }
+.rf-lbl         { font-size: 10px; color: var(--muted); letter-spacing: 1px; margin-top: 2px; }
+
+/* ============================================================
+   MISSED QUESTIONS PANEL
+   ============================================================ */
+#missed-panel { display: none; }
+#missed-panel .sec-label { color: var(--red); border-color: rgba(255,68,68,0.3); }
+
+/* ============================================================
+   PHONETIC DRILL PANEL
+   ============================================================ */
+#drill-panel { display: none; }
+#drill-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 30px 20px;
+  text-align: center;
+  margin-bottom: 14px;
+}
+#drill-letter {
+  font-size: 80px;
+  color: var(--amber);
+  line-height: 1;
+  font-weight: bold;
+  letter-spacing: 4px;
+  margin-bottom: 10px;
+}
+#drill-hint { font-size: 11px; color: var(--muted); margin-bottom: 16px; min-height: 16px; }
+#drill-input {
+  width: 100%;
+  max-width: 280px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-align: center;
+}
+#drill-input:focus { outline: none; border-color: var(--amber); }
+#drill-input.correct-anim { border-color: var(--green); background: rgba(0,217,126,0.1); }
+#drill-input.wrong-anim   { border-color: var(--red); background: rgba(255,68,68,0.1); }
+#drill-feedback { font-size: 13px; margin-top: 10px; min-height: 20px; text-align: center; }
+#drill-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  margin-bottom: 14px;
+}
+#drill-timer-bar   { height: 4px; background: var(--dim); border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
+#drill-timer-fill  { height: 100%; background: var(--amber); width: 100%; transition: width 1s linear; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 700px) {
+  #app { grid-template-columns: 1fr; }
+  #sidebar { position: static; height: auto; }
+  #nav-list { max-height: 40vh; }
+  .quiz-opts { grid-template-columns: 1fr; }
+  #drill-letter { font-size: 56px; }
+}
+/* ============================================================
+   LIGHT MODE — overrides CSS variables only
+   ============================================================ */
+/* ============================================================
+   LIGHT MODE — Aviation Green Theme
+   ============================================================ */
+body.light {
+  --bg:      #EEF4F0;
+  --surface: #DDE9E1;
+  --card:    #F5FAF6;
+  --border:  #B2CCBA;
+  --dim:     #8AADA0;
+  --text:    #1A2E22;
+  --muted:   #4A6B58;
+  --amber:   #8B6914;
+  --green:   #1A5C38;
+  --red:     #B03030;
+  --blue:    #1E5A8A;
+  --purple:  #5B3FA0;
+}
+
+/* Sidebar gets a deeper green tint */
+body.light #sidebar {
+  background: #C8DDD0;
+  border-right-color: #9DBDAA;
+}
+
+/* Frequency display stays bold */
+body.light #freq-num {
+  color: #7A5A0A;
+}
+
+/* Nav active item */
+body.light .nav-item.active {
+  background: #D8EDE0;
+  border-color: #1A5C38;
+}
+body.light .nav-item:hover {
+  background: #DCF0E4;
+}
+
+/* Top bar */
+body.light #topbar {
+  background: #EEF4F0;
+  border-bottom-color: #B2CCBA;
+}
+
+/* Cards */
+body.light .card {
+  background: #F5FAF6;
+  border-color: #B2CCBA;
+}
+body.light .card:hover  { border-color: #1E5A8A; }
+body.light .card.flipped { border-color: #1A5C38; }
+body.light .card-a { color: #1A5C38; border-top-color: #B2CCBA; }
+
+/* Notes / info boxes */
+body.light .note        { background: #F5FAF6; }
+body.light .note.green  { background: #EDFAF2; }
+body.light .note.red    { background: #FDF2F2; }
+body.light .note.blue   { background: #EEF4FC; }
+body.light .note.purple { background: #F4F0FC; }
+
+/* Tables */
+body.light th { background: #C8DDD0; color: #1A2E22; }
+body.light td { border-bottom-color: #C8DDD0; }
+body.light tr:hover td { background: #EBF4EE; }
+body.light .tbl-wrap { border-color: #B2CCBA; }
+
+/* Quiz */
+body.light .quiz-block { background: #F5FAF6; border-color: #B2CCBA; }
+body.light .opt-btn    { background: #EEF4F0; border-color: #B2CCBA; color: #1A2E22; }
+body.light .opt-btn:hover:not(:disabled) { border-color: #1E5A8A; }
+body.light .opt-btn.correct { background: #EDFAF2; color: #1A5C38; border-color: #1A5C38; }
+body.light .opt-btn.wrong   { background: #FDF2F2; color: #B03030; border-color: #B03030; }
+body.light .quiz-feedback.show-ok  { background: #EDFAF2; color: #1A5C38; border-color: #A8D5B8; }
+body.light .quiz-feedback.show-bad { background: #FDF2F2; color: #B03030; border-color: #E8AAAA; }
+
+/* Score badge */
+body.light #score-badge { background: #F5FAF6; border-color: #B2CCBA; color: #1A5C38; }
+
+/* Search */
+body.light #sidebar-search { background: #EEF4F0; border-color: #9DBDAA; color: #1A2E22; }
+body.light #search-results  { background: #F5FAF6; border-color: #B2CCBA; }
+body.light .search-result-item:hover { background: #DDE9E1; }
+
+/* Progress bar */
+body.light #progress-bar  { background: #C8DDD0; }
+body.light #progress-fill { background: #1A5C38; }
+
+/* Sidebar buttons */
+body.light .sidebar-btn        { border-color: #8AADA0; color: #4A6B58; }
+body.light .sidebar-btn:hover  { background: rgba(26,92,56,0.08); border-color: #1A5C38; color: #1A5C38; }
+body.light .sidebar-btn.amber  { border-color: #8B6914; color: #8B6914; }
+body.light .sidebar-btn.green  { border-color: #1A5C38; color: #1A5C38; }
+body.light .sidebar-btn.red    { border-color: #B03030; color: #B03030; }
+body.light .sidebar-btn.purple { border-color: #5B3FA0; color: #5B3FA0; }
+
+/* Notes panel */
+body.light #notes-panel { background: #EBF7EF; border-color: #9DBDAA; }
+body.light #notes-header { border-bottom-color: #B2CCBA; }
+body.light #notes-header-title { color: #1A5C38; }
+body.light #notes-toggle-icon  { color: #1A5C38; }
+body.light .exam-note { border-bottom-color: #C8DDD0; color: #1A2E22; }
+
+/* RF / Drill stat boxes */
+body.light .rf-stat  { background: #F5FAF6; border-color: #B2CCBA; }
+body.light .rf-val   { color: #1A5C38; }
+
+/* Drill card */
+body.light #drill-card   { background: #F5FAF6; border-color: #B2CCBA; }
+body.light #drill-letter { color: #8B6914; }
+body.light #drill-input  { background: #EEF4F0; border-color: #B2CCBA; color: #1A2E22; }
+
+/* Tags */
+body.light .tag-amber  { background: #FDF6E3; color: #8B6914;  border-color: #D4A843; }
+body.light .tag-green  { background: #EDFAF2; color: #1A5C38;  border-color: #6DBF8A; }
+body.light .tag-red    { background: #FDF2F2; color: #B03030;  border-color: #E08080; }
+body.light .tag-blue   { background: #EEF4FC; color: #1E5A8A;  border-color: #7AB0D8; }
+body.light .tag-purple { background: #F4F0FC; color: #5B3FA0;  border-color: #A990D8; }
+
+/* Section labels */
+body.light .sec-label { color: #4A6B58; border-bottom-color: #B2CCBA; }
+
+/* p-grid cards */
+body.light .p-card { background: #F5FAF6; border-color: #B2CCBA; }
+body.light .p-big  { color: #8B6914; }
+
+/* Mod badge */
+body.light #mod-badge.complete   { background: #EDFAF2; color: #1A5C38; border-color: #6DBF8A; }
+body.light #mod-badge.incomplete { background: #FDF6E3; color: #8B6914; border-color: #D4A843; }
 </style>
-<script src="../protection.js"></script>
-<h2 class="sr-only">DGCA RTR(A) exam cockpit-themed study session — flashcards, tables and quizzes across all topics</h2>
-
-<div id="app">
-<div id="nav">
-  <div id="nav-header">
-    <div class="freq-display" id="freq-disp">118.100</div>
-    <div class="freq-label">ACTIVE FREQ — RTR STUDY</div>
-  </div>
-  <div id="nav-items"></div>
-</div>
-<div id="content">
-  <div id="content-header">
-    <div><div class="ch-title" id="ch-title">READY</div><div class="ch-sub" id="ch-sub">SELECT A MODULE</div></div>
-    <div id="quiz-score">0 / 0</div>
-  </div>
-  <div id="progress-bar"><div id="progress-fill" style="width:0%"></div></div>
-  <div id="cards-area"></div>
-</div>
-</div>
-
-<script>
-const MODULES = [
-  {id:'defs',freq:'118.100',title:'DEFINITIONS',sub:'ATS · AIRSPACE · RT TERMS',
-   content:()=>buildDefs()},
-  {id:'abbr',freq:'119.300',title:'ABBREVIATIONS',sub:'RT · SPOKEN · LETTER FORM',
-   content:()=>buildAbbr()},
-  {id:'phrase',freq:'121.500',title:'RT PHRASEOLOGY',sub:'27+ STANDARD PHRASES',
-   content:()=>buildPhrase()},
-  {id:'numbers',freq:'122.800',title:'NUMBER TRANSMISSION',sub:'HEADINGS · QNH · TRANSPONDER',
-   content:()=>buildNumbers()},
-  {id:'callsign',freq:'123.450',title:'CALL SIGN SUFFIXES',sub:'TOWER · APPROACH · CONTROL',
-   content:()=>buildCallSign()},
-  {id:'fir',freq:'124.700',title:'FIRs & ICAO CODES',sub:'5 FIRs · LOCATION INDICATORS',
-   content:()=>buildFIR()},
-  {id:'airline',freq:'125.050',title:'AIRLINE CODES',sub:'ICAO · IATA · RT CALLSIGNS',
-   content:()=>buildAirline()},
-  {id:'tech',freq:'126.900',title:'TRANSMISSION TECHNIQUE',sub:'RATE · DISCIPLINE · TIMING',
-   content:()=>buildTech()},
-  {id:'emerg',freq:'121.500',title:'EMERGENCY RT',sub:'MAYDAY · PANPAN · SILENCE',
-   content:()=>buildEmerg()},
-  {id:'lic',freq:'128.350',title:'LICENSING & EQUIPMENT',sub:'DGCA · WPC · ARSL · VHF/HF',
-   content:()=>buildLic()},
-  {id:'met',freq:'130.000',title:'MET CODES',sub:'METAR · TAF · SIGMET · PIREP',
-   content:()=>buildMet()},
-  {id:'radio',freq:'131.450',title:'RADIO THEORY',sub:'PROPAGATION · MODULATION · LAYERS',
-   content:()=>buildRadio()},
-  {id:'selcal',freq:'132.000',title:'SELCAL',sub:'CODES · CHECK PROCEDURE',
-   content:()=>buildSelcal()},
-  {id:'satcom',freq:'133.200',title:'SATCOM & VDL',sub:'BANDS · UPLINK · VDL MODES',
-   content:()=>buildSatcom()},
-  {id:'ics',freq:'134.500',title:'ICS / PA SYSTEMS',sub:'INTERPHONE · PA · PRIORITY',
-   content:()=>buildICS()},
-];
-
-const visited=new Set();
-let scores={correct:0,total:0};
-let currentMod=null;
-
-function buildNav(){
-  const el=document.getElementById('nav-items');
-  MODULES.forEach((m,i)=>{
-    const d=document.createElement('div');
-    d.className='nav-item';
-    d.id='nav-'+m.id;
-    d.innerHTML=`<span class="nav-num">${String(i+1).padStart(2,'0')}</span><span class="nav-title">${m.title}</span><span class="nav-dot" id="dot-${m.id}"></span>`;
-    d.onclick=()=>loadModule(m);
-    el.appendChild(d);
-  });
-}
-
-function loadModule(m){
-  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
-  document.getElementById('nav-'+m.id).classList.add('active');
-  document.getElementById('freq-disp').textContent=m.freq;
-  document.getElementById('ch-title').textContent=m.title;
-  document.getElementById('ch-sub').textContent=m.sub;
-  visited.add(m.id);
-  document.getElementById('dot-'+m.id).classList.add('done');
-  updateProgress();
-  currentMod=m;
-  const area=document.getElementById('cards-area');
-  area.innerHTML='';
-  area.appendChild(m.content());
-}
-
-function updateProgress(){
-  const pct=Math.round(visited.size/MODULES.length*100);
-  document.getElementById('progress-fill').style.width=pct+'%';
-  document.getElementById('quiz-score').textContent=scores.correct+' / '+scores.total;
-}
-
-function card(q,a,tag=''){
-  const d=document.createElement('div');
-  d.className='card';
-  d.innerHTML=`<div class="card-tag">${tag} — CLICK TO REVEAL</div><div class="card-q">${q}</div><div class="card-a">${a}</div>`;
-  d.onclick=()=>d.classList.toggle('flipped');
-  return d;
-}
-
-function section(title){
-  const d=document.createElement('div');
-  d.className='section-label';
-  d.textContent=title;
-  return d;
-}
-
-function grid(...cards){
-  const g=document.createElement('div');
-  g.className='card-grid';
-  cards.forEach(c=>g.appendChild(c));
-  return g;
-}
-
-function infoBox(title,body,color=''){
-  const d=document.createElement('div');
-  d.className='info-box '+(color||'');
-  d.innerHTML=`<div class="info-title">${title}</div><div class="info-body">${body}</div>`;
-  return d;
-}
-
-function tableBlock(headers,rows){
-  const w=document.createElement('div');
-  w.className='table-wrap';
-  const t=document.createElement('table');
-  t.innerHTML='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>'+
-    rows.map(r=>'<tr>'+r.map(c=>`<td>${c}</td>`).join('')+'</tr>').join('');
-  w.appendChild(t);
-  return w;
-}
-
-function quiz(qs){
-  const wrap=document.createElement('div');
-  let qi=0;
-  function show(){
-    wrap.innerHTML='';
-    if(qi>=qs.length){
-      wrap.innerHTML=`<div id="done-banner" class="show"><div class="done-t">QUIZ COMPLETE</div><div style="font-size:11px;color:var(--muted);margin-top:6px">All questions answered</div></div>`;
-      return;
-    }
-    const q=qs[qi];
-    const d=document.createElement('div');
-    d.className='quiz-wrap';
-    d.innerHTML=`<div class="quiz-q"><span class="tag tag-amber" style="margin-right:8px">Q ${qi+1}/${qs.length}</span>${q.q}</div>`;
-    const og=document.createElement('div');og.className='quiz-opts';
-    const fb=document.createElement('div');fb.className='quiz-feedback';
-    q.opts.forEach((o,i)=>{
-      const b=document.createElement('button');
-      b.className='opt-btn';b.textContent=o;
-      b.onclick=()=>{
-        Array.from(og.children).forEach(x=>x.style.pointerEvents='none');
-        if(i===q.ans){
-          b.classList.add('correct');
-          fb.textContent='✓  CORRECT — '+q.exp;
-          fb.className='quiz-feedback show ok';
-          scores.correct++;
-        } else {
-          b.classList.add('wrong');
-          og.children[q.ans].classList.add('correct');
-          fb.textContent='✗  INCORRECT — '+q.exp;
-          fb.className='quiz-feedback show bad';
-        }
-        scores.total++;
-        updateProgress();
-        const nb=document.createElement('button');
-        nb.className='btn btn-primary';nb.style.marginTop='10px';
-        nb.textContent=qi<qs.length-1?'NEXT →':'FINISH';
-        nb.onclick=()=>{qi++;show();};
-        d.appendChild(nb);
-      };
-      og.appendChild(b);
-    });
-    d.appendChild(og);d.appendChild(fb);
-    wrap.appendChild(d);
-  }
-  show();
-  return wrap;
-}
-
-function frag(...els){
-  const f=document.createDocumentFragment();
-  els.forEach(e=>{
-    if(typeof e==='string'){const d=document.createElement('div');d.style.marginBottom='8px';d.innerHTML=e;f.appendChild(d);}
-    else f.appendChild(e);
-  });
-  return f;
-}
-
-function buildDefs(){
-  const f=document.createDocumentFragment();
-  f.appendChild(section('KEY DEFINITIONS — CLICK CARDS TO REVEAL'));
-  f.appendChild(grid(
-    card('What is ATS?','Air Traffic Services — generic term for flight information service, alerting service, air traffic advisory service, and air traffic control service','DEF'),
-    card('Define ATSU','Air Traffic Services Unit — a generic term for ATC unit, flight information centre, or air-ground facility','DEF'),
-    card('What is an aerodrome?','A defined area on land or water intended to be used wholly or in part for arrival, departure and movement of aircraft','DEF'),
-    card('Define controlled airspace','Airspace of defined dimensions within which ATC service is provided in accordance with the airspace classification','DEF'),
-    card('What is a TMA?','Terminal Maneuvering Area — controlled airspace established at the confluence of ATS routes in the vicinity of major aerodromes','DEF'),
-    card('Define CTR','Control Zone — controlled airspace extending upward from the surface to a specified upper limit','DEF'),
-    card('What is a FIR?','Flight Information Region — airspace of defined dimensions within which FIS and alerting service are provided','DEF'),
-    card('Define blind transmission','A transmission made to a station where two-way communication cannot be established but where it is believed the called station can receive the message','DEF'),
-  ));
-  f.appendChild(section('COMMUNICATION TERMS'));
-  f.appendChild(grid(
-    card('What is "Duplex"?','Communications where transmission and reception can occur simultaneously on two different frequencies','COMMS'),
-    card('What is "Simplex"?','Communications using the same frequency for both transmission and reception — cannot transmit and receive simultaneously','COMMS'),
-    card('Define guard frequency','A frequency monitored by an aircraft in addition to the assigned working frequency — typically 121.5 MHz VHF or 243.0 MHz UHF','COMMS'),
-    card('What is SELCAL?','Selective Calling System — allows a ground station to alert a specific aircraft by transmitting a unique 4-tone code','COMMS'),
-  ));
-  f.appendChild(section('QUICK QUIZ'));
-  f.appendChild(quiz([
-    {q:'A TMA is established near:',opts:['Oceanic routes','Major aerodromes','Military restricted zones','Airways intersections above FL245'],ans:1,exp:'TMA is at confluence of ATS routes near major aerodromes'},
-    {q:'Blind transmission is used when:',opts:['Normal comms are prohibited','Two-way comms fail but reception may be possible','Weather precludes all RT','Frequency congestion occurs'],ans:1,exp:'When 2-way fails but the station may still be able to receive'},
-    {q:'A CTR extends from:',opts:['FL100 upward','1000ft AGL to FL245','The surface upward to specified limit','500ft AGL to TMA base'],ans:2,exp:'Control Zone extends from surface to a specified upper limit'},
-  ]));
-  return f;
-}
-
-function buildAbbr(){
-  const f=document.createDocumentFragment();
-  f.appendChild(section('RT ABBREVIATIONS — TABLE'));
-  f.appendChild(tableBlock(['ABBR','MEANING','TYPE'],[
-    ['ATC','Air Traffic Control','RT'],['ATS','Air Traffic Services','RT'],['ATZ','Aerodrome Traffic Zone','RT'],
-    ['CTR','Control Zone','RT'],['FIR','Flight Information Region','RT'],['FIS','Flight Information Service','RT'],
-    ['HF','High Frequency (3–30 MHz)','RT'],['VHF','Very High Frequency (30–300 MHz)','RT'],
-    ['ELT','Emergency Locator Transmitter','RT'],['SSR','Secondary Surveillance Radar','RT'],
-    ['ATIS','Automatic Terminal Information Service','RT'],['QNH','Altimeter setting to give elevation at airfield','RT'],
-    ['QFE','Altimeter setting to give zero on touchdown','RT'],['QDM','Magnetic bearing to station','RT'],
-    ['SIGMET','Significant Meteorological Information','MET'],['METAR','Meteorological Aerodrome Report','MET'],
-    ['TAF','Terminal Aerodrome Forecast','MET'],['PIREP','Pilot Report','MET'],
-    ['SELCAL','Selective Calling System','COMMS'],['SATCOM','Satellite Communications','COMMS'],
-  ]));
-  f.appendChild(section('SPOKEN ABBREVIATIONS — PHONETIC'));
-  f.appendChild(grid(
-    card('How is "ACKNOWLEDGE" abbreviated in RT?','ACKDO not used — say full word ACKNOWLEDGE','SPOKEN'),
-    card('How do you say the letter "C" in RT?','CHARLIE','SPOKEN'),
-    card('How do you say the digit "9" in RT?','NINER','SPOKEN'),
-    card('How do you say "3" in RT?','THREE (not "three" like English — emphatic pronunciation)','SPOKEN'),
-    card('How do you say "5" in RT?','FIFE','SPOKEN'),
-    card('How do you say "2000" in RT?','TWO THOUSAND','SPOKEN'),
-  ));
-  f.appendChild(section('QUIZ'));
-  f.appendChild(quiz([
-    {q:'QNH is:',opts:['Bearing to station','Altimeter setting for field elevation at sea level reference','Magnetic track to destination','Pressure altitude'],ans:1,exp:'QNH gives altitude above MSL; field elevation when on ground'},
-    {q:'"FIFE" is spoken for:',opts:['4','5','9','7'],ans:1,exp:'5 is spoken as FIFE to avoid confusion with fire/five'},
-    {q:'VHF frequency range:',opts:['3–30 MHz','300–3000 MHz','30–300 MHz','30–300 kHz'],ans:2,exp:'VHF = Very High Frequency = 30 to 300 MHz'},
-  ]));
-  return f;
-}
-
-function buildPhrase(){
-  const f=document.createDocumentFragment();
-  f.appendChild(section('RT PHRASEOLOGY — 27+ PHRASES'));
-  f.appendChild(tableBlock(['PHRASE','MEANING'],[
-    ['ACKNOWLEDGE','Let me know that you have received and understood this message'],
-    ['AFFIRM','Yes / That is correct'],
-    ['APPROVED','Permission granted to proceed as requested'],
-    ['BREAK','Separation between messages addressed to different stations (in congested RT)'],
-    ['BREAK BREAK','Urgently separates messages in very congested conditions'],
-    ['CANCEL','Annul the previously transmitted clearance'],
-    ['CHECK','Examine a system or procedure — no answer expected unless findings are negative'],
-    ['CLEARED','Authorised to proceed under conditions specified'],
-    ['CONFIRM','I request verification — or — have you received?'],
-    ['CONTACT','Establish communications with...'],
-    ['CORRECT','True / Accurate'],
-    ['CORRECTION','An error was made; the correct version is...'],
-    ['DISREGARD','Ignore / this transmission is in error'],
-    ['EXPEDITE','Carry out without delay'],
-    ['FREECALL','Contact [unit] without prior coordination'],
-    ['GO AHEAD','Proceed with your message'],
-    ['HOW DO YOU READ','What is the readability of my transmission? (Scale 1–5)'],
-    ['I SAY AGAIN','Repetition for emphasis or because of bad readability'],
-    ['MAINTAIN','Continue in accordance with condition(s) specified'],
-    ['MONITOR','Listen out on (frequency)'],
-    ['NEGATIVE','No / Permission not granted / That is not correct'],
-    ['NEXT','Your turn after the aircraft currently receiving instructions'],
-    ['OUT','End of communication — no reply expected'],
-    ['OVER','My transmission is ended — reply expected'],
-    ['READ BACK','Repeat all / specified part of this message exactly as received'],
-    ['REPORT','Pass me the following information...'],
-    ['REQUEST','I would like to know / I wish to obtain'],
-    ['ROGER','I have received all your last transmission'],
-    ['SAY AGAIN','Repeat all or following part of your last transmission'],
-    ['SPEAK SLOWER','Reduce your rate of speech'],
-    ['STANDBY','Wait — I will call you'],
-    ['UNABLE','I cannot comply with your request / instruction'],
-    ['WILCO','I understand and will comply'],
-    ['WORDS TWICE','Communication difficult — send every phrase twice'],
-  ]));
-  f.appendChild(section('CRITICAL DISTINCTIONS — ROGER vs WILCO vs AFFIRM'));
-  f.appendChild(infoBox('ROGER','Means "received all of your last transmission." Does NOT mean yes, does NOT mean you will comply. Purely an acknowledgement of receipt.'));
-  f.appendChild(infoBox('WILCO','Means "I understand and will comply." Use when you intend to act on a clearance. Implies ROGER — do NOT say ROGER WILCO.','green'));
-  f.appendChild(infoBox('AFFIRM','Means YES / CORRECT. NOT "affirmative." Never use "affirmative" — it is non-standard.','blue'));
-  f.appendChild(infoBox('NEGATIVE','Means NO. Say NEGATIVE, not "no" or "nope."','red'));
-  f.appendChild(section('QUIZ'));
-  f.appendChild(quiz([
-    {q:'You receive a clearance and intend to comply. You say:',opts:['ROGER','AFFIRM','WILCO','STANDBY'],ans:2,exp:'WILCO = understand + will comply. ROGER only acknowledges receipt.'},
-    {q:'A pilot says "HOW DO YOU READ" — they want to know:',opts:['Your location','If you copy their message','The readability of their signal 1–5','Your QNH setting'],ans:2,exp:'HOW DO YOU READ asks for signal readability on the 1–5 scale'},
-    {q:'ROGER WILCO is:',opts:['Standard procedure','Non-standard — redundant','Used only for MAYDAY','Correct at HF but not VHF'],ans:1,exp:'WILCO already implies reception; adding ROGER is redundant and non-standard'},
-    {q:'"I SAY AGAIN" is used:',opts:['To begin any transmission','For emphasis or when readability is poor','Only for emergency messages','To indicate end of contact'],ans:1,exp:'I SAY AGAIN = repeating for emphasis or bad readability'},
-  ]));
-  return f;
-}
-
-function buildNumbers(){
-  const f=document.createDocumentFragment();
-  f.appendChild(section('NUMBER PRONUNCIATION TABLE'));
-  const pairs=[['0','ZE-RO'],['1','WUN'],['2','TOO'],['3','TREE'],['4','FOW-ER'],['5','FIFE'],['6','SIX'],['7','SEV-EN'],['8','AIT'],['9','NIN-ER']];
-  const pg=document.createElement('div');pg.style.display='grid';pg.style.gridTemplateColumns='repeat(5,1fr)';pg.style.gap='6px';pg.style.marginBottom='12px';
-  pairs.forEach(([n,p])=>{
-    const d=document.createElement('div');d.className='p-card';
-    d.innerHTML=`<div class="p-letter">${n}</div><div class="p-pron">${p}</div>`;
-    pg.appendChild(d);
-  });
-  f.appendChild(pg);
-  f.appendChild(section('SPECIFIC TRANSMISSION RULES'));
-  f.appendChild(grid(
-    card('How to transmit heading 270?','TWO SEVEN ZERO — each digit separately','HDG'),
-    card('How to transmit QNH 1013?','ONE ZERO ONE THREE — each digit separately','QNH'),
-    card('How to transmit altitude 5500 ft?','FIVE THOUSAND FIVE HUNDRED — grouped','ALT'),
-    card('How to transmit transponder 7700?','SEVEN SEVEN ZERO ZERO — each digit separately','XPDR'),
-    card('How to transmit time 1435?','ONE FOUR THREE FIVE — all four digits','TIME'),
-    card('How to say "Flight Level 350"?','FLIGHT LEVEL THREE FIVE ZERO','FL'),
-    card('How to say "frequency 118.3"?','ONE ONE EIGHT DECIMAL THREE','FREQ'),
-    card('How to say "runway 28L"?','RUNWAY TWO EIGHT LEFT','RWY'),
-  ));
-  f.appendChild(section('QUIZ'));
-  f.appendChild(quiz([
-    {q:'Heading 090 is transmitted as:',opts:['ZERO NINE','NINER ZERO','ZERO NINER ZERO','NINER-ZERO degrees'],ans:2,exp:'Each digit spoken separately: ZERO NINER ZERO'},
-    {q:'The number "9" is pronounced:',opts:['NINE','NINER','NEE-NER','NIN'],ans:1,exp:'NINER to distinguish from German "nein" meaning no'},
-    {q:'Altitude 11,000 ft is transmitted as:',opts:['ELEVEN THOUSAND','ONE ONE ZERO ZERO ZERO','ONE ONE THOUSAND','ONE-ONE ZERO ZERO ZERO'],ans:2,exp:'ONE ONE THOUSAND — grouped by thousands'},
-    {q:'Transponder code 7500 is read as:',opts:['SEVENTY FIVE HUNDRED','SEVEN FIVE ZERO ZERO','SEVEN THOUSAND FIVE HUNDRED','SEVEN-FIVE'],ans:1,exp:'Each digit: SEVEN FIVE ZERO ZERO'},
-  ]));
-  return f;
-}
-
-function buildCallSign(){
-  const f=document.createDocumentFragment();
-  f.appendChild(section('CALL SIGN SUFFIXES — TABLE'));
-  f.appendChild(tableBlock(['UNIT TYPE','CALLSIGN SUFFIX','EXAMPLE'],[
-    ['Aerodrome Control (runway/circuit)','TOWER','CHENNAI TOWER'],
-    ['Ground Movement Control','GROUND','MUMBAI GROUND'],
-    ['Approach Control','APPROACH','DELHI APPROACH'],
-    ['Approach Control (radar)','RADAR','BANGALORE RADAR'],
-    ['Departure Control','DEPARTURE','HYDERABAD DEPARTURE'],
-    ['Area Control (enroute)','CONTROL','KOLKATA CONTROL'],
-    ['Flight Information Service','INFORMATION','CHENNAI INFORMATION'],
-    ['Oceanic Control','OCEANIC','MUMBAI OCEANIC'],
-    ['Precision Approach Radar','PRECISION','— PRECISION'],
-    ['Direction Finding Station','HOMER','— HOMER'],
-    ['Clearance Delivery','DELIVERY','DELHI DELIVERY'],
-    ['ATIS','INFORMATION','CHENNAI INFORMATION'],
-  ]));
-  f.appendChild(section('AIRCRAFT CALL SIGNS'));
-  f.appendChild(grid(
-    card('What is a Type A aircraft callsign?','The telephony designator of the aircraft operating agency (ICAO) + flight number. E.g. AIR INDIA 302','TYPE A'),
-    card('What is a Type B aircraft callsign?','Nationality + registration. E.g. VICTOR TANGO KILO NOVEMBER TANGO (VT-KNT)','TYPE B'),
-    card('When can a callsign be abbreviated?','Only after communication is established — using last 3 characters of registration. E.g. KNT','ABBR'),
-    card('When must full callsign always be used?','Initial contact, when similarity with another callsign exists, when instructed by ATC','FULL'),
-  ));
-  f.appendChild(section('QUIZ'));
-  f.appendChild(quiz([
-    {q:'Which unit uses the suffix "APPROACH"?',opts:['Ground movement','Runway/circuit control','Approach control for arriving/departing aircraft','Area control enroute'],ans:2,exp:'APPROACH = approach control handling arrivals and departures in terminal area'},
-    {q:'VT-KNT in full radiotelephony is:',opts:['VICTOR TANGO KILO NOVEMBER TANGO','VEE-TEE KILO-NOVEMBER-TANGO','VICTOR-TANGO KNT','VT KILO-NOVEMBER-TANGO'],ans:0,exp:'Each letter spoken using ICAO phonetic alphabet'},
-    {q:'A callsign can be abbreviated:',opts:['At pilot\'s discretion','Only after ATC first abbreviates it','After first contact is established','Never — always use full callsign'],ans:1,exp:'Abbreviation is used only after ATC has first abbreviated the callsign'},
-  ]));
-  return f;
-}
-
-function buildFIR(){
-  const f=document.createDocumentFragment();
-  f.appendChild(section('INDIA\'S 5 FIRs'));
-  f.appendChild(tableBlock(['FIR NAME','ICAO INDICATOR','ACC LOCATION'],[
-    ['Mumbai FIR','VABB','Mumbai (Sahar)'],
-    ['Delhi FIR','VIDF','Delhi (Palam)'],
-    ['Chennai FIR','VOMF','Chennai (Meenambakkam)'],
-    ['Kolkata FIR','VECF','Kolkata (Dum Dum)'],
-    ['Hyderabad FIR (UIR also)','VOHY','Hyderabad (Begumpet)'],
-  ]));
-  f.appendChild(infoBox('INDIA UIR','India Upper Information Region uses indicator VINF and covers flight above FL245 across all 5 FIRs','blue'));
-  f.appendChild(section('ICAO LOCATION INDICATOR FORMAT'));
-  f.appendChild(infoBox('FORMAT','4-letter code: 1st letter = region, 2nd = country, 3rd+4th = station. INDIA = V_. e.g. VABB = V(Asia)+A(Bombay/Mumbai)+BB(Sahar)'));
-  f.appendChild(section('COMMON ICAO CODES — MAJOR AIRPORTS'));
-  f.appendChild(tableBlock(['AIRPORT','ICAO','IATA'],[
-    ['Mumbai (CSIA)','VABB','BOM'],['Delhi (IGI)','VIDP','DEL'],['Chennai (MAA)','VOMM','MAA'],
-    ['Kolkata (NSCBI)','VECC','CCU'],['Bengaluru (KIA)','VOBL','BLR'],['Hyderabad (RGIA)','VOHS','HYD'],
-    ['Kochi','VOCI','COK'],['Ahmedabad','VAAH','AMD'],['Guwahati','VEGT','GAU'],
-    ['Thiruvananthapuram','VOTV','TRV'],['Nagpur','VANP','NAG'],['Pune','VAPO','PNQ'],
-  ]));
-  f.appendChild(section('QUIZ'));
-  f.appendChild(quiz([
-    {q:'The ICAO code for Chennai Airport is:',opts:['VOCH','VOMM','VECC','VICC'],ans:1,exp:'VOMM — VO = South India / Chennai region'},
-    {q:'India has how many FIRs?',opts:['3','4','5','6'],ans:2,exp:'India has 5 FIRs: Mumbai, Delhi, Chennai, Kolkata, Hyderabad'},
-    {q:'India UIR indicator is:',opts:['VINF','VIND','VIUI','VOUI'],ans:0,exp:'VINF is the ICAO indicator for India Upper Information Region'},
-    {q:'VIDP is:',opts:['Vizag Airport','Delhi IGI Airport','Dehradun Airport','Dimapur Airport'],ans:1,exp:'VIDP = Delhi Indira Gandhi International Airport'},
-  ]));
-  return f;
-}
-
-function buildAirline(){
-  const f=document.createDocumentFragment();
-  f.appendChild(section('MAJOR AIRLINE CODES — INDIA'));
-  f.appendChild(tableBlock(['AIRLINE','ICAO','IATA','RT CALLSIGN'],[
-    ['Air India','AIC','AI','AIRINDIA'],
-    ['IndiGo','IGO','6E','IFLY'],
-    ['SpiceJet','SEJ','SG','SPICEJET'],
-    ['Go First (Wadia)','GOW','G8','GOAIR'],
-    ['Air Asia India','IAD','I5','AIRASIA'],
-    ['Vistara','VTI','UK','VISTARA'],
-    ['Alliance Air','LLR','9I','ALLIANCE'],
-    ['Blue Dart Aviation','BDA','BZ','BLUE DART'],
-    ['Helicopter Corporation of India','HCI','—','HELICORP'],
-    ['Pawan Hans','PHE','—','PAWAN HANS'],
-  ]));
-  f.appendChild(infoBox('TELEPHONY DESIGNATOR','The RT callsign (telephony designator) is used on frequency instead of ICAO code. e.g. Air India 302 is said AIRINDIA THREE ZERO TWO','green'));
-  f.appendChild(section('INTERNATIONAL AIRLINES — COMMON IN INDIA'));
-  f.appendChild(tableBlock(['AIRLINE','ICAO','RT CALLSIGN'],[
-    ['British Airways','BAW','SPEEDBIRD'],['Emirates','UAE','EMIRATES'],
-    ['Singapore Airlines','SIA','SINGAPORE'],['Lufthansa','DLH','LUFTHANSA'],
-    ['Cathay Pacific','CPA','CATHAY'],['Qatar Airways','QTR','QATARI'],
-    ['Etihad Airways','ETD','ETIHAD'],['Air France','AFR','AIRFRANS'],
-    ['KLM','KLM','KLM'],['Thai Airways','THA','THAI'],
-  ]));
-  f.appendChild(section('QUIZ'));
-  f.appendChild(quiz([
-    {q:'The RT callsign for British Airways is:',opts:['BRITAIR','SPEEDBIRD','AIRWAYS','BRITISH'],ans:1,exp:'BA uses SPEEDBIRD — a nod to the BEA/BOAC heritage logo'},
-    {q:'IndiGo\'s ICAO code is:',opts:['IGO','6E','IND','IGE'],ans:0,exp:'IndiGo ICAO = IGO, IATA = 6E, RT = IFLY'},
-    {q:'Air India\'s RT callsign is:',opts:['INDIA AIR','AIR INDIA','AIRINDIA','INDIA'],ans:2,exp:'AIRINDIA (one word) is the telephony designator'},
-  ]));
-  return f;
-}
-
-function buildTech(){
-  const f=document.createDocumentFragment();
-  f.appendChild(section('TRANSMISSION TECHNIQUE'));
-  f.appendChild(grid(
-    card('What is the standard speaking rate for RT?','100–120 words per minute. Must be slow enough to allow writing. No faster than 100 wpm on initial contact.','TECH'),
-    card('What is the readability scale?','1 = Unreadable, 2 = Readable in part, 3 = Readable with difficulty, 4 = Readable, 5 = Perfectly readable','TECH'),
-    card('When should you not transmit?','When someone else is transmitting, during critical phases of flight, and when you are in doubt of message content','TECH'),
-    card('What is the response time requirement?','Respond within 20 seconds of receiving a call. ATS unit should acknowledge within 5 seconds where possible','TECH'),
-  ));
-  f.appendChild(section('FREQUENCY DISCIPLINE'));
-  f.appendChild(infoBox('BEFORE TRANSMITTING','1. Listen on frequency to ensure it is clear. 2. Think about what you will say. 3. Press PTT. 4. Pause 1 second. 5. Speak clearly, slowly and concisely.'));
-  f.appendChild(infoBox('DO NOT','Use excessive courtesy phrases ("please", "thank you"). Repeat a message without saying SAY AGAIN. Use non-standard words. Transmit on frequency without clear reason.','red'));
-  f.appendChild(infoBox('BLOCKED FREQUENCY','If you suspect frequency is blocked (constant tone), report to ATC and request alternative frequency or use guard frequency 121.5 MHz.','blue'));
-  f.appendChild(section('ALPHABET FOR DIFFICULT CALLSIGNS'));
-  const alphabet=[['A','ALFA'],['B','BRAVO'],['C','CHARLIE'],['D','DELTA'],['E','ECHO'],['F','FOXTROT'],['G','GOLF'],['H','HOTEL'],['I','INDIA'],['J','JULIETT'],['K','KILO'],['L','LIMA'],['M','MIKE'],['N','NOVEMBER'],['O','OSCAR'],['P','PAPA'],['Q','QUEBEC'],['R','ROMEO'],['S','SIERRA'],['T','TANGO'],['U','UNIFORM'],['V','VICTOR'],['W','WHISKEY'],['X','X-RAY'],['Y','YANKEE'],['Z','ZULU']];
-  const pg=document.createElement('div');pg.style.display='grid';pg.style.gridTemplateColumns='repeat(4,1fr)';pg.style.gap='4px';pg.style.marginBottom='12px';
-  alphabet.forEach(([l,w])=>{
-    const d=document.createElement('div');d.className='p-card';
-    d.innerHTML=`<div class="p-letter">${l}</div><div class="p-word">${w}</div>`;
-    pg.appendChild(d);
-  });
-  f.appendChild(pg);
-  f.appendChild(section('QUIZ'));
-  f.appendChild(quiz([
-    {q:'Standard RT speaking rate is:',opts:['60–80 wpm','80–100 wpm','100–120 wpm','120–150 wpm'],ans:2,exp:'100–120 wpm is the standard speaking rate for RT communications'},
-    {q:'Readability "3" means:',opts:['Readable','Unreadable','Readable with difficulty','Perfectly readable'],ans:2,exp:'Scale: 1=Unreadable, 2=Parts, 3=With difficulty, 4=Readable, 5=Perfect'},
-    {q:'Before transmitting you should:',opts:['Announce intention to transmit','Listen to ensure frequency is clear','Ask for clearance to transmit','Wait for ATC to call you first'],ans:1,exp:'Always listen first to ensure frequency is clear before transmitting'},
-  ]));
-  return f;
-}
-
-function buildEmerg(){
-  const f=document.createDocumentFragment();
-  f.appendChild(infoBox('MAYDAY','Highest priority distress signal. Life and/or aircraft in grave and imminent danger requiring immediate assistance.','red'));
-  f.appendChild(infoBox('PAN PAN','Urgency signal. Safety of aircraft/person on board is at risk but not imminent danger. Lower priority than MAYDAY.','green'));
-  f.appendChild(section('DISTRESS CALL FORMAT — MAYDAY'));
-  f.appendChild(grid(
-    card('MAYDAY call structure?','MAYDAY MAYDAY MAYDAY / [station called] / [callsign] MAYDAY / [nature of emergency] / intentions / position / altitude / souls on board / fuel endurance / any other info','FORMAT'),
-    card('How many times is MAYDAY spoken?','Three times at the beginning of the distress call','PROC'),
-    card('PAN PAN call structure?','PAN PAN PAN PAN PAN PAN / [station] / [callsign] / [nature of urgency] / position / intentions / other info','FORMAT'),
-    card('Emergency frequency?','121.5 MHz VHF (civil) / 243.0 MHz UHF (military) — international aeronautical emergency frequency','FREQ'),
-  ));
-  f.appendChild(section('SILENCE PROCEDURES'));
-  f.appendChild(infoBox('"SILENCE MAYDAY"','Transmitted by the distress station or a controlling station to impose radio silence on ALL stations. All other traffic must cease immediately.','red'));
-  f.appendChild(infoBox('"SILENCE FEENEE"','Ends the silence period (from French "fini" = finished). Signals that the emergency is over and normal communications may resume.','green'));
-  f.appendChild(infoBox('"SILENCE DISTRESS"','Used by another station (not the distress aircraft) to silence interfering traffic during an emergency in progress.'));
-  f.appendChild(section('TRANSPONDER EMERGENCY CODES'));
-  f.appendChild(tableBlock(['CODE','MEANING'],[
-    ['7700','General Emergency'],['7600','Radio Failure (lost comms)'],['7500','Unlawful interference (Hijack)'],
-    ['2000','No discrete code assigned (VFR in uncontrolled)'],['1200','VFR flight (ICAO standard)'],
-  ]));
-  f.appendChild(section('QUIZ'));
-  f.appendChild(quiz([
-    {q:'Transponder 7500 means:',opts:['Radio failure','General emergency','Unlawful interference / hijack','Minimum fuel'],ans:2,exp:'7500 = Unlawful Interference (hijack). Memory: 7500=Hijack, 7600=Radio, 7700=Emergency'},
-    {q:'"SILENCE FEENEE" means:',opts:['Maintain radio silence','Emergency is over — normal comms resume','Emergency is escalating','Switch to guard frequency'],ans:1,exp:'SILENCE FEENEE ends the silence period (French fini = finished)'},
-    {q:'International emergency frequency is:',opts:['123.45 MHz','118.0 MHz','121.5 MHz','126.9 MHz'],ans:2,exp:'121.5 MHz VHF is the international aeronautical emergency / guard frequency'},
-    {q:'MAYDAY is spoken how many times?',opts:['Once','Twice','Three times','Five times'],ans:2,exp:'MAYDAY MAYDAY MAYDAY — three times at start of distress call'},
-  ]));
-  return f;
-}
-
-function buildLic(){
-  const f=document.createDocumentFragment();
-  f.appendChild(section('LICENSING FRAMEWORK — INDIA'));
-  f.appendChild(tableBlock(['LICENCE / CERT','ISSUING AUTHORITY','PURPOSE'],[
-    ['RTR(A) — Restricted Radiotelephony (Aeronautical)','WPC (Wireless Planning & Coordination, DoT)','Required for any person who operates aircraft RT equipment'],
-    ['Aircraft Radio Station Licence (ARSL)','WPC / Ministry of Telecom','Required for each individual aircraft radio installation'],
-    ['ATC Operator Licence','DGCA','Authorises ATC personnel to provide air traffic services'],
-    ['CPL / ATPL with RT endorsement','DGCA','Commercial pilot licences include RT endorsement'],
-  ]));
-  f.appendChild(infoBox('RTR(A) REQUIREMENT','Every person who operates aeronautical RT equipment (pilot, co-pilot, comms operator) must hold a valid RTR(A) certificate. Issued by WPC, Ministry of Telecommunications, NOT DGCA.','amber'));
-  f.appendChild(section('EQUIPMENT REQUIREMENTS'));
-  f.appendChild(grid(
-    card('VHF requirements?','108–136.975 MHz band. Must have at minimum 2 VHF comm radios in commercial aircraft. Guard 121.5 MHz monitored at all times in controlled airspace.','VHF'),
-    card('HF requirements?','HF required for oceanic and long-range operations (3–30 MHz). SSB (Single Sideband) used for HF voice communications.','HF'),
-    card('ELT requirements?','Emergency Locator Transmitter — mandatory on all aircraft. Transmits on 121.5 MHz and 406 MHz. COSPAS-SARSAT system monitors 406 MHz.','ELT'),
-    card('Transponder requirements?','SSR transponder (Mode A/C or Mode S) mandatory in controlled airspace. Mode S provides aircraft identification + altitude.','XPDR'),
-  ));
-  f.appendChild(section('QUIZ'));
-  f.appendChild(quiz([
-    {q:'RTR(A) licence is issued by:',opts:['DGCA','AAI','WPC (Ministry of Telecom)','MoCA'],ans:2,exp:'RTR(A) is issued by Wireless Planning & Coordination wing under Ministry of Telecom'},
-    {q:'Aircraft Radio Station Licence (ARSL) is needed:',opts:['Once per pilot','Per aircraft radio installation','Per airline fleet','Only for HF equipment'],ans:1,exp:'ARSL is required for each individual radio installation in an aircraft'},
-    {q:'ELT transmits on:',opts:['121.5 MHz only','243.0 MHz only','121.5 MHz and 406 MHz','118.0 MHz and 406 MHz'],ans:2,exp:'Modern ELTs transmit on 121.5 MHz (legacy) and 406 MHz (COSPAS-SARSAT)'},
-  ]));
-  return f;
-}
-
-function buildMet(){
-  const f=document.createDocumentFragment();
-  f.appendChild(section('METEOROLOGICAL CODES — OVERVIEW'));
-  f.appendChild(tableBlock(['CODE','FULL NAME','ISSUED','VALIDITY'],[
-    ['METAR','Meteorological Aerodrome Report','Hourly (or 30 min)','1 hour'],
-    ['SPECI','Special METAR (selected change)','As required','Until next METAR'],
-    ['TAF','Terminal Aerodrome Forecast','4× daily','24 or 30 hours'],
-    ['SIGMET','Significant Meteorological Information','As needed','Up to 4 hours (6 for TC/VA)'],
-    ['AIRMET','Airmen\'s Meteorological Information','As needed','Enroute, low level'],
-    ['PIREP','Pilot Report','By pilots in-flight','Real-time observation'],
-    ['VOLMET','Continuous RT broadcast of METAR/TAF','Continuous broadcast','—'],
-    ['ATIS','Automatic Terminal Info Service','Updated each hour (or sig change)','Until next issue'],
-  ]));
-  f.appendChild(section('METAR DECODING'));
-  f.appendChild(infoBox('EXAMPLE','VOMM 101000Z 21015KT 5000 TSRA FEW015CB SCT030 29/26 Q1005 TEMPO 2000 +TSRA'));
-  f.appendChild(tableBlock(['ELEMENT','EXAMPLE','MEANING'],[
-    ['Station ID','VOMM','Chennai Meenambakkam'],
-    ['Date/Time','101000Z','10th day, 1000 UTC (Zulu)'],
-    ['Wind','21015KT','210° at 15 knots'],
-    ['Visibility','5000','5000 metres'],
-    ['Weather','TSRA','Thunderstorm with rain'],
-    ['Cloud','FEW015CB','Few at 1500ft, Cumulonimbus'],
-    ['Temp/Dewpoint','29/26','29°C / 26°C'],
-    ['QNH','Q1005','QNH 1005 hPa'],
-    ['Trend','TEMPO 2000 +TSRA','Temporarily 2km, heavy TS rain'],
-  ]));
-  f.appendChild(section('SIGMET HAZARDS'));
-  f.appendChild(grid(
-    card('What hazards require SIGMET?','Severe turbulence, severe icing, severe mountain wave, tropical cyclone, severe dust/sandstorm, volcanic ash, radioactive release','SIGMET'),
-    card('SIGMET validity period?','Up to 4 hours normally. Up to 6 hours for Tropical Cyclones and Volcanic Ash','SIGMET'),
-    card('What is AIRMET?','Weather phenomenon hazardous to low-level (below FL100) flights: moderate turbulence, moderate icing, mountain obscuration, reduced visibility','AIRMET'),
-  ));
-  f.appendChild(section('QUIZ'));
-  f.appendChild(quiz([
-    {q:'SPECI is issued when:',opts:['Every 30 minutes','Significant change in conditions warrants special report','At sunset and sunrise only','Requested by pilot'],ans:1,exp:'SPECI = Special METAR triggered by significant meteorological change'},
-    {q:'SIGMET for volcanic ash is valid for up to:',opts:['2 hours','4 hours','6 hours','12 hours'],ans:2,exp:'VA and TC SIGMETs are valid up to 6 hours; others up to 4 hours'},
-    {q:'FEW in a METAR means:',opts:['1/8 to 2/8 cloud cover','3/8 to 4/8','5/8 to 7/8','8/8 overcast'],ans:0,exp:'FEW = 1–2 oktas; SCT=3–4; BKN=5–7; OVC=8'},
-  ]));
-  return f;
-}
-
-function buildRadio(){
-  const f=document.createDocumentFragment();
-  f.appendChild(section('FREQUENCY BANDS'));
-  f.appendChild(tableBlock(['BAND','FREQUENCY','PROPAGATION MODE','USE IN AVIATION'],[
-    ['ELF/VLF','< 30 kHz','Ground wave','—'],
-    ['LF','30–300 kHz','Ground wave + some sky','NDB (Non-Directional Beacon)'],
-    ['MF','300 kHz–3 MHz','Ground & sky wave','NDB, some comms'],
-    ['HF','3–30 MHz','Sky wave (ionosphere)','Long range / oceanic comms'],
-    ['VHF','30–300 MHz','Line of sight','Primary ATC comms, VOR, ILS LOC'],
-    ['UHF','300 MHz–3 GHz','Line of sight','DME, SSR transponders, military'],
-    ['SHF','3–30 GHz','Line of sight + diffraction','ILS Glidepath, some radar'],
-    ['EHF','30–300 GHz','Line of sight','Satellite (some bands)'],
-  ]));
-  f.appendChild(section('IONOSPHERIC LAYERS'));
-  f.appendChild(tableBlock(['LAYER','HEIGHT','PRESENT','EFFECT'],[
-    ['D Layer','60–90 km','Day only','Absorbs HF, dissipates at night'],
-    ['E Layer','90–130 km','Day (some night)','Reflects MF, some HF. Sporadic-E possible'],
-    ['F1 Layer','130–210 km','Day only','Merges with F2 at night'],
-    ['F2 Layer','210–400 km','Day and night','Primary HF reflection layer. Higher at night'],
-  ]));
-  f.appendChild(section('MODULATION TYPES'));
-  f.appendChild(grid(
-    card('AM — Amplitude Modulation','Amplitude of carrier wave varies with audio signal. Used in ATC VHF (DSB-AM). Bandwidth ~25 kHz. Susceptible to atmospheric noise.','MOD'),
-    card('FM — Frequency Modulation','Frequency of carrier varies with audio. Better noise immunity than AM. Used in weather broadcast, civil radio. Not standard ATC VHF.','MOD'),
-    card('SSB — Single Sideband','One sideband of AM suppressed. Reduces bandwidth by 50%. Used in HF comms for long-range. LSB and USB variants.','MOD'),
-    card('DSB — Double Sideband','Both sidebands transmitted (standard AM). Used in VHF ATC communications.','MOD'),
-  ));
-  f.appendChild(section('PROPAGATION'));
-  f.appendChild(infoBox('SKIP DISTANCE','The minimum distance from a transmitter at which sky-wave returns to ground. Between ground wave and sky wave return = skip zone (dead zone).'));
-  f.appendChild(infoBox('LINE OF SIGHT (LOS)','VHF and above follow LOS path. Range limited by Earth\'s curvature. Formula: Range (NM) ≈ 1.25 × √altitude (ft). Higher aircraft = greater range.','green'));
-  f.appendChild(section('QUIZ'));
-  f.appendChild(quiz([
-    {q:'HF communications use which propagation?',opts:['Line of sight','Ground wave only','Sky wave (ionospheric reflection)','Satellite relay'],ans:2,exp:'HF (3–30 MHz) bounces off ionosphere (sky wave) for long-range comms'},
-    {q:'The F2 layer is significant because:',opts:['Absorbs HF signals at night','It is the primary HF reflection layer, present day and night','Disappears with the E layer','Only reflects VHF'],ans:1,exp:'F2 is the most important HF-reflecting layer, remains at night'},
-    {q:'VHF ATC uses which modulation?',opts:['FM','SSB','DSB-AM','PCM'],ans:2,exp:'VHF ATC uses Double Sideband Amplitude Modulation (DSB-AM)'},
-    {q:'Skip zone is:',opts:['Area of strong signal beyond ionosphere','Dead zone between ground wave and returning sky wave','Zone near the transmitter only','Area of FM interference'],ans:1,exp:'Skip zone = dead zone between ground wave coverage and sky wave return'},
-  ]));
-  return f;
-}
-
-function buildSelcal(){
-  const f=document.createDocumentFragment();
-  f.appendChild(infoBox('WHAT IS SELCAL?','Selective Calling System. Allows a ground station to alert a specific aircraft by sending a unique 4-tone code sequence. Eliminates need for continuous HF monitoring.','blue'));
-  f.appendChild(section('HOW SELCAL WORKS'));
-  f.appendChild(grid(
-    card('SELCAL tone frequency range?','312.6 Hz to 1479.1 Hz. 16 tones available (A through S, excluding I, N, O). Used in pairs.','SELCAL'),
-    card('SELCAL code format?','4 characters — 2 pairs of tones, each pair sent simultaneously. E.g. AB-CD. Total 10,920 unique codes possible.','SELCAL'),
-    card('SELCAL check procedure?','Aircraft requests SELCAL check from ground station. Ground transmits the aircraft\'s unique code. Aircraft receiver alerts crew. Crew acknowledges receipt.','PROC'),
-    card('When is SELCAL used?','Primarily on HF long-range / oceanic routes where continuous monitoring is impractical due to noise. Aircraft monitors frequency silently.','USE'),
-  ));
-  f.appendChild(section('SELCAL QUICK FACTS'));
-  f.appendChild(tableBlock(['PARAMETER','VALUE'],[
-    ['Number of tone codes','16 (A,B,C,D,E,F,G,H,J,K,L,M,P,Q,R,S)'],
-    ['Duration of each tone pair','1 second each × 2 pairs = ~2 seconds total signal'],
-    ['Frequency range','312.6 Hz – 1479.1 Hz'],
-    ['System purpose','Alert specific aircraft without crew monitoring continuously'],
-    ['Typical use','HF oceanic communications (MNPS, SLOP routes)'],
-  ]));
-  f.appendChild(section('QUIZ'));
-  f.appendChild(quiz([
-    {q:'SELCAL eliminates the need for:',opts:['VHF monitoring','HF continuous monitoring','SSR squawking','ATIS listening'],ans:1,exp:'SELCAL allows crew to rest without continuously monitoring noisy HF frequency'},
-    {q:'How many SELCAL tone codes are available?',opts:['12','14','16','20'],ans:2,exp:'16 tones: A through S excluding I, N, O — giving 10,920 unique 4-character codes'},
-    {q:'SELCAL code format is:',opts:['2 single tones','4 tones in 2 pairs sent simultaneously in each pair','6 tones','8-bit digital code'],ans:1,exp:'Two pairs, each pair of two tones sent simultaneously, e.g. AB-CD'},
-  ]));
-  return f;
-}
-
-function buildSatcom(){
-  const f=document.createDocumentFragment();
-  f.appendChild(section('SATCOM BASICS'));
-  f.appendChild(grid(
-    card('Active vs Passive satellite?','Active: receives, amplifies and retransmits signal (repeater). Passive: simply reflects signal (mirror). All modern SATCOM uses active satellites.','SAT'),
-    card('Geostationary orbit altitude?','~35,786 km above equator. Period = 24 hours (Earth rotation). Fixed position relative to Earth. Coverage to ~75° latitude.','SAT'),
-    card('What is uplink / downlink?','Uplink = aircraft/ground to satellite transmission. Downlink = satellite to aircraft/ground transmission. Use different frequencies to avoid interference.','SAT'),
-    card('INMARSAT aviation bands?','L-band (1–2 GHz) for aircraft terminal. C-band (4–8 GHz) for ground station. Ku-band (12–18 GHz) for newer broadband.','SAT'),
-  ));
-  f.appendChild(section('FREQUENCY BANDS — SATCOM'));
-  f.appendChild(tableBlock(['BAND','FREQUENCY','TYPICAL USE'],[
-    ['L-band','1–2 GHz','Aircraft to satellite (voice/data)'],
-    ['S-band','2–4 GHz','Weather satellites, some data'],
-    ['C-band','4–8 GHz','Ground stations, older SATCOM'],
-    ['X-band','8–12 GHz','Military, some weather radar'],
-    ['Ku-band','12–18 GHz','Modern broadband, passenger WiFi'],
-    ['Ka-band','26–40 GHz','High-speed broadband satcom'],
-  ]));
-  f.appendChild(section('VDL — VHF DATALINK MODES'));
-  f.appendChild(tableBlock(['MODE','STANDARD','USE'],[
-    ['VDL Mode 1','ACARS over VHF','Legacy ACARS — older aircraft, being phased out'],
-    ['VDL Mode 2','ACARS over VDL2, ATN','Current standard for ATC data link; CPDLC, ATIS-D, D-METAR'],
-    ['VDL Mode 3','Time-division, combined voice+data','Combines voice + data in same channel; not widely deployed'],
-    ['VDL Mode 4','VHF nav aid, ADS-B','ADS-B broadcasts position; used in European ADS-B'],
-  ]));
-  f.appendChild(infoBox('CPDLC','Controller–Pilot Data Link Communications. Uses VDL Mode 2. Replaces some voice communications with digital text messages. Reduces RT congestion on busy sectors.','green'));
-  f.appendChild(section('QUIZ'));
-  f.appendChild(quiz([
-    {q:'An active satellite:',opts:['Simply reflects signals','Receives, amplifies and retransmits signals','Transmits its own signals only','Stores and forwards messages'],ans:1,exp:'Active = repeater. Passive = mirror/reflector. All modern SATCOM = active'},
-    {q:'VDL Mode 2 is used for:',opts:['Legacy ACARS','ADS-B position broadcast','CPDLC and ATC datalink','Voice communications only'],ans:2,exp:'VDL Mode 2 is the current standard for ATC datalink including CPDLC'},
-    {q:'L-band (1–2 GHz) is used for:',opts:['Ground station to satellite','Passenger broadband WiFi','Aircraft terminal to satellite','Military communications'],ans:2,exp:'L-band is the aircraft-side SATCOM terminal frequency band'},
-  ]));
-  return f;
-}
-
-function buildICS(){
-  const f=document.createDocumentFragment();
-  f.appendChild(section('ICS — INTERNAL COMMUNICATION SYSTEMS'));
-  f.appendChild(tableBlock(['SYSTEM','PURPOSE','WHO USES IT'],[
-    ['Flight Interphone','Communication between cockpit and cabin crew','Pilots ↔ Cabin crew'],
-    ['Cabin Interphone','Communication within cabin between crew stations','Cabin crew ↔ Cabin crew'],
-    ['Service Interphone','On-ground maintenance / ground crew comms','Crew ↔ Ground technicians'],
-    ['Passenger Address (PA)','One-way announcements to passengers','Crew → Passengers'],
-    ['Crew Call System','Alert signal between stations','Any crew → Any station'],
-    ['ACARS','Aircraft Communications and Reporting System — datalink','Cockpit ↔ Airline OCC'],
-  ]));
-  f.appendChild(section('PRIORITY HIERARCHY — ICS'));
-  f.appendChild(infoBox('PRIORITY ORDER (HIGH TO LOW)','1. ATC Communications (external VHF/HF) → 2. MAYDAY / Emergency calls → 3. Flight Interphone (cockpit-cabin) → 4. Cabin Interphone → 5. PA System → 6. Service Interphone','red'));
-  f.appendChild(section('PA SYSTEM DETAILS'));
-  f.appendChild(grid(
-    card('Who can make PA announcements?','Captain has priority. Cabin crew can make announcements. Automatic systems (chimes, altitude announcements) are lowest priority.','PA'),
-    card('What is the crew call chime pattern?','Single high-low chime = flight deck calling cabin. Single high chime = cabin calling flight deck. Pattern varies by aircraft type.','PA'),
-    card('Can passengers hear flight interphone?','No. Flight interphone is private between flight deck and cabin crew only. PA is one-way to passengers.','PA'),
-    card('Service interphone location?','External access panels (belly, wheel wells). Used when aircraft is on ground for pre-flight/maintenance.','PA'),
-  ));
-  f.appendChild(section('QUIZ'));
-  f.appendChild(quiz([
-    {q:'Highest priority in ICS is:',opts:['PA system','Cabin interphone','ATC communications (external)','Crew call chimes'],ans:2,exp:'ATC comms always have highest priority in the communication hierarchy'},
-    {q:'Service interphone is primarily used:',opts:['In-flight between cabin crew','On ground by maintenance crew','By passengers to call crew','Between cockpit crew only'],ans:1,exp:'Service interphone is for ground crew and maintenance access around the aircraft'},
-    {q:'PA system is:',opts:['Two-way crew communication','One-way announcements to passengers','Only for emergency use','Crew-to-ATC backup system'],ans:1,exp:'PA = Passenger Address = one-way broadcast from crew to passengers'},
-  ]));
-  return f;
-}
-
-buildNav();
-loadModule(MODULES[0]);
-</script>
+</head>
+<body>
 <script>
 (function(){
   const a=sessionStorage.getItem('rtr_auth');
@@ -790,3 +659,1516 @@ loadModule(MODULES[0]);
   try{const d=JSON.parse(a);if(!d.loggedIn||Date.now()-d.time>14400000){sessionStorage.removeItem('rtr_auth');window.location.replace('../login.html');}}catch(e){window.location.replace('../login.html');}
 })();
 </script>
+<div id="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <div id="sidebar">
+
+    <div id="freq-box">
+      <button id="theme-btn" class="sidebar-btn" onclick="toggleTheme()" style="margin-top:6px">☀ LIGHT MODE</button>
+      <div id="freq-num">118.100</div>
+      <div id="freq-label">ACTIVE — RTR STUDY</div>
+    </div>
+
+    <!-- Search -->
+    <div id="sidebar-search-wrap">
+      <input id="sidebar-search" type="text" placeholder="Search terms... (METAR, MAYDAY...)" autocomplete="off" oninput="doSearch(this.value)" onfocus="toggleSearchResults(true)" onblur="setTimeout(()=>toggleSearchResults(false),200)">
+      <div id="search-results"></div>
+    </div>
+
+    <div id="nav-list"></div>
+
+    <button class="sidebar-btn amber" onclick="startRapidFire()">⚡ RAPID FIRE MODE</button>
+    <button class="sidebar-btn purple" onclick="startDrill()">🔤 PHONETIC DRILL</button>
+    <button class="sidebar-btn red"   onclick="showMissed()">✗ REVIEW MISTAKES</button>
+
+  </div>
+
+  <!-- ===================== MAIN ===================== -->
+  <div id="main">
+
+    <div id="topbar">
+      <div>
+        <div id="mod-title">RTR STUDY COCKPIT</div>
+        <div id="mod-sub">SELECT A MODULE FROM THE LEFT</div>
+      </div>
+      <div id="topbar-right">
+        <span id="mod-badge"></span>
+        <div id="score-badge">0 / 0</div>
+      </div>
+    </div>
+
+    <div id="progress-bar"><div id="progress-fill"></div></div>
+
+    <div id="content">
+
+      <!-- Landing -->
+      <div id="landing">
+        <div class="note blue" style="margin-top:8px">
+          <div class="note-title">Welcome to RTR Study Cockpit v2</div>
+          <div class="note-body">
+            <strong>15 modules</strong> covering all DGCA RTR(A) exam topics.<br>
+            Click any module on the left to begin.<br><br>
+            Each module has <strong>flashcards</strong>, <strong>reference tables</strong>, <strong>notes</strong>, and a <strong>quiz</strong>.<br>
+            Complete a module quiz with <strong>≥ 70%</strong> to earn the <span style="color:var(--green)">COMPLETE</span> badge.<br><br>
+            Try <strong>⚡ Rapid Fire</strong> for timed all-topic questions.<br>
+            Try <strong>🔤 Phonetic Drill</strong> to master the alphabet.<br>
+            Your progress is <strong>saved automatically</strong> between sessions.
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes panel — shown above module content when a module is loaded -->
+      <div id="notes-panel" style="display:none">
+        <div id="notes-header" onclick="toggleNotes()">
+          <span id="notes-header-title">📌 EXAMINER NOTES &amp; MNEMONICS</span>
+          <span id="notes-toggle-icon">▼</span>
+        </div>
+        <div id="notes-body"></div>
+      </div>
+
+      <!-- Module content slot — only this div gets wiped on module switch -->
+      <div id="module-slot"></div>
+
+      <!-- Rapid Fire — always in DOM, toggled by JS -->
+      <div id="rf-panel" style="display:none">
+        <div class="sec-label">⚡ RAPID FIRE — ALL TOPICS — 12 SEC PER QUESTION</div>
+        <div id="rf-timer-bar"><div id="rf-timer-fill"></div></div>
+        <div id="rf-stats">
+          <div class="rf-stat"><div class="rf-val" id="rf-score">0</div><div class="rf-lbl">CORRECT</div></div>
+          <div class="rf-stat"><div class="rf-val" id="rf-total">0</div><div class="rf-lbl">DONE</div></div>
+          <div class="rf-stat"><div class="rf-val" id="rf-left">0</div><div class="rf-lbl">LEFT</div></div>
+          <div class="rf-stat"><div class="rf-val" id="rf-pct">—</div><div class="rf-lbl">ACCURACY</div></div>
+        </div>
+        <div id="rf-question-area"></div>
+      </div>
+
+      <!-- Missed Questions — always in DOM -->
+      <div id="missed-panel" style="display:none">
+        <div class="sec-label">MISSED QUESTIONS — REVIEW THESE</div>
+        <div id="missed-list"></div>
+        <button class="btn btn-red" style="margin-top:12px" onclick="clearMissed()">CLEAR LIST</button>
+      </div>
+
+      <!-- Phonetic Drill — always in DOM -->
+      <div id="drill-panel" style="display:none">
+        <div class="sec-label">🔤 PHONETIC ALPHABET DRILL — TYPE THE WORD</div>
+        <div id="drill-timer-bar"><div id="drill-timer-fill"></div></div>
+        <div id="drill-stats">
+          <div class="rf-stat"><div class="rf-val" id="drill-score">0</div><div class="rf-lbl">CORRECT</div></div>
+          <div class="rf-stat"><div class="rf-val" id="drill-done">0</div><div class="rf-lbl">DONE</div></div>
+          <div class="rf-stat"><div class="rf-val" id="drill-pct">—</div><div class="rf-lbl">ACCURACY</div></div>
+        </div>
+        <div id="drill-card">
+          <div id="drill-letter">A</div>
+          <div id="drill-hint"></div>
+          <input id="drill-input" type="text" placeholder="TYPE THE PHONETIC WORD" autocomplete="off" onkeydown="drillKeydown(event)">
+          <div id="drill-feedback"></div>
+        </div>
+        <button class="btn btn-primary" onclick="startDrill()">RESTART DRILL</button>
+        <button class="btn" onclick="skipDrillLetter()" style="margin-left:8px">SKIP →</button>
+      </div>
+
+    </div><!-- /content -->
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   1. MODULES ARRAY
+   ============================================================ */
+const MODULES = [
+  { id:'defs',     freq:'118.100', title:'DEFINITIONS',         sub:'ATS · AIRSPACE · COMMS',        build: buildDefs     },
+  { id:'abbr',     freq:'119.300', title:'ABBREVIATIONS',       sub:'RT · SPOKEN · Q-CODES',         build: buildAbbr     },
+  { id:'phrase',   freq:'121.500', title:'RT PHRASEOLOGY',      sub:'27+ STANDARD PHRASES',          build: buildPhrase   },
+  { id:'numbers',  freq:'122.800', title:'NUMBER TRANSMISSION', sub:'HEADINGS · QNH · TRANSPONDER',  build: buildNumbers  },
+  { id:'callsign', freq:'123.450', title:'CALL SIGN SUFFIXES',  sub:'TOWER · APPROACH · CONTROL',    build: buildCallSign },
+  { id:'fir',      freq:'124.700', title:'FIRs & ICAO CODES',   sub:'5 FIRs · LOCATION INDICATORS',  build: buildFIR      },
+  { id:'airline',  freq:'125.050', title:'AIRLINE CODES',       sub:'ICAO · IATA · RT CALLSIGNS',    build: buildAirline  },
+  { id:'tech',     freq:'126.900', title:'TX TECHNIQUE',        sub:'RATE · DISCIPLINE · PHONETICS', build: buildTech     },
+  { id:'emerg',    freq:'121.500', title:'EMERGENCY RT',        sub:'MAYDAY · PANPAN · SILENCE',     build: buildEmerg    },
+  { id:'lic',      freq:'128.350', title:'LICENSING',           sub:'DGCA · WPC · ARSL',             build: buildLic      },
+  { id:'met',      freq:'130.000', title:'MET CODES',           sub:'METAR · TAF · SIGMET',          build: buildMet      },
+  { id:'radio',    freq:'131.450', title:'RADIO THEORY',        sub:'PROPAGATION · MODULATION',      build: buildRadio    },
+  { id:'selcal',   freq:'132.000', title:'SELCAL',              sub:'CODES · CHECK PROCEDURE',       build: buildSelcal   },
+  { id:'satcom',   freq:'133.200', title:'SATCOM & VDL',        sub:'BANDS · UPLINK · VDL MODES',    build: buildSatcom   },
+  { id:'ics',      freq:'134.500', title:'ICS / PA SYSTEMS',    sub:'INTERPHONE · PA · PRIORITY',    build: buildICS      },
+];
+
+/* ============================================================
+   MODULE NOTES — examiner favourites + mnemonics
+   ============================================================ */
+const MODULE_NOTES = {
+  defs: [
+    '<strong>TRAP:</strong> CTR = extends from SURFACE upward. Students often say "1000 ft AGL" — wrong.',
+    '<strong>REMEMBER:</strong> FIR = Flight Info + Alerting. It does NOT control aircraft.',
+    '<strong>MNEMONIC:</strong> TMA = Terminal MA — found near MA-jor aerodromes.',
+    '<strong>TRAP:</strong> Blind transmission ≠ blind flying. It means you think they can RECEIVE but not reply.',
+  ],
+  abbr: [
+    '<strong>EXAM FAV:</strong> QNH = height above MSL, reads field elevation on ground. QFE = reads ZERO on runway.',
+    '<strong>TRAP:</strong> QDM = direction TO station (magnetic). QDR = bearing FROM station (radial).',
+    '<strong>MNEMONIC:</strong> QDR = Q-Direction-Radial = from station = like a VOR radial.',
+    '<strong>TRAP:</strong> VHF = 30–300 MHz. HF = 3–30 MHz. ELF–LF–MF–HF–VHF order.',
+  ],
+  phrase: [
+    '<strong>TRAP #1:</strong> ROGER ≠ Yes. ROGER = "received your transmission." Nothing more.',
+    '<strong>TRAP #2:</strong> WILCO ≠ Roger. Never say ROGER WILCO — redundant and non-standard.',
+    '<strong>TRAP #3:</strong> Never say "affirmative" — the standard word is AFFIRM.',
+    '<strong>TRAP #4:</strong> GO AHEAD = "send your message" — NEVER means "proceed on runway."',
+    '<strong>EXAM FAV:</strong> OUT vs OVER — both HF only. OUT = no reply. OVER = reply expected.',
+    '<strong>EXAM FAV:</strong> CHECK = no reply expected unless findings require reporting.',
+  ],
+  numbers: [
+    '<strong>MNEMONIC:</strong> FIFE=5, NINER=9, TREE=3 — all changed to avoid confusion with other words.',
+    '<strong>RULE:</strong> Headings/transponders — every digit separately. Altitudes — group by thousands.',
+    '<strong>EXAM FAV:</strong> 12,000 ft = ONE TWO THOUSAND, NOT "twelve thousand".',
+    '<strong>TRAP:</strong> QNH 1013 = ONE ZERO ONE THREE (each digit), NOT "one thousand thirteen".',
+  ],
+  callsign: [
+    '<strong>TRAP:</strong> Abbreviation introduced by ATC first — NOT by the pilot.',
+    '<strong>EXAM FAV:</strong> Ground Movement = GROUND. Runway = TOWER. Terminal = APPROACH.',
+    '<strong>REMEMBER:</strong> DELIVERY for clearances, HOMER for DF, PRECISION for PAR.',
+    '<strong>RULE:</strong> Full callsign always on INITIAL contact and when instructed by ATC.',
+  ],
+  fir: [
+    '<strong>EXAM FAV:</strong> India has 5 FIRs: Mumbai (A), Delhi (I), Chennai (O), Kolkata (E), Guwahati (E).',
+    '<strong>MNEMONIC:</strong> "MICE-G" = Mumbai, (Delhi)I, Chennai, (Kolkata)E, Guwahati.',
+    '<strong>TRAP:</strong> VABB = Mumbai airport. VABF = Mumbai FIR. Different last two letters!',
+    '<strong>EXAM FAV:</strong> VOMM = Chennai. VIDP = Delhi. VECC = Kolkata. VOBL = Bengaluru.',
+  ],
+  airline: [
+    '<strong>EXAM FAV:</strong> British Airways = SPEEDBIRD. Emirates = EMIRATES. Qatar = QATARI.',
+    '<strong>TRAP:</strong> Air India ICAO = AIC. IATA = AI. But RT callsign = AIRINDIA (one word).',
+    '<strong>REMEMBER:</strong> IATA codes are for tickets (2-letter). ICAO are for ATC (3-letter).',
+  ],
+  tech: [
+    '<strong>EXAM FAV:</strong> Max speaking rate = 100 wpm. Readability 3 = with difficulty.',
+    '<strong>MNEMONIC:</strong> Four Ws = Whom calling, Who you are, Where you are, What you want.',
+    '<strong>TRAP:</strong> JULIETT has double T. Official ICAO spelling — examiners check this.',
+    '<strong>RULE:</strong> Always LISTEN before transmitting. Wait 1 second after PTT before speaking.',
+  ],
+  emerg: [
+    '<strong>EXAM FAV:</strong> 7700 = Emergency. 7600 = Radio fail. 7500 = Hijack. (H = 75 = Hi5 for Help).',
+    '<strong>MNEMONIC:</strong> 7-7-0-0 = Double 7 = Lucky number gone bad = Emergency.',
+    '<strong>TRAP:</strong> SILENCE FEENEE ≠ be silent. It ENDS the silence. (French "fini" = finished).',
+    '<strong>EXAM FAV:</strong> Message priority: MAYDAY (1) → PAN PAN (2) → DF (3) → Safety (4) → Met (5).',
+    '<strong>RULE:</strong> MAYDAY, PAN PAN, SECURITY — each spoken 3 times at the start.',
+  ],
+  lic: [
+    '<strong>EXAM FAV:</strong> RTR(A) issued by WPC (Ministry of Telecom), NOT DGCA.',
+    '<strong>TRAP:</strong> ARSL = per aircraft installation. RTR(A) = per person operating the radio.',
+    '<strong>REMEMBER:</strong> ELT on 406 MHz for COSPAS-SARSAT. 121.5 MHz is legacy.',
+    '<strong>EXAM FAV:</strong> Mode S transponder mandatory. ADS-B Out mandatory for international routes.',
+  ],
+  met: [
+    '<strong>EXAM FAV:</strong> BKN = 5–7 oktas. OVC = 8 oktas. FEW = 1–2. SCT = 3–4.',
+    '<strong>TRAP:</strong> SIGMET for VA/TC valid 6 hrs. All others 4 hrs.',
+    '<strong>MNEMONIC:</strong> SPECI = SPECIal = triggered by significant change (sudden fog, storm onset).',
+    '<strong>EXAM FAV:</strong> METAR = routine obs. TAF = forecast (24/30 hr). PIREP = real-time pilot report.',
+    '<strong>TRAP:</strong> VOLMET is a continuous broadcast — NOT issued on request.',
+  ],
+  radio: [
+    '<strong>EXAM FAV:</strong> D layer disappears at night → HF range increases (D was absorbing signals).',
+    '<strong>EXAM FAV:</strong> F2 is the PRIMARY HF reflecting layer — present day AND night.',
+    '<strong>MNEMONIC:</strong> "Dead zone = Skip zone" — between ground wave range and first sky wave return.',
+    '<strong>TRAP:</strong> VHF = Line of Sight ONLY. NOT affected by ionosphere.',
+    '<strong>FORMULA:</strong> VHF range (NM) ≈ 1.25 × √altitude(ft). At 10,000 ft ≈ 125 NM.',
+  ],
+  selcal: [
+    '<strong>EXAM FAV:</strong> SELCAL check = Secondary first, then Primary HF.',
+    '<strong>TRAP:</strong> SELCAL letters are A–S excluding I, N, O (16 tones total).',
+    '<strong>EXAM FAV:</strong> Transmission duration = 2.2 seconds (1s + 0.2s gap + 1s).',
+    '<strong>RULE:</strong> SELCAL unserviceable = flight continues but pilots must monitor HF continuously.',
+    '<strong>INDIA SPECIFIC:</strong> In India, SELCAL is used on HF only, not VHF.',
+  ],
+  satcom: [
+    '<strong>EXAM FAV:</strong> L-band = Aircraft to satellite. C-band = Ground station to satellite.',
+    '<strong>TRAP:</strong> Active satellite = amplifies + retransmits. Passive = just reflects (mirror).',
+    '<strong>EXAM FAV:</strong> VDL Mode 2 = current ATC datalink standard (CPDLC, ATIS-D).',
+    '<strong>REMEMBER:</strong> Geostationary orbit = 35,786 km. Coverage fails above ~75° lat.',
+    '<strong>MNEMONIC:</strong> "Ku" band = kinda new = passenger WiFi broadband.',
+  ],
+  ics: [
+    '<strong>EXAM FAV:</strong> Priority: ATC comms (1) > Emergency (2) > Flight Interphone (3) > Cabin (4) > PA (5) > Service (6).',
+    '<strong>TRAP:</strong> PA is one-way only (to passengers). Interphone is two-way (crew only).',
+    '<strong>TRAP:</strong> Passengers CANNOT hear flight interphone — it is private.',
+    '<strong>REMEMBER:</strong> Service interphone = ground crew access points around the aircraft exterior.',
+  ],
+};
+
+/* ============================================================
+   2. STATE
+   ============================================================ */
+const visited      = new Set();
+const completed    = {};   // { moduleId: highestScore% }
+const missedQ      = [];
+let scores         = { c: 0, t: 0 };
+let currentModId   = null;
+let notesOpen      = false;
+
+// Rapid Fire
+let rfQuestions = [], rfCurrent = 0, rfCorrect = 0, rfDone = 0, rfTimer = null, rfTimeLeft = 12;
+
+// Phonetic Drill
+const PHONETICS = {
+  A:'ALFA',B:'BRAVO',C:'CHARLIE',D:'DELTA',E:'ECHO',F:'FOXTROT',G:'GOLF',H:'HOTEL',
+  I:'INDIA',J:'JULIETT',K:'KILO',L:'LIMA',M:'MIKE',N:'NOVEMBER',O:'OSCAR',P:'PAPA',
+  Q:'QUEBEC',R:'ROMEO',S:'SIERRA',T:'TANGO',U:'UNIFORM',V:'VICTOR',W:'WHISKEY',
+  X:'X-RAY',Y:'YANKEE',Z:'ZULU'
+};
+let drillLetters = [], drillIdx = 0, drillCorrect = 0, drillDone = 0, drillTimer = null, drillTimeLeft = 8;
+
+/* ============================================================
+   LOCALSTORAGE PERSISTENCE
+   ============================================================ */
+function saveState() {
+  try {
+    localStorage.setItem('rtr_visited', JSON.stringify([...visited]));
+    localStorage.setItem('rtr_scores',  JSON.stringify(scores));
+    localStorage.setItem('rtr_missed',  JSON.stringify(missedQ));
+    localStorage.setItem('rtr_completed', JSON.stringify(completed));
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    // ── THEME RESTORE (added) ──────────────────────────────
+    if (localStorage.getItem('rtr_theme') === 'light') {
+      document.body.classList.add('light');
+      document.getElementById('theme-btn').textContent = '🌙 DARK MODE';
+    }
+
+    // ── EXISTING CODE (unchanged) ─────────────────────────
+    const v = localStorage.getItem('rtr_visited');
+    if (v) JSON.parse(v).forEach(id => { visited.add(id); const d = document.getElementById('dot-'+id); if(d) d.classList.add('visited'); });
+    const s = localStorage.getItem('rtr_scores');
+    if (s) { const parsed = JSON.parse(s); scores.c = parsed.c||0; scores.t = parsed.t||0; }
+    const m = localStorage.getItem('rtr_missed');
+    if (m) { const arr = JSON.parse(m); arr.forEach(q => missedQ.push(q)); }
+    const c = localStorage.getItem('rtr_completed');
+    if (c) { const obj = JSON.parse(c); Object.assign(completed, obj); }
+    updateScoreBadge();
+    updateProgress();
+    // Restore nav dots for completed modules
+    Object.keys(completed).forEach(id => {
+      const dot = document.getElementById('dot-'+id);
+      if (dot && completed[id] >= 70) dot.classList.add('done');
+      else if (dot && completed[id] < 70) dot.classList.add('visited');
+    });
+  } catch(e) {}
+}
+
+/* ============================================================
+   3. HELPER FUNCTIONS
+   ============================================================ */
+function secLabel(text) {
+  const d = document.createElement('div');
+  d.className = 'sec-label';
+  d.textContent = text;
+  return d;
+}
+
+function card(q, a, tag = '') {
+  const d = document.createElement('div');
+  d.className = 'card';
+  d.innerHTML = `<div class="card-tag">${tag} — CLICK TO FLIP</div><div class="card-q">${q}</div><div class="card-a">${a}</div>`;
+  d.onclick = () => d.classList.toggle('flipped');
+  return d;
+}
+
+function cardGrid(...cards) {
+  const g = document.createElement('div');
+  g.className = 'card-grid';
+  cards.forEach(c => g.appendChild(c));
+  return g;
+}
+
+function note(title, body, color = '') {
+  const d = document.createElement('div');
+  d.className = 'note ' + color;
+  d.innerHTML = `<div class="note-title">${title}</div><div class="note-body">${body}</div>`;
+  return d;
+}
+
+function tbl(headers, rows) {
+  const wrap = document.createElement('div');
+  wrap.className = 'tbl-wrap';
+  const t = document.createElement('table');
+  t.innerHTML = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>' +
+    rows.map(r => '<tr>' + r.map(c => `<td>${c}</td>`).join('') + '</tr>').join('');
+  wrap.appendChild(t);
+  return wrap;
+}
+
+function pgrid(items) {
+  const g = document.createElement('div');
+  g.className = 'p-grid';
+  items.forEach(([big, small, muted = '']) => {
+    const d = document.createElement('div');
+    d.className = 'p-card';
+    d.innerHTML = `<div class="p-big">${big}</div><div class="p-small">${small}</div>${muted ? `<div class="p-muted">${muted}</div>` : ''}`;
+    g.appendChild(d);
+  });
+  return g;
+}
+
+/* quiz() with module tracking for completion badge */
+function quiz(questions, modId) {
+  const wrap = document.createElement('div');
+  let qi = 0, modCorrect = 0;
+
+  function showQ() {
+    wrap.innerHTML = '';
+    if (qi >= questions.length) {
+      const pct = Math.round(modCorrect / questions.length * 100);
+      const passed = pct >= 70;
+      // Update completion record
+      if (modId) {
+        if (!completed[modId] || pct > completed[modId]) {
+          completed[modId] = pct;
+        }
+        // Update nav dot
+        const dot = document.getElementById('dot-' + modId);
+        if (dot) {
+          dot.classList.remove('visited');
+          if (pct >= 70) dot.classList.add('done');
+        }
+        updateModBadge(modId);
+        saveState();
+      }
+      wrap.innerHTML = `<div class="note ${passed ? 'green' : 'red'}">
+        <div class="note-title">QUIZ COMPLETE</div>
+        <div class="note-body">
+          Score: <strong>${modCorrect} / ${questions.length} (${pct}%)</strong><br><br>
+          ${passed
+            ? '✓ PASSED — module marked COMPLETE'
+            : `✗ ${pct}% — need 70% for COMPLETE badge. You can retry by reopening this module.`}
+        </div>
+      </div>`;
+      return;
+    }
+
+    const q = questions[qi];
+    const block = document.createElement('div');
+    block.className = 'quiz-block';
+    block.innerHTML = `<div class="quiz-q"><span class="tag tag-amber" style="margin-right:8px">Q${qi+1}/${questions.length}</span>${q.q}</div>`;
+
+    const og = document.createElement('div');
+    og.className = 'quiz-opts';
+    const fb = document.createElement('div');
+    fb.className = 'quiz-feedback';
+
+    q.opts.forEach((optText, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt-btn';
+      btn.textContent = optText;
+      btn.onclick = () => {
+        Array.from(og.children).forEach(b => b.disabled = true);
+        if (i === q.ans) {
+          btn.classList.add('correct');
+          fb.textContent = '✓  CORRECT — ' + q.exp;
+          fb.className = 'quiz-feedback show-ok';
+          scores.c++; modCorrect++;
+        } else {
+          btn.classList.add('wrong');
+          og.children[q.ans].classList.add('correct');
+          fb.textContent = '✗  INCORRECT — ' + q.exp;
+          fb.className = 'quiz-feedback show-bad';
+          missedQ.push({ question: q.q, correct: q.opts[q.ans], exp: q.exp, module: modId });
+        }
+        scores.t++;
+        updateScoreBadge();
+        saveState();
+        const nb = document.createElement('button');
+        nb.className = 'btn btn-primary';
+        nb.textContent = qi < questions.length - 1 ? 'NEXT →' : 'FINISH ✓';
+        nb.onclick = () => { qi++; showQ(); };
+        block.appendChild(nb);
+      };
+      og.appendChild(btn);
+    });
+
+    block.appendChild(og);
+    block.appendChild(fb);
+    wrap.appendChild(block);
+  }
+
+  showQ();
+  return wrap;
+}
+
+function frag(...els) {
+  const f = document.createDocumentFragment();
+  els.forEach(e => {
+    if (typeof e === 'string') {
+      const d = document.createElement('div');
+      d.style.marginBottom = '8px';
+      d.innerHTML = e;
+      f.appendChild(d);
+    } else { f.appendChild(e); }
+  });
+  return f;
+}
+
+/* ============================================================
+   4. CONTENT BUILDERS
+   ============================================================ */
+
+function buildDefs() {
+  const f = document.createDocumentFragment();
+  f.appendChild(secLabel('KEY DEFINITIONS — CLICK CARDS TO FLIP'));
+  f.appendChild(cardGrid(
+    card('What is ATS?', 'Air Traffic Services — generic term for: Flight Information Service, Alerting Service, Air Traffic Advisory Service, and Air Traffic Control Service.', 'DEF'),
+    card('What is an Aerodrome?', 'A defined area on land or water intended to be used wholly or in part for the arrival, departure, and surface movement of aircraft.', 'DEF'),
+    card('What is a FIR?', 'Flight Information Region — airspace of defined dimensions within which Flight Information Service (FIS) and Alerting Service are provided.', 'DEF'),
+    card('What is a CTR?', 'Control Zone — controlled airspace extending upward from the surface to a specified upper limit. Protects traffic near an aerodrome.', 'DEF'),
+    card('What is a TMA?', 'Terminal Manoeuvring Area — controlled airspace established at the confluence of ATS routes in the vicinity of one or more major aerodromes.', 'DEF'),
+    card('What is Blind Transmission?', 'A transmission made to a station where two-way communication cannot be established, but it is believed the called station can receive the transmission.', 'DEF'),
+    card('What is a Guard Frequency?', 'A frequency monitored by an aircraft in addition to the assigned working frequency. 121.5 MHz VHF (civil) and 243.0 MHz UHF (military).', 'DEF'),
+    card('What is ATIS?', 'Automatic Terminal Information Service — continuous broadcast of current routine aerodrome and meteorological information. Updated hourly or on significant change.', 'DEF'),
+  ));
+  f.appendChild(secLabel('COMMUNICATION TYPES'));
+  f.appendChild(note('SIMPLEX', '<strong>One direction at a time</strong> on the same frequency. Standard aircraft VHF RT — cannot transmit and receive simultaneously.'));
+  f.appendChild(note('DUPLEX', '<strong>Both directions simultaneously</strong> on two different frequencies. Example: mobile phones.', 'green'));
+  f.appendChild(note('SEMI-DUPLEX', 'Simplex on one side, duplex on the other. Aircraft RT is semi-duplex — pilot presses PTT to transmit, releases to receive.', 'blue'));
+  f.appendChild(secLabel('QUIZ'));
+  f.appendChild(quiz([
+    { q:'A CTR (Control Zone) extends from:', opts:['1000 ft AGL to FL100','The surface upward to a specified upper limit','FL100 to FL245','500 ft AGL to TMA base'], ans:1, exp:'CTR extends from surface to a specified upper limit — it exists to protect aerodrome traffic.' },
+    { q:'Blind transmission is used when:', opts:['Weather prevents any RT','Two-way comms fail but the station may still receive','Frequency congestion occurs','Normal comms are prohibited'], ans:1, exp:'When 2-way comms cannot be established but the other station is believed to be receiving.' },
+    { q:'Aircraft VHF RT operates as:', opts:['Full Duplex','Simplex','Semi-Duplex','Half-Duplex only in emergencies'], ans:2, exp:'Semi-Duplex — pilot uses PTT, so one direction at a time, but the system can do both directions.' },
+  ], 'defs'));
+  return f;
+}
+
+function buildAbbr() {
+  const f = document.createDocumentFragment();
+  f.appendChild(secLabel('COMMON RT ABBREVIATIONS'));
+  f.appendChild(tbl(['ABBR','MEANING','TYPE'],[
+    ['ATC','Air Traffic Control','<span class="tag tag-amber">RT</span>'],
+    ['ATS','Air Traffic Services','<span class="tag tag-amber">RT</span>'],
+    ['ATIS','Automatic Terminal Information Service','<span class="tag tag-amber">RT</span>'],
+    ['CTR','Control Zone','<span class="tag tag-amber">RT</span>'],
+    ['FIR','Flight Information Region','<span class="tag tag-amber">RT</span>'],
+    ['FIS','Flight Information Service','<span class="tag tag-amber">RT</span>'],
+    ['ELT','Emergency Locator Transmitter','<span class="tag tag-red">EQUIP</span>'],
+    ['SSR','Secondary Surveillance Radar','<span class="tag tag-blue">RADAR</span>'],
+    ['VHF','Very High Frequency (30–300 MHz)','<span class="tag tag-green">FREQ</span>'],
+    ['HF','High Frequency (3–30 MHz)','<span class="tag tag-green">FREQ</span>'],
+    ['QNH','Altimeter sub-scale setting → altitude above MSL','<span class="tag tag-purple">Q-CODE</span>'],
+    ['QFE','Altimeter setting → height above aerodrome (0 on touchdown)','<span class="tag tag-purple">Q-CODE</span>'],
+    ['QDM','Magnetic heading TO the station','<span class="tag tag-purple">Q-CODE</span>'],
+    ['QDR','Magnetic bearing FROM the station (radial)','<span class="tag tag-purple">Q-CODE</span>'],
+    ['QTE','True bearing FROM the station','<span class="tag tag-purple">Q-CODE</span>'],
+    ['METAR','Meteorological Aerodrome Report','<span class="tag tag-blue">MET</span>'],
+    ['TAF','Terminal Aerodrome Forecast','<span class="tag tag-blue">MET</span>'],
+    ['SIGMET','Significant Meteorological Information','<span class="tag tag-blue">MET</span>'],
+    ['PIREP','Pilot Report (in-flight weather observation)','<span class="tag tag-blue">MET</span>'],
+    ['CPDLC','Controller–Pilot Data Link Communications','<span class="tag tag-green">COMMS</span>'],
+    ['SELCAL','Selective Calling System','<span class="tag tag-green">COMMS</span>'],
+    ['SATCOM','Satellite Communications','<span class="tag tag-green">COMMS</span>'],
+    ['RVR','Runway Visual Range','<span class="tag tag-amber">RT</span>'],
+    ['ILS','Instrument Landing System','<span class="tag tag-red">EQUIP</span>'],
+    ['VOR','VHF Omnidirectional Radio Range','<span class="tag tag-red">EQUIP</span>'],
+  ]));
+  f.appendChild(secLabel('Q-CODES — QUICK REFERENCE'));
+  f.appendChild(note('EXAMINER TIP','Q-codes are <strong>three-letter codes</strong> starting with Q. Know QNH, QFE, QNE, QDM, QDR, QTE, QFU, QGH inside out — they come up every year.','amber'));
+  f.appendChild(tbl(['Q-CODE','MEANING','REMEMBER IT AS'],[
+    ['QNH','Altimeter setting to read altitude above MSL. Reads field elevation on ground.','N = Near sea level'],
+    ['QFE','Altimeter setting to read height above aerodrome. Reads zero on touchdown.','F = Field elevation = 0'],
+    ['QNE','Standard pressure setting = 1013.25 hPa. Used above Transition Altitude.','E = 1013 (standard)'],
+    ['QDM','Magnetic heading you must fly TO reach the station (wind ignored).','D to M = direction to me'],
+    ['QDR','Magnetic bearing of your position FROM the station.','R = Radial from station'],
+    ['QTE','True bearing of your position FROM the station.','T = True bearing'],
+    ['QFU','Magnetic direction of the runway in use.','F = Field runway heading'],
+    ['QGH','Controlled descent through cloud using DF.','GH = Get Home procedure'],
+  ]));
+  f.appendChild(secLabel('QUIZ'));
+  f.appendChild(quiz([
+    { q:'QNH is the altimeter setting that gives:', opts:['Height above aerodrome','Altitude above MSL','Pressure altitude','True altitude'], ans:1, exp:'QNH → altitude above MSL. On the ground it reads the aerodrome elevation.' },
+    { q:'QDR is the:', opts:['Magnetic heading to fly to the station','True bearing from the station','Magnetic bearing FROM the station','Distance to station'], ans:2, exp:'QDR = magnetic bearing of your position FROM (radial from) the station.' },
+    { q:'VHF stands for:', opts:['Variable High Frequency','Very High Frequency 30–300 MHz','Voice High Frequency','Very High Frequency 3–30 MHz'], ans:1, exp:'VHF = Very High Frequency = 30 to 300 MHz. Aviation RT uses 118–136.975 MHz.' },
+    { q:'QFE set on the altimeter will read __ on the runway:', opts:['Field elevation','Pressure altitude','Zero','MSL altitude'], ans:2, exp:'QFE setting makes the altimeter read zero (0) when the aircraft is at the aerodrome level.' },
+  ], 'abbr'));
+  return f;
+}
+
+function buildPhrase() {
+  const f = document.createDocumentFragment();
+  f.appendChild(secLabel('ALL STANDARD RT PHRASES — ICAO / CAR 9 SERIES D PART III'));
+  f.appendChild(tbl(['PHRASE','MEANING'],[
+    ['ACKNOWLEDGE','Let me know you received and understood this message'],
+    ['AFFIRM','Yes — that is correct'],
+    ['APPROVED','Permission granted for the proposed action'],
+    ['BREAK','Separation between parts of a message to different stations'],
+    ['BREAK BREAK','Urgently separates messages in very congested conditions'],
+    ['CANCEL','Annul the previously transmitted clearance'],
+    ['CHECK','Examine system or procedure — no reply normally expected'],
+    ['CLEARED','Authorised to proceed under conditions specified'],
+    ['CONFIRM','Request verification — or — have you received?'],
+    ['CONTACT','Establish communications with...'],
+    ['CORRECT','True / Accurate'],
+    ['CORRECTION','An error was made; the correct version follows'],
+    ['DISREGARD','Ignore — this transmission is in error'],
+    ['EXPEDITE','Carry out without delay'],
+    ['GO AHEAD','Proceed with your message (NOT permission to move/takeoff)'],
+    ['HOW DO YOU READ','What is the readability of my transmission? (Scale 1–5)'],
+    ['I SAY AGAIN','Repetition for emphasis or because of bad readability'],
+    ['MAINTAIN','Continue in accordance with condition(s) specified'],
+    ['MONITOR','Listen out on (frequency)'],
+    ['NEGATIVE','No / Permission not granted / That is not correct'],
+    ['OUT','End of communication — no reply expected (HF only)'],
+    ['OVER','My transmission ended — reply expected (HF only)'],
+    ['READ BACK','Repeat all / specified part of this message exactly as received'],
+    ['REPORT','Pass me the following information'],
+    ['REQUEST','I would like to know / I wish to obtain'],
+    ['ROGER','I have received all of your last transmission'],
+    ['SAY AGAIN','Repeat all or following part of your last transmission'],
+    ['SPEAK SLOWER','Reduce your rate of speech'],
+    ['STANDBY','Wait — I will call you'],
+    ['UNABLE','Cannot comply with your request / instruction'],
+    ['WILCO','I understand and will comply'],
+    ['WORDS TWICE','Communication difficult — send every phrase twice'],
+  ]));
+  f.appendChild(secLabel('CRITICAL DISTINCTIONS — EXAM FAVOURITES'));
+  f.appendChild(note('ROGER vs WILCO vs AFFIRM',`<strong>ROGER</strong> = "I received all of your last transmission." Does NOT mean yes. Does NOT mean you will comply.<br><br><strong>WILCO</strong> = "I understand and will comply." Already implies ROGER — <em>never say ROGER WILCO</em> — it is redundant and non-standard.<br><br><strong>AFFIRM</strong> = YES. <em>Never say "affirmative"</em> — that is non-standard.`,'amber'));
+  f.appendChild(note('APPROVED vs CLEARED vs INSTRUCTION',`<strong>APPROVED</strong> — Permission granted for a pilot-proposed action.<br><strong>CLEARED</strong> — Authorised to proceed under conditions stated by ATC.<br><strong>INSTRUCTION</strong> — A command from ATC. Must be obeyed and read back.`,'blue'));
+  f.appendChild(note('GO AHEAD — DANGER ZONE',`<strong>GO AHEAD</strong> means "send your message" — it does NOT mean "proceed / taxi / take off".<br>Never use GO AHEAD on or near a runway.`,'red'));
+  f.appendChild(note('OUT vs OVER',`Both are <strong>HF only</strong> — rarely used on VHF.<br><strong>OUT</strong> = transmission ended, no reply expected.<br><strong>OVER</strong> = transmission ended, reply expected.`,'green'));
+  f.appendChild(secLabel('QUIZ'));
+  f.appendChild(quiz([
+    { q:'You receive a clearance and intend to comply. You say:', opts:['ROGER','AFFIRM','WILCO','ROGER WILCO'], ans:2, exp:'WILCO = I understand and will comply. ROGER only acknowledges receipt.' },
+    { q:'Which phrase must NEVER be said?', opts:['ROGER','WILCO','ROGER WILCO','AFFIRM'], ans:2, exp:'ROGER WILCO is redundant and non-standard. WILCO already implies receipt.' },
+    { q:'ATC says "Check altimeter." A reply is:', opts:['Expected always','Not normally expected','Mandatory read-back','Required only in IMC'], ans:1, exp:'CHECK means examine a system — no reply is normally expected unless findings require a report.' },
+    { q:'I SAY AGAIN is used:', opts:['To begin any transmission','For emphasis or when readability is poor','Only during emergencies','To indicate end of contact'], ans:1, exp:'I SAY AGAIN = repeating your own words for emphasis or clarity.' },
+    { q:'"AFFIRM" means:', opts:['I will comply','Received and understood','Yes — that is correct','Affirmative — I agree'], ans:2, exp:'AFFIRM = Yes. Never say "affirmative" — not an ICAO standard phrase.' },
+  ], 'phrase'));
+  return f;
+}
+
+function buildNumbers() {
+  const f = document.createDocumentFragment();
+  f.appendChild(secLabel('DIGIT PRONUNCIATION'));
+  f.appendChild(pgrid([
+    ['0','ZE-RO',''],['1','WUN',''],['2','TOO',''],['3','TREE',''],['4','FOW-ER',''],['5','FIFE',''],
+    ['6','SIX',''],['7','SEV-EN',''],['8','AIT',''],['9','NIN-ER',''],
+    ['.','DAY-SEE-MAL','decimal'],['00','HUN-dred','hundred'],
+  ]));
+  f.appendChild(note('WHY "NINER" NOT "NINE"?','To avoid confusion with German <strong>nein</strong> (= no). FIFE for 5 avoids "fire". TREE for 3 avoids "free". TOO for 2 avoids "to/two/too".'));
+  f.appendChild(secLabel('TRANSMISSION RULES'));
+  f.appendChild(tbl(['ITEM','EXAMPLE','SAY THIS'],[
+    ['Heading','270°','TWO SEVEN ZERO'],
+    ['QNH','1013 hPa','ONE ZERO ONE THREE'],
+    ['QNH round','1000 hPa','ONE THOUSAND'],
+    ['Altitude','5500 ft','FIVE THOUSAND FIVE HUNDRED'],
+    ['Altitude >9999','12000 ft','ONE TWO THOUSAND'],
+    ['Flight Level','FL350','FLIGHT LEVEL THREE FIVE ZERO'],
+    ['Frequency','118.3 MHz','ONE ONE EIGHT DECIMAL THREE'],
+    ['Transponder','7700','SEVEN SEVEN ZERO ZERO'],
+    ['Runway','28L','RUNWAY TWO EIGHT LEFT'],
+    ['Time','1435','ONE FOUR THREE FIVE'],
+    ['Wind','270/15 kt','WIND TWO SEVEN ZERO DEGREES ONE FIVE KNOTS'],
+  ]));
+  f.appendChild(note('RESPONSE TIME STANDARDS',`<strong>Pilot replying to ATC:</strong> within 5 seconds.<br><strong>ATC replying to pilot:</strong> within 10 seconds.<br><br>Max speaking rate: <strong>100 words per minute</strong>. Speak clearly — not loudly.`,'green'));
+  f.appendChild(secLabel('QUIZ'));
+  f.appendChild(quiz([
+    { q:'Heading 090 is transmitted as:', opts:['ZERO NINE','NINER ZERO','ZERO NINER ZERO','HEADING NINETY'], ans:2, exp:'Each digit spoken separately: ZERO NINER ZERO.' },
+    { q:'Altitude 12,000 ft is transmitted as:', opts:['TWELVE THOUSAND','ONE TWO ZERO ZERO ZERO','ONE TWO THOUSAND','ONE-TWO THOUSAND'], ans:2, exp:'ONE TWO THOUSAND — digits spoken individually, then "thousand".' },
+    { q:'Transponder 7500 is transmitted as:', opts:['SEVENTY-FIVE HUNDRED','SEVEN FIVE ZERO ZERO','SEVEN THOUSAND FIVE HUNDRED','SEVEN-FIVE'], ans:1, exp:'Each squawk digit separately: SEVEN FIVE ZERO ZERO.' },
+    { q:'The digit "3" is pronounced:', opts:['THREE','THRI','TREE','TRI'], ans:2, exp:'TREE — to avoid confusion with "free" on radio.' },
+  ], 'numbers'));
+  return f;
+}
+
+function buildCallSign() {
+  const f = document.createDocumentFragment();
+  f.appendChild(secLabel('ATC UNIT CALL SIGN SUFFIXES'));
+  f.appendChild(tbl(['UNIT TYPE','R/T SUFFIX','EXAMPLE'],[
+    ['Aerodrome Control (runway/circuit)','TOWER','CHENNAI TOWER'],
+    ['Ground Movement Control','GROUND','MUMBAI GROUND'],
+    ['Approach Control','APPROACH','DELHI APPROACH'],
+    ['Approach Control (Arrivals radar)','ARRIVAL','BANGALORE ARRIVAL'],
+    ['Approach Control (Departures)','DEPARTURE','HYDERABAD DEPARTURE'],
+    ['Area Control (En-route)','CONTROL','KOLKATA CONTROL'],
+    ['Flight Information Service','INFORMATION','CHENNAI INFORMATION'],
+    ['Oceanic Control','OCEANIC','MUMBAI OCEANIC'],
+    ['Precision Approach Radar','PRECISION','— PRECISION'],
+    ['Direction Finding Station','HOMER','— HOMER'],
+    ['Clearance Delivery','DELIVERY','DELHI DELIVERY'],
+    ['Apron Control','APRON','— APRON'],
+  ]));
+  f.appendChild(secLabel('AIRCRAFT CALL SIGNS'));
+  f.appendChild(cardGrid(
+    card('Type A — Airline call sign format','Telephony designator of the operating agency (ICAO) + flight number.\nExample: AIR INDIA 302 → said as "AIRINDIA THREE ZERO TWO"','CALLSIGN'),
+    card('Type B — Registration call sign format','Nationality + full registration using phonetic alphabet.\nExample: VT-KNT → "VICTOR TANGO KILO NOVEMBER TANGO"','CALLSIGN'),
+    card('When can a call sign be abbreviated?','ONLY after ATC first uses the abbreviated form. Use last 3 characters of registration.\nExample: VT-KNT → "KILO NOVEMBER TANGO" or just "KNT"','RULE'),
+    card('When must FULL call sign be used?','1. Initial contact\n2. When similarity with another call sign exists\n3. When ATC instructs full call sign to be used','RULE'),
+  ));
+  f.appendChild(secLabel('QUIZ'));
+  f.appendChild(quiz([
+    { q:'Which unit uses the R/T suffix "APPROACH"?', opts:['Ground movement control','Runway/circuit control','Approach control in terminal area','Area control en-route'], ans:2, exp:'APPROACH = approach control handling arrivals and departures in the terminal area.' },
+    { q:'VT-KNT spoken in full phonetics is:', opts:['VICTOR TANGO KILO NOVEMBER TANGO','VEE-TEE KILO-NOVEMBER-TANGO','VICTOR-TANGO KNT','VT KILO NOVEMBER TANGO'], ans:0, exp:'Each letter uses ICAO phonetic alphabet: V=VICTOR, T=TANGO, K=KILO, N=NOVEMBER, T=TANGO.' },
+    { q:'A pilot may abbreviate the call sign:', opts:["At pilot's discretion",'Only after ATC first abbreviates it','After first contact is established','Never'], ans:1, exp:'Abbreviation is introduced by ATC first — not by the pilot.' },
+  ], 'callsign'));
+  return f;
+}
+
+function buildFIR() {
+  const f = document.createDocumentFragment();
+  f.appendChild(secLabel("INDIA'S 5 FIRs"));
+  f.appendChild(tbl(['FIR NAME','FIR ICAO ID','SECOND LETTER','ACC LOCATION'],[
+    ['Mumbai FIR','VABF','A','Mumbai'],
+    ['Delhi FIR','VIDF','I','Delhi'],
+    ['Chennai FIR','VOMF','O','Chennai'],
+    ['Kolkata FIR','VECF','E','Kolkata'],
+    ['Guwahati FIR','VEGT','E','Guwahati'],
+  ]));
+  f.appendChild(note('ICAO CODE FORMAT FOR INDIA',`<strong>4 letters:</strong> always starts with <strong>V</strong> (South/Southeast Asia region).<br>Second letter = FIR: <strong>A</strong>=Mumbai, <strong>I</strong>=Delhi, <strong>O</strong>=Chennai, <strong>E</strong>=Kolkata/Guwahati.<br>Last two letters = specific location.<br><br>Example: <strong>VOMM</strong> = V(India) + O(Chennai FIR) + MM(Meenambakkam/Chennai airport).`,'blue'));
+  f.appendChild(secLabel('MAJOR AIRPORT ICAO CODES — INDIA'));
+  f.appendChild(tbl(['AIRPORT','ICAO','IATA','FIR'],[
+    ['Mumbai (CSIA)','VABB','BOM','Mumbai'],
+    ['Delhi (IGI)','VIDP','DEL','Delhi'],
+    ['Chennai (MAA)','VOMM','MAA','Chennai'],
+    ['Kolkata (NSCBI)','VECC','CCU','Kolkata'],
+    ['Bengaluru (KIA)','VOBL','BLR','Chennai'],
+    ['Hyderabad (RGIA)','VOHS','HYD','Chennai'],
+    ['Kochi (CIAL)','VOCI','COK','Chennai'],
+    ['Ahmedabad (SVPI)','VAAH','AMD','Mumbai'],
+    ['Guwahati (LGBI)','VEGT','GAU','Guwahati'],
+    ['Thiruvananthapuram','VOTV','TRV','Chennai'],
+    ['Nagpur (DIAL)','VANP','NAG','Mumbai'],
+    ['Pune (Lohegaon)','VAPO','PNQ','Mumbai'],
+    ['Srinagar','VISR','SXR','Delhi'],
+    ['Amritsar (SGIA)','VIAR','ATQ','Delhi'],
+    ['Coimbatore','VOCB','CJB','Chennai'],
+    ['Visakhapatnam','VOVZ','VTZ','Chennai'],
+  ]));
+  f.appendChild(secLabel('QUIZ'));
+  f.appendChild(quiz([
+    { q:'The ICAO code for Chennai Airport is:', opts:['VOCH','VOMM','VECC','VICC'], ans:1, exp:'VOMM — V=India, O=Chennai FIR, MM=Meenambakkam.' },
+    { q:'India has how many FIRs?', opts:['3','4','5','6'], ans:2, exp:'India has 5 FIRs: Mumbai, Delhi, Chennai, Kolkata, Guwahati.' },
+    { q:'VIDP is:', opts:['Vizag Airport','Delhi IGI Airport','Dehradun Airport','Dimapur Airport'], ans:1, exp:'VIDP = Delhi Indira Gandhi International Airport.' },
+    { q:'The second letter "O" in an Indian ICAO code represents:', opts:['Kolkata FIR','Mumbai FIR','Guwahati FIR','Chennai FIR'], ans:3, exp:'O = Chennai FIR. A=Mumbai, I=Delhi, E=Kolkata/Guwahati, O=Chennai.' },
+  ], 'fir'));
+  return f;
+}
+
+function buildAirline() {
+  const f = document.createDocumentFragment();
+  f.appendChild(secLabel('INDIAN AIRLINES'));
+  f.appendChild(tbl(['AIRLINE','ICAO','IATA','R/T CALLSIGN'],[
+    ['Air India','AIC','AI','AIRINDIA'],
+    ['IndiGo','IGO','6E','IFLY'],
+    ['SpiceJet','SEJ','SG','SPICEJET'],
+    ['Air India Express','AXB','IX','EXPRESS INDIA'],
+    ['Alliance Air','LLR','9I','ALLIANCE'],
+    ['Blue Dart Aviation','BDA','BZ','BLUE DART'],
+    ['Pawan Hans','PHE','—','PAWAN HANS'],
+    ['Indian Air Force','IFC','—','INDIAN AIR FORCE'],
+  ]));
+  f.appendChild(note('TELEPHONY DESIGNATOR','The RT callsign (telephony designator) is used on frequency instead of the ICAO code.<br>Example: Air India flight 302 is called <strong>"AIRINDIA THREE ZERO TWO"</strong> — not "AIC THREE ZERO TWO".','green'));
+  f.appendChild(secLabel('INTERNATIONAL AIRLINES — COMMON IN INDIA'));
+  f.appendChild(tbl(['AIRLINE','ICAO','R/T CALLSIGN'],[
+    ['British Airways','BAW','SPEEDBIRD'],
+    ['Emirates','UAE','EMIRATES'],
+    ['Singapore Airlines','SIA','SINGAPORE'],
+    ['Lufthansa','DLH','LUFTHANSA'],
+    ['Cathay Pacific','CPA','CATHAY'],
+    ['Qatar Airways','QTR','QATARI'],
+    ['Etihad Airways','ETD','ETIHAD'],
+    ['Air France','AFR','AIRFRANS'],
+    ['KLM','KLM','KLM'],
+    ['Thai Airways','THA','THAI'],
+  ]));
+  f.appendChild(secLabel('QUIZ'));
+  f.appendChild(quiz([
+    { q:'The R/T callsign for British Airways is:', opts:['BRITAIR','SPEEDBIRD','AIRWAYS','BRITISH'], ans:1, exp:'British Airways uses SPEEDBIRD — heritage from BOAC logo.' },
+    { q:"IndiGo's ICAO code is:", opts:['IGO','6E','IND','IGE'], ans:0, exp:'IndiGo: ICAO = IGO, IATA = 6E, R/T = IFLY.' },
+    { q:"Air India's R/T callsign is:", opts:['INDIA AIR','AIR INDIA','AIRINDIA','INDIA'], ans:2, exp:'AIRINDIA (one word) is the telephony designator.' },
+  ], 'airline'));
+  return f;
+}
+
+function buildTech() {
+  const f = document.createDocumentFragment();
+  f.appendChild(secLabel('TRANSMISSION TECHNIQUE'));
+  f.appendChild(cardGrid(
+    card('Standard RT speaking rate?','100 words per minute maximum. Slow enough to allow writing. Pause briefly before numbers.','TECH'),
+    card('Readability scale?','1 = Unreadable\n2 = Readable now and then\n3 = Readable with difficulty\n4 = Readable\n5 = Perfectly readable','TECH'),
+    card('What is frequency discipline?','Never interrupt active stations. Never jam the frequency. Never block emergency calls. Use only ICAO standard phraseology.','TECH'),
+    card('Before pressing PTT:','1. Listen — ensure frequency is clear\n2. Think — plan what you will say\n3. Press PTT\n4. Pause 1 second\n5. Speak clearly and concisely','TECH'),
+  ));
+  f.appendChild(secLabel('THE FOUR Ws — BEFORE EVERY CALL'));
+  f.appendChild(note('FOUR Ws',`<strong>W</strong>hom are you calling?<br><strong>W</strong>ho are you?<br><strong>W</strong>here are you?<br><strong>W</strong>hat do you want?<br><br>Example: "<strong>Delhi Ground</strong>, <strong>AIRINDIA 302</strong>, <strong>at Gate 14</strong>, <strong>request push-back and start</strong>."`,'amber'));
+  f.appendChild(secLabel('ICAO PHONETIC ALPHABET'));
+  f.appendChild(pgrid([
+    ['A','ALFA',''],['B','BRAVO',''],['C','CHARLIE',''],['D','DELTA',''],
+    ['E','ECHO',''],['F','FOXTROT',''],['G','GOLF',''],['H','HOTEL',''],
+    ['I','INDIA',''],['J','JULIETT',''],['K','KILO',''],['L','LIMA',''],
+    ['M','MIKE',''],['N','NOVEMBER',''],['O','OSCAR',''],['P','PAPA',''],
+    ['Q','QUEBEC',''],['R','ROMEO',''],['S','SIERRA',''],['T','TANGO',''],
+    ['U','UNIFORM',''],['V','VICTOR',''],['W','WHISKEY',''],['X','X-RAY',''],
+    ['Y','YANKEE',''],['Z','ZULU',''],
+  ]));
+  f.appendChild(secLabel('QUIZ'));
+  f.appendChild(quiz([
+    { q:'Standard RT maximum speaking rate is:', opts:['60–80 wpm','80–100 wpm','100 wpm','120–150 wpm'], ans:2, exp:'100 words per minute is the ICAO standard maximum speaking rate for RT.' },
+    { q:'Readability "3" means:', opts:['Readable','Unreadable','Readable with difficulty','Perfectly readable'], ans:2, exp:'Scale: 1=Unreadable, 2=Now and then, 3=With difficulty, 4=Readable, 5=Perfect.' },
+    { q:'The phonetic word for the letter "J" is:', opts:['JULIET','JULIETT','JAMES','JAZZ'], ans:1, exp:'JULIETT — note the double T at the end. Official ICAO spelling.' },
+  ], 'tech'));
+  return f;
+}
+
+function buildEmerg() {
+  const f = document.createDocumentFragment();
+  f.appendChild(note('MAYDAY — DISTRESS','Highest priority. <strong>Immediate danger</strong> to aircraft, passengers or crew.<br>Said <strong>3 times</strong>: MAYDAY MAYDAY MAYDAY.','red'));
+  f.appendChild(note('PAN PAN — URGENCY','Second priority. <strong>Safety of aircraft or person</strong> is at risk but not immediate danger.<br>Said <strong>3 times</strong>: PAN PAN PAN PAN PAN PAN.','amber'));
+  f.appendChild(note('SECURITY','Navigation or meteorological warning that could affect flight safety.<br>Said <strong>3 times</strong>: SECURITY SECURITY SECURITY.','blue'));
+  f.appendChild(secLabel('MESSAGE PRIORITY ORDER (HIGH TO LOW)'));
+  f.appendChild(tbl(['PRIORITY','CATEGORY','SIGNAL'],[
+    ['1','Distress','MAYDAY MAYDAY MAYDAY'],
+    ['2','Urgency + Medical transport','PAN PAN PAN PAN PAN PAN'],
+    ['3','Direction finding comms','—'],
+    ['4','Flight safety messages','—'],
+    ['5','Meteorological messages','—'],
+    ['6','Flight regularity messages','—'],
+  ]));
+  f.appendChild(secLabel('MAYDAY CALL FORMAT'));
+  f.appendChild(note('FULL MAYDAY STRUCTURE',`<strong>MAYDAY MAYDAY MAYDAY</strong><br>[Station called]<br>[Callsign] MAYDAY<br>[Nature of emergency]<br>[Intentions]<br>[Position / last known position]<br>[Altitude / Flight Level]<br>[Heading]<br>[Souls on board]<br>[Fuel endurance]<br>[Any other useful info]`,'red'));
+  f.appendChild(secLabel('SILENCE PROCEDURES'));
+  f.appendChild(cardGrid(
+    card('"SILENCE MAYDAY"','Transmitted by distress station or controlling station.\nImposes radio silence on ALL stations immediately.','SILENCE'),
+    card('"SILENCE FEENEE"','Ends the silence period (French "fini" = finished).\nEmergency is over — normal comms may resume.','SILENCE'),
+    card('"SILENCE DISTRESS"','Used by ANOTHER station (not the distress aircraft) to silence interfering traffic during ongoing emergency.','SILENCE'),
+    card('Guard Receiver — 121.5 MHz','Every aircraft MUST monitor 121.5 MHz even while on another frequency.\n121.5 MHz = international aeronautical emergency frequency.','FREQ'),
+  ));
+  f.appendChild(secLabel('TRANSPONDER EMERGENCY CODES'));
+  f.appendChild(tbl(['SQUAWK CODE','MEANING','MEMORY AID'],[
+    ['7700','General Emergency','7700 = double 7 = lucky/unlucky = Emergency'],
+    ['7600','Radio Communication Failure (NORDO)','7600 = 76 = Lost comms'],
+    ['7500','Unlawful Interference / Hijack','7500 = Hi5 for Help = Hijack'],
+    ['2000','No discrete code assigned','VFR entering controlled airspace'],
+    ['1200','VFR flight (ICAO standard)','USA/ICAO standard VFR squawk'],
+  ]));
+  f.appendChild(secLabel('QUIZ'));
+  f.appendChild(quiz([
+    { q:'Transponder squawk 7500 means:', opts:['Radio failure','General emergency','Unlawful interference / hijack','Minimum fuel'], ans:2, exp:'7500 = Unlawful Interference (hijack). 7600=Radio failure. 7700=General emergency.' },
+    { q:'"SILENCE FEENEE" means:', opts:['Maintain radio silence','Emergency over — normal comms resume','Emergency escalating','Switch to guard frequency'], ans:1, exp:'SILENCE FEENEE (French: fini = finished) ends the distress silence period.' },
+    { q:'International emergency VHF frequency is:', opts:['123.45 MHz','118.0 MHz','121.5 MHz','126.9 MHz'], ans:2, exp:'121.5 MHz VHF is the international aeronautical emergency / guard frequency.' },
+    { q:'MAYDAY is spoken how many times?', opts:['Once','Twice','Three times','Five times'], ans:2, exp:'MAYDAY MAYDAY MAYDAY — three times at the beginning of the distress call.' },
+    { q:'Message priority 2 after MAYDAY is:', opts:['Met messages','Flight safety','PAN PAN (Urgency)','Direction finding'], ans:2, exp:'Priority: 1=MAYDAY, 2=PAN PAN, 3=DF, 4=Flight safety, 5=Met, 6=Regularity.' },
+  ], 'emerg'));
+  return f;
+}
+
+function buildLic() {
+  const f = document.createDocumentFragment();
+  f.appendChild(secLabel('LICENSING FRAMEWORK — INDIA'));
+  f.appendChild(tbl(['LICENCE / CERT','ISSUING AUTHORITY','PURPOSE'],[
+    ['RTR(A) — Restricted Radiotelephony (Aeronautical)','WPC — Wireless Planning & Coordination (DoT)','Required for anyone operating aircraft RT equipment'],
+    ['Aircraft Radio Station Licence (ARSL)','WPC — Ministry of Telecommunications','Required per individual aircraft radio installation'],
+    ['ATC Operator Licence','DGCA','Authorises ATC personnel to provide services'],
+    ['CPL / ATPL with RT endorsement','DGCA','Pilot licences include RT endorsement'],
+  ]));
+  f.appendChild(note('RTR(A) — KEY FACTS',`<strong>Issued by:</strong> WPC (Wireless Planning & Coordination Wing), Ministry of Telecommunications — NOT DGCA.<br><br><strong>Required for:</strong> every person who operates aeronautical RT equipment — pilots, co-pilots, comm operators.<br><br><strong>Legal basis:</strong> Indian Telegraph Act, 1885 and ITU Radio Regulations.`,'amber'));
+  f.appendChild(secLabel('RADIO EQUIPMENT REQUIREMENTS'));
+  f.appendChild(cardGrid(
+    card('VHF requirement — commercial international','Minimum 2 independent VHF communication systems.\nBand: 118–136.975 MHz.\nGuard 121.5 MHz must be monitored.','VHF'),
+    card('HF requirement','Required for oceanic and long-range routes beyond VHF range (3–30 MHz).\nSSB (Single Sideband) modulation used.','HF'),
+    card('ELT — Emergency Locator Transmitter','Passenger aircraft: minimum 2 ELTs.\nGA / cargo: minimum 1 automatic ELT.\nTransmits on 121.5 MHz and 406 MHz (COSPAS-SARSAT).','ELT'),
+    card('Transponder requirement','Mode S mandatory. ADS-B Out for international routes (post-2020).\nProvides: aircraft ID + altitude to SSR radar.','XPDR'),
+  ));
+  f.appendChild(secLabel('ICAO vs DGCA — COMPARISON'));
+  f.appendChild(tbl(['REQUIREMENT','ICAO ANNEX 6','DGCA (INDIA)'],[
+    ['Radio Licence','Required by state of registry','Issued by WPC — mandatory'],
+    ['Pilot RT Cert','At least one licensed operator','RTR(A) issued by WPC — mandatory'],
+    ['VHF Radios','Min 2 commercial, 1 GA','2 commercial, 1 GA'],
+    ['HF Radios','Required oceanic/remote routes','Required oceanic/remote routes'],
+    ['ELT','At least 1 auto (406 MHz)','2 passenger AC, 1 GA'],
+    ['Transponder','Mode C/S or ADS-B','Mode S, ADS-B mandatory'],
+  ]));
+  f.appendChild(secLabel('QUIZ'));
+  f.appendChild(quiz([
+    { q:'RTR(A) licence is issued by:', opts:['DGCA','AAI','WPC (Ministry of Telecom)','MoCA'], ans:2, exp:'RTR(A) is issued by Wireless Planning & Coordination (WPC) under Ministry of Telecommunications, NOT DGCA.' },
+    { q:'Aircraft Radio Station Licence (ARSL) is required:', opts:['Once per pilot','Per aircraft radio installation','Per airline fleet','Only for HF equipment'], ans:1, exp:'ARSL is required for each individual radio installation in each aircraft.' },
+    { q:'ELT transmits on:', opts:['121.5 MHz only','243.0 MHz only','121.5 MHz and 406 MHz','118.0 MHz and 406 MHz'], ans:2, exp:'Modern ELTs transmit on 121.5 MHz (legacy) and 406 MHz (COSPAS-SARSAT).' },
+  ], 'lic'));
+  return f;
+}
+
+function buildMet() {
+  const f = document.createDocumentFragment();
+  f.appendChild(secLabel('METEOROLOGICAL CODES — OVERVIEW'));
+  f.appendChild(tbl(['CODE','FULL NAME','ISSUED','VALIDITY'],[
+    ['METAR','Meteorological Aerodrome Report','Every 30 min (some hourly)','30–60 min'],
+    ['SPECI','Special METAR (significant change)','As required','Until next METAR'],
+    ['TAF','Terminal Aerodrome Forecast','4× daily','24 or 30 hours'],
+    ['SIGMET','Significant Met Information','As needed','Up to 4 hrs (6 for TC/VA)'],
+    ['AIRMET',"Airmen's Met Information",'As needed','En-route, low level'],
+    ['PIREP','Pilot Report (in-flight obs)','By pilots in flight','Real-time'],
+    ['VOLMET','Continuous RT wx broadcast','Continuous broadcast','—'],
+    ['ATIS','Auto Terminal Info Service','Hourly or on sig change','Until next issue'],
+  ]));
+  f.appendChild(secLabel('METAR DECODE EXAMPLE'));
+  f.appendChild(note('SAMPLE METAR','<strong>VOMM 101000Z 21015KT 5000 TSRA FEW015CB SCT030 29/26 Q1005 TEMPO 2000 +TSRA</strong>','blue'));
+  f.appendChild(tbl(['ELEMENT','FROM EXAMPLE','MEANING'],[
+    ['Station','VOMM','Chennai Meenambakkam'],
+    ['Date/Time','101000Z','10th day, 1000 UTC'],
+    ['Wind','21015KT','210° at 15 knots'],
+    ['Visibility','5000','5000 metres'],
+    ['Weather','TSRA','Thunderstorm with rain'],
+    ['Cloud','FEW015CB','Few at 1500 ft, cumulonimbus'],
+    ['Temp/Dew','29/26','29°C / Dewpoint 26°C'],
+    ['QNH','Q1005','QNH 1005 hPa'],
+    ['Trend','TEMPO 2000 +TSRA','Temporarily 2km vis, heavy TS rain'],
+  ]));
+  f.appendChild(secLabel('CLOUD COVER CODES'));
+  f.appendChild(tbl(['CODE','MEANING','OKTAS (eighths)'],[
+    ['SKC','Sky clear','0'],['FEW','Few clouds','1–2'],['SCT','Scattered','3–4'],
+    ['BKN','Broken','5–7'],['OVC','Overcast','8'],
+  ]));
+  f.appendChild(note('SIGMET HAZARDS',`SIGMETs are issued for weather hazardous to <strong>all aircraft</strong>:<br>Severe turbulence · Severe icing · Severe mountain wave · Tropical cyclone · Severe dust/sandstorm · Volcanic ash · Radioactive release.<br><br><strong>Validity:</strong> Up to 4 hours normally. Up to <strong>6 hours</strong> for TC and VA.`,'red'));
+  f.appendChild(secLabel('QUIZ'));
+  f.appendChild(quiz([
+    { q:'METAR is issued at intervals of:', opts:['Every hour only','Every 30 min at major airports','Every 2 hours','Every 15 minutes'], ans:1, exp:'METAR is issued every 30 minutes at major airports.' },
+    { q:'SPECI is issued when:', opts:['Every 30 min','Significant weather change warrants a special report','At sunrise and sunset','Requested by pilot'], ans:1, exp:'SPECI = Special METAR triggered by significant meteorological change.' },
+    { q:'SIGMET for volcanic ash is valid for:', opts:['2 hours','4 hours','Up to 6 hours','12 hours'], ans:2, exp:'VA and TC SIGMETs valid up to 6 hours; all other SIGMETs up to 4 hours.' },
+    { q:'BKN in a METAR means:', opts:['1–2 oktas','3–4 oktas','5–7 oktas','8 oktas'], ans:2, exp:'BKN = Broken = 5 to 7 oktas cloud cover.' },
+  ], 'met'));
+  return f;
+}
+
+function buildRadio() {
+  const f = document.createDocumentFragment();
+  f.appendChild(secLabel('FREQUENCY BANDS'));
+  f.appendChild(tbl(['BAND','FREQUENCY','PROPAGATION','AVIATION USE'],[
+    ['LF','30–300 kHz','Ground wave','NDB (Non-Directional Beacon)'],
+    ['MF','300 kHz–3 MHz','Ground + sky wave','NDB, some comms'],
+    ['HF','3–30 MHz','Sky wave (ionosphere)','Long-range / oceanic comms'],
+    ['VHF','30–300 MHz','Line of sight','Primary ATC comms (118–136 MHz), VOR, ILS LOC'],
+    ['UHF','300 MHz–3 GHz','Line of sight','DME, SSR transponders, military'],
+    ['SHF','3–30 GHz','Line of sight','ILS Glidepath, radar, SATCOM'],
+  ]));
+  f.appendChild(secLabel('IONOSPHERIC LAYERS'));
+  f.appendChild(tbl(['LAYER','HEIGHT','EXISTS','EFFECT'],[
+    ['D Layer','60–90 km','Day only','Absorbs HF signals. Disappears at night → HF range increases.'],
+    ['E Layer','90–130 km','Day (some night)','Reflects MF, some HF. Sporadic-E occasionally.'],
+    ['F1 Layer','130–210 km','Day only','Merges with F2 at night.'],
+    ['F2 Layer','210–400 km','Day AND night','PRIMARY HF reflection layer. Present even at night.'],
+  ]));
+  f.appendChild(note('KEY IONOSPHERE FACTS FOR EXAM',`<strong>D layer</strong> disappears at night → HF signals travel further (D was absorbing them in the day).<br><br><strong>F1 + F2 merge</strong> at night into a single F layer.<br><br><strong>Skip distance</strong> = minimum distance from TX where sky wave first returns to ground.<br><br><strong>Dead zone (skip zone)</strong> = area between max ground wave range and min sky wave return. No signal here.<br><br><strong>VHF and above:</strong> NOT affected by ionosphere — line of sight only.`,'blue'));
+  f.appendChild(secLabel('MODULATION TYPES'));
+  f.appendChild(cardGrid(
+    card('AM — Amplitude Modulation','Amplitude of carrier wave varies with the audio signal. Frequency stays constant.\nUsed in: VHF ATC (DSB-AM). Susceptible to atmospheric noise.','MOD'),
+    card('FM — Frequency Modulation','Frequency of carrier varies with the audio. Amplitude stays constant.\nBetter noise immunity. Used in weather broadcasts, civil radio.','MOD'),
+    card('SSB — Single Sideband','One sideband of AM is suppressed. Reduces bandwidth by ~50%.\nUsed in: HF long-range communications.','MOD'),
+    card('DSB — Double Sideband','Both sidebands transmitted (standard AM).\nUsed in: VHF ATC communications (standard).','MOD'),
+  ));
+  f.appendChild(note('LINE OF SIGHT RANGE','VHF range (NM) ≈ <strong>1.25 × √altitude (ft)</strong><br><br>Example: Aircraft at 10,000 ft → range ≈ 1.25 × 100 = <strong>125 NM</strong>','green'));
+  f.appendChild(secLabel('QUIZ'));
+  f.appendChild(quiz([
+    { q:'HF communications use which propagation mode?', opts:['Line of sight','Ground wave only','Sky wave (ionospheric reflection)','Satellite relay'], ans:2, exp:'HF (3–30 MHz) bounces off the ionosphere (sky wave) for long-range comms.' },
+    { q:'The F2 layer is significant because:', opts:['Absorbs HF at night','It is the primary HF-reflecting layer, present day and night','Disappears with E layer','Only reflects VHF'], ans:1, exp:'F2 is the most important HF-reflecting layer — remains present at night.' },
+    { q:'VHF ATC uses which modulation?', opts:['FM','SSB','DSB-AM','PCM'], ans:2, exp:'VHF ATC uses Double Sideband Amplitude Modulation (DSB-AM).' },
+    { q:'Why does HF range increase at night?', opts:['F2 layer disappears','D layer disappears — it was absorbing HF signals in the day','E layer rises higher','Ground conductivity improves'], ans:1, exp:'D layer exists only in daytime and absorbs HF. When D disappears at night, HF reaches F2 and reflects much further.' },
+  ], 'radio'));
+  return f;
+}
+
+function buildSelcal() {
+  const f = document.createDocumentFragment();
+  f.appendChild(note('WHAT IS SELCAL?','<strong>Selective Calling System</strong> — allows a ground station to alert a specific aircraft by transmitting its unique 4-tone code. Aircrew do not need to continuously monitor noisy HF.','blue'));
+  f.appendChild(secLabel('HOW SELCAL WORKS'));
+  f.appendChild(tbl(['STEP','ACTION'],[
+    ['1','ATC encodes the aircraft\'s unique SELCAL code at the ground station transmitter.'],
+    ['2','The 4-tone sequence is sent over HF: two tone-pairs, each pair simultaneously, ~2.2 sec total.'],
+    ['3','The aircraft\'s SELCAL decoder recognises its own code.'],
+    ['4','Cockpit alert: visual (light flashes) + audio (chime sounds).'],
+    ['5','Pilot switches to active monitoring or responds to ATC.'],
+  ]));
+  f.appendChild(secLabel('SELCAL QUICK FACTS'));
+  f.appendChild(tbl(['PARAMETER','VALUE'],[
+    ['Available tone letters','A B C D E F G H J K L M P Q R S (16 tones — I, N, O excluded)'],
+    ['Code format','4 letters in 2 pairs, e.g. AB-CD. Each pair sent simultaneously.'],
+    ['SELCAL 16 capacity','~10,920 unique codes'],
+    ['Transmission duration','1 sec (pair 1) + 0.2 sec gap + 1 sec (pair 2) = 2.2 seconds total'],
+    ['Code issuing authority','ASRI — Aviation Spectrum Resources Inc. (USA), per ICAO guidelines'],
+    ['Usage in India','HF communication ONLY'],
+  ]));
+  f.appendChild(note('SELCAL CHECK SEQUENCE',`Always check <strong>Secondary HF first</strong>, then <strong>Primary HF</strong>.<br><br>Pilot: <em>"Delhi Radio, AIRINDIA 302, request SELCAL check on secondary."</em><br>ATC: [transmits SELCAL code]<br>Pilot: <em>"SELCAL check OK on secondary. Changing to primary."</em><br><br>If SELCAL is unserviceable: <strong>flight can continue</strong> — but pilots must monitor HF continuously.`,'green'));
+  f.appendChild(secLabel('QUIZ'));
+  f.appendChild(quiz([
+    { q:'In India, SELCAL is used on:', opts:['VHF only','HF only','Both VHF and HF','SATCOM only'], ans:1, exp:'In India, SELCAL is used on HF communication only.' },
+    { q:'A SELCAL code consists of:', opts:['2 letters','4 letters (A–S, excluding I, N, O)','4 numbers','6 alphanumeric characters'], ans:1, exp:'SELCAL codes are 4 letters from A to S, excluding I, N, and O, in two pairs.' },
+    { q:'SELCAL check is performed:', opts:['Primary first, then Secondary','Secondary first, then Primary','Primary only','Either order'], ans:1, exp:'Always Secondary first, then Primary HF frequency.' },
+    { q:'Total SELCAL transmission time is:', opts:['1 second','2 seconds','2.2 seconds','4 seconds'], ans:2, exp:'1 sec (pair 1) + 0.2 sec gap + 1 sec (pair 2) = 2.2 seconds total.' },
+  ], 'selcal'));
+  return f;
+}
+
+function buildSatcom() {
+  const f = document.createDocumentFragment();
+  f.appendChild(note('SATCOM PURPOSE','VHF and HF can fail over <strong>oceans, mountains, polar regions</strong>. SATCOM provides <strong>uninterrupted global communication</strong> via satellite.'));
+  f.appendChild(tbl(['SATELLITE TYPE','DESCRIPTION','LIMITATION'],[
+    ['Active satellite','Has onboard amplifier. Receives, amplifies, and retransmits signal.','More complex, but standard for aviation SATCOM.'],
+    ['Passive satellite','No amplifier — reflects signals back to Earth like a mirror.','Weak return signal strength.'],
+  ]));
+  f.appendChild(secLabel('SATCOM FREQUENCY BANDS'));
+  f.appendChild(tbl(['BAND','FREQUENCY','USED FOR'],[
+    ['L-band','1–2 GHz','Aircraft terminal → satellite (voice/data). Aircraft-side frequency.'],
+    ['S-band','2–4 GHz','Weather satellites, some data links.'],
+    ['C-band','4–8 GHz','Ground earth station → satellite (uplink). Older SATCOM.'],
+    ['X-band','8–12 GHz','Military SATCOM, weather radar.'],
+    ['Ku-band','12–18 GHz','Modern broadband, passenger WiFi.'],
+    ['Ka-band','26–40 GHz','High-speed broadband SATCOM.'],
+  ]));
+  f.appendChild(note('UPLINK vs DOWNLINK','<strong>Uplink:</strong> Ground Earth Station (GES) → Satellite. Uses C-band (4–8 GHz).<br><strong>Downlink:</strong> Satellite → Aircraft Earth Station (AES). Uses L-band (1–2 GHz).<br><br>Different frequencies prevent TX/RX interference.','green'));
+  f.appendChild(secLabel('VDL — VHF DATA LINK MODES'));
+  f.appendChild(tbl(['MODE','STANDARD','STATUS / USE'],[
+    ['VDL Mode 1','Legacy ACARS over VHF','Older aircraft — being phased out.'],
+    ['VDL Mode 2','ACARS over VDL2, ATN','Current standard for ATC datalink: CPDLC, ATIS-D, D-METAR.'],
+    ['VDL Mode 3','Voice + data combined','Combines voice + data in same channel. Not widely deployed.'],
+    ['VDL Mode 4','VHF nav aid, ADS-B','ADS-B position broadcasts on 1090 MHz.'],
+  ]));
+  f.appendChild(note('CPDLC','<strong>Controller–Pilot Data Link Communications</strong> — uses VDL Mode 2. Replaces some voice RT with digital text messages. Reduces congestion on busy ATC frequencies.','blue'));
+  f.appendChild(secLabel('QUIZ'));
+  f.appendChild(quiz([
+    { q:'An active satellite:', opts:['Simply reflects signals','Receives, amplifies and retransmits signals','Transmits its own signals','Stores and forwards messages'], ans:1, exp:'Active = repeater with amplifier. Passive = mirror/reflector. All modern SATCOM = active.' },
+    { q:'VDL Mode 2 is used for:', opts:['Legacy ACARS','ADS-B position broadcast','CPDLC and ATC datalink','Voice communications only'], ans:2, exp:'VDL Mode 2 is the current standard for ATC datalink including CPDLC.' },
+    { q:'L-band (1–2 GHz) is used for:', opts:['Ground station to satellite uplink','Passenger broadband WiFi','Aircraft terminal to satellite','Military SATCOM'], ans:2, exp:'L-band is the aircraft-side SATCOM terminal frequency. C-band is the ground station.' },
+  ], 'satcom'));
+  return f;
+}
+
+function buildICS() {
+  const f = document.createDocumentFragment();
+  f.appendChild(secLabel('INTERNAL COMMUNICATION SYSTEMS'));
+  f.appendChild(tbl(['SYSTEM','PURPOSE','WHO USES IT'],[
+    ['Flight Interphone','Communication between cockpit and cabin crew','Pilots ↔ Cabin crew'],
+    ['Cabin Interphone','Communication within cabin between crew stations','Cabin crew ↔ Cabin crew'],
+    ['Service Interphone','On-ground maintenance / ground crew comms','Crew ↔ Ground technicians'],
+    ['Passenger Address (PA)','One-way announcements to passengers','Crew → Passengers'],
+    ['Crew Call System','Alert signal between stations (chime + light)','Any crew → Any station'],
+    ['ACARS','Aircraft Communications and Reporting System — datalink','Cockpit ↔ Airline OCC'],
+  ]));
+  f.appendChild(note('PRIORITY ORDER (HIGH → LOW)',`<strong>1.</strong> ATC Communications (external VHF / HF)<br><strong>2.</strong> MAYDAY / Emergency calls<br><strong>3.</strong> Flight Interphone (cockpit ↔ cabin)<br><strong>4.</strong> Cabin Interphone<br><strong>5.</strong> PA System (passengers)<br><strong>6.</strong> Service Interphone (ground crew)`,'amber'));
+  f.appendChild(secLabel('PA SYSTEM DETAILS'));
+  f.appendChild(cardGrid(
+    card('Who can make PA announcements?','Captain has priority. Cabin crew can also make PA announcements. Automated chimes are lowest priority.','PA'),
+    card('Can passengers hear Flight Interphone?','NO. Flight interphone is private between flight deck and cabin crew only. PA is one-way to passengers.','PA'),
+    card('Service Interphone location?','External access panels — belly, wheel wells, galley. Used when aircraft is on ground.','PA'),
+    card('Crew Call chime pattern?','Varies by aircraft. Typically: single high-low chime = flight deck calling cabin. Single high chime = cabin calling flight deck.','PA'),
+  ));
+  f.appendChild(secLabel('QUIZ'));
+  f.appendChild(quiz([
+    { q:'Highest priority in the ICS hierarchy is:', opts:['PA system','Cabin interphone','ATC communications (external)','Crew call chimes'], ans:2, exp:'ATC external communications always have the highest priority in the aircraft communication hierarchy.' },
+    { q:'Service interphone is primarily used:', opts:['In-flight between cabin crew','On ground by maintenance crew','By passengers to call crew','Cockpit only'], ans:1, exp:'Service interphone is for ground crew and maintenance technicians — external access points around the aircraft.' },
+    { q:'PA system is:', opts:['Two-way crew communication','One-way announcements to passengers','Emergency use only','Crew-to-ATC backup'], ans:1, exp:'PA = Passenger Address = one-way broadcast from crew to passengers.' },
+  ], 'ics'));
+  return f;
+}
+
+
+/* ============================================================
+   5. ENGINE — NAV, NOTES, BADGES, SEARCH
+   ============================================================ */
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  document.getElementById('theme-btn').textContent = isLight ? '🌙 DARK MODE' : '☀ LIGHT MODE';
+  localStorage.setItem('rtr_theme', isLight ? 'light' : 'dark');
+}
+function buildNav() {
+  const list = document.getElementById('nav-list');
+  MODULES.forEach((m, i) => {
+    const d = document.createElement('div');
+    d.className = 'nav-item';
+    d.id = 'nav-' + m.id;
+    d.innerHTML = `<span class="nav-num">${String(i+1).padStart(2,'0')}</span><span class="nav-text">${m.title}</span><span class="nav-dot" id="dot-${m.id}"></span>`;
+    d.onclick = () => loadModule(m);
+    list.appendChild(d);
+  });
+}
+
+function loadModule(m) {
+  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+  document.getElementById('nav-' + m.id).classList.add('active');
+
+  document.getElementById('freq-num').textContent  = m.freq;
+  document.getElementById('mod-title').textContent = m.title;
+  document.getElementById('mod-sub').textContent   = m.sub;
+
+  visited.add(m.id);
+  const dot = document.getElementById('dot-' + m.id);
+  if (dot && !dot.classList.contains('done')) dot.classList.add('visited');
+  updateProgress();
+  currentModId = m.id;
+
+  // Hide all special panels safely (no innerHTML wipe)
+  ['landing','rf-panel','missed-panel','drill-panel'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+
+  // Load notes panel (visible above module content)
+  loadNotes(m.id);
+
+  // Only clear the dedicated module-content slot
+  const slot = document.getElementById('module-slot');
+  slot.innerHTML = '';
+  slot.appendChild(m.build());
+
+  updateModBadge(m.id);
+  saveState();
+}
+
+function loadNotes(modId) {
+  const notes = MODULE_NOTES[modId];
+  const body = document.getElementById('notes-body');
+  body.innerHTML = '';
+  if (notes && notes.length) {
+    notes.forEach(n => {
+      const d = document.createElement('div');
+      d.className = 'exam-note';
+      d.innerHTML = n;
+      body.appendChild(d);
+    });
+    document.getElementById('notes-panel').style.display = 'block';
+  } else {
+    document.getElementById('notes-panel').style.display = 'none';
+  }
+  // Always start collapsed
+  body.classList.remove('open');
+  document.getElementById('notes-toggle-icon').textContent = '▼';
+  notesOpen = false;
+}
+
+function toggleNotes() {
+  notesOpen = !notesOpen;
+  document.getElementById('notes-body').classList.toggle('open', notesOpen);
+  document.getElementById('notes-toggle-icon').textContent = notesOpen ? '▲' : '▼';
+}
+
+function updateModBadge(modId) {
+  const badge = document.getElementById('mod-badge');
+  if (!modId) { badge.className = 'mod-badge'; return; }
+  const pct = completed[modId];
+  if (pct === undefined) {
+    badge.className = 'mod-badge incomplete';
+    badge.textContent = 'NOT ATTEMPTED';
+  } else if (pct >= 70) {
+    badge.className = 'mod-badge complete';
+    badge.textContent = '✓ COMPLETE ' + pct + '%';
+  } else {
+    badge.className = 'mod-badge incomplete';
+    badge.textContent = 'SCORE: ' + pct + '% (NEED 70%)';
+  }
+}
+
+function updateProgress() {
+  const doneCount = Object.keys(completed).filter(id => completed[id] >= 70).length;
+  const visitedCount = visited.size;
+  const pct = Math.round(visitedCount / MODULES.length * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  updateScoreBadge();
+}
+
+function updateScoreBadge() {
+  document.getElementById('score-badge').textContent = scores.c + ' / ' + scores.t;
+}
+
+/* ============================================================
+   6. SEARCH
+   ============================================================ */
+const SEARCH_INDEX = [
+  { mod:'defs',     terms:'ATS airspace CTR TMA FIR control zone blind transmission ATIS simplex duplex semi-duplex guard frequency' },
+  { mod:'abbr',     terms:'QNH QFE QDM QDR QTE QNE QFU QGH VHF HF ELT SSR ATIS METAR SELCAL SATCOM CPDLC ILS VOR RVR Q-code abbreviation' },
+  { mod:'phrase',   terms:'ROGER WILCO AFFIRM MAYDAY PANPAN ACKNOWLEDGE CLEARED APPROVE CONFIRM CONTACT NEGATIVE STANDBY READBACK GO AHEAD OUT OVER CHECK CORRECTION DISREGARD EXPEDITE' },
+  { mod:'numbers',  terms:'pronunciation heading QNH transponder squawk altitude flight level frequency runway time NINER FIFE TREE TOO ZE-RO WUN' },
+  { mod:'callsign', terms:'TOWER GROUND APPROACH ARRIVAL DEPARTURE CONTROL INFORMATION OCEANIC PRECISION HOMER DELIVERY APRON type A type B registration VT-KNT abbreviate' },
+  { mod:'fir',      terms:'FIR Mumbai Delhi Chennai Kolkata Guwahati VABB VIDP VOMM VECC VOBL VOHS VOCI VAAH ICAO location indicator airport code' },
+  { mod:'airline',  terms:'Air India IndiGo SpiceJet AIRINDIA IFLY SPICEJET British Airways SPEEDBIRD Emirates Lufthansa telephony designator ICAO IATA callsign' },
+  { mod:'tech',     terms:'speaking rate 100 wpm readability scale phonetic alphabet ALFA BRAVO CHARLIE DELTA ECHO FOXTROT GOLF HOTEL INDIA JULIETT KILO LIMA MIKE NOVEMBER OSCAR PAPA QUEBEC ROMEO SIERRA TANGO UNIFORM VICTOR WHISKEY XRAY YANKEE ZULU four Ws PTT' },
+  { mod:'emerg',    terms:'MAYDAY PAN PAN PANPAN SECURITY 7700 7600 7500 squawk hijack radio failure emergency silence SILENCE MAYDAY SILENCE FEENEE SILENCE DISTRESS 121.5 souls on board fuel endurance distress urgency' },
+  { mod:'lic',      terms:'RTR WPC DGCA ARSL licence ELT transponder Mode S ADS-B VHF HF equipment requirement wireless planning coordination' },
+  { mod:'met',      terms:'METAR TAF SIGMET AIRMET PIREP VOLMET ATIS SPECI cloud cover FEW SCT BKN OVC oktas QNH thunderstorm TSRA volcanic ash tropical cyclone validity' },
+  { mod:'radio',    terms:'VHF HF LF MF UHF SHF frequency band propagation ionosphere D layer E layer F1 F2 skip distance dead zone AM FM SSB DSB modulation line of sight VHF range formula' },
+  { mod:'selcal',   terms:'SELCAL selective calling system HF tones code 4 letters check procedure secondary primary ASRI 2.2 seconds' },
+  { mod:'satcom',   terms:'SATCOM satellite L-band C-band Ku-band Ka-band uplink downlink active passive geostationary VDL Mode 1 2 3 4 CPDLC ACARS ADS-B' },
+  { mod:'ics',      terms:'ICS flight interphone cabin interphone service interphone PA passenger address crew call ACARS priority ATC cockpit cabin ground' },
+];
+
+function doSearch(val) {
+  const q = val.trim().toLowerCase();
+  const container = document.getElementById('search-results');
+  if (q.length < 2) { container.innerHTML = ''; container.style.display = 'none'; return; }
+
+  const results = [];
+  SEARCH_INDEX.forEach(entry => {
+    if (entry.terms.toLowerCase().includes(q)) {
+      const mod = MODULES.find(m => m.id === entry.mod);
+      if (mod) results.push(mod);
+    }
+  });
+
+  if (!results.length) {
+    container.innerHTML = '<div class="search-result-item" style="color:var(--muted)">No results found</div>';
+  } else {
+    container.innerHTML = results.map(m =>
+      `<div class="search-result-item" onclick="loadModule(MODULES.find(x=>x.id==='${m.id}')); document.getElementById('sidebar-search').value=''; toggleSearchResults(false)">
+        <div class="sr-module">${String(MODULES.indexOf(m)+1).padStart(2,'0')} — ${m.sub}</div>
+        <div>${m.title}</div>
+      </div>`
+    ).join('');
+  }
+  container.style.display = 'block';
+
+  // Highlight in content
+  if (results.length === 1) {
+    setTimeout(() => highlightInContent(q), 300);
+  }
+}
+
+function toggleSearchResults(show) {
+  const c = document.getElementById('search-results');
+  if (!show) { c.style.display = 'none'; }
+}
+
+function highlightInContent(term) {
+  const content = document.getElementById('module-slot');
+  const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null, false);
+  const matches = [];
+  let node;
+  while ((node = walker.nextNode())) {
+    if (node.textContent.toLowerCase().includes(term)) matches.push(node);
+  }
+  matches.forEach(n => {
+    const re = new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+    const span = document.createElement('span');
+    span.innerHTML = n.textContent.replace(re, '<mark class="search-hl">$1</mark>');
+    n.parentNode.replaceChild(span, n);
+  });
+}
+
+/* ============================================================
+   7. RAPID FIRE
+   ============================================================ */
+function collectAllQuestions() {
+  return [
+    { q:'A CTR extends from:', opts:['FL100 upward','1000ft AGL','The surface to a specified upper limit','500ft AGL'], ans:2, exp:'CTR = from surface to specified upper limit' },
+    { q:'Aircraft VHF RT is:', opts:['Full Duplex','Simplex','Semi-Duplex','Half-Duplex in emergencies'], ans:2, exp:'Semi-Duplex — PTT, one direction at a time' },
+    { q:'QNH gives:', opts:['Height above aerodrome','Altitude above MSL','Pressure altitude','True altitude'], ans:1, exp:'QNH → altitude above Mean Sea Level' },
+    { q:'QFE set → altimeter reads __ on runway:', opts:['Field elevation','Pressure alt','Zero','MSL alt'], ans:2, exp:'QFE = zero on touchdown at that aerodrome' },
+    { q:'You receive a clearance and will comply. Say:', opts:['ROGER','AFFIRM','WILCO','ROGER WILCO'], ans:2, exp:'WILCO = understand + will comply' },
+    { q:'ATC says "Check altimeter." Reply is:', opts:['Expected always','Not normally expected','Mandatory readback','Required in IMC'], ans:1, exp:'CHECK = no reply normally expected' },
+    { q:'"AFFIRM" means:', opts:['Will comply','Received','Yes — correct','Affirmative'], ans:2, exp:'AFFIRM = Yes. Never say "affirmative".' },
+    { q:'Heading 090 is transmitted as:', opts:['ZERO NINE','NINER ZERO','ZERO NINER ZERO','HEADING NINETY'], ans:2, exp:'Each digit: ZERO NINER ZERO' },
+    { q:'Altitude 12,000 ft is:', opts:['TWELVE THOUSAND','ONE TWO ZERO ZERO ZERO','ONE TWO THOUSAND','ONE-TWO THOUSAND'], ans:2, exp:'ONE TWO THOUSAND' },
+    { q:'"3" is pronounced:', opts:['THREE','THRI','TREE','TRI'], ans:2, exp:'TREE — avoids confusion with "free"' },
+    { q:'Surface Movement Control suffix:', opts:['TOWER','GROUND','RADAR','CONTROL'], ans:1, exp:'Ground Movement Control = GROUND' },
+    { q:'Call sign abbreviated by:', opts:["Pilot's choice","Only after ATC abbreviates first",'After first contact','Never'], ans:1, exp:'Only after ATC first uses abbreviated form' },
+    { q:'ICAO code for Chennai airport:', opts:['VOCH','VOMM','VECC','VICC'], ans:1, exp:'VOMM = Chennai Meenambakkam' },
+    { q:'India has how many FIRs?', opts:['3','4','5','6'], ans:2, exp:'5 FIRs: Mumbai, Delhi, Chennai, Kolkata, Guwahati' },
+    { q:'VIDP is:', opts:['Vizag','Delhi IGI','Dehradun','Dimapur'], ans:1, exp:'VIDP = Delhi Indira Gandhi International' },
+    { q:'Squawk 7500 means:', opts:['Radio failure','General emergency','Hijack','Min fuel'], ans:2, exp:'7500 = Unlawful Interference / Hijack' },
+    { q:'MAYDAY is spoken:', opts:['Once','Twice','Three times','Five times'], ans:2, exp:'MAYDAY MAYDAY MAYDAY — three times' },
+    { q:'Emergency frequency:', opts:['123.45','118.0','121.5','126.9'], ans:2, exp:'121.5 MHz = international emergency frequency' },
+    { q:'RTR(A) issued by:', opts:['DGCA','AAI','WPC (Ministry of Telecom)','MoCA'], ans:2, exp:'WPC under Ministry of Telecommunications' },
+    { q:'ELT transmits on:', opts:['121.5 only','243.0 only','121.5 and 406 MHz','118.0 and 406 MHz'], ans:2, exp:'121.5 MHz (legacy) + 406 MHz (COSPAS-SARSAT)' },
+    { q:'METAR issued every:', opts:['Hour only','30 min at major airports','2 hours','15 min'], ans:1, exp:'30 minutes at major airports' },
+    { q:'SIGMET for volcanic ash valid for:', opts:['2 hrs','4 hrs','Up to 6 hrs','12 hrs'], ans:2, exp:'VA and TC SIGMETs valid up to 6 hours' },
+    { q:'BKN means:', opts:['1–2 oktas','3–4 oktas','5–7 oktas','8 oktas'], ans:2, exp:'BKN = Broken = 5–7 oktas' },
+    { q:'HF propagation mode:', opts:['Line of sight','Ground wave only','Sky wave','Satellite relay'], ans:2, exp:'HF = sky wave (ionospheric reflection)' },
+    { q:'VHF ATC modulation:', opts:['FM','SSB','DSB-AM','PCM'], ans:2, exp:'VHF ATC = Double Sideband Amplitude Modulation' },
+    { q:'D layer disappears at night causing:', opts:['VHF range drops','HF range increases','VOR failure','ATIS interruption'], ans:1, exp:'D layer absorbed HF in day — gone at night → HF travels further' },
+    { q:'SELCAL in India used on:', opts:['VHF only','HF only','Both VHF and HF','SATCOM'], ans:1, exp:'India: SELCAL on HF only' },
+    { q:'SELCAL check sequence:', opts:['Primary first','Secondary first','Either order','Both simultaneously'], ans:1, exp:'Secondary first, then Primary HF frequency' },
+    { q:'Active satellite:', opts:['Reflects signals','Amplifies and retransmits','Transmits own signals','Stores and forwards'], ans:1, exp:'Active = repeater with amplifier' },
+    { q:'L-band (1–2 GHz) used for:', opts:['Ground uplink','Passenger WiFi','Aircraft to satellite','Military'], ans:2, exp:'L-band = aircraft-side SATCOM terminal frequency' },
+    { q:'Highest ICS priority:', opts:['PA system','Cabin interphone','ATC external comms','Crew call'], ans:2, exp:'ATC external communications = highest priority' },
+    { q:'PA system is:', opts:['Two-way comms','One-way to passengers','Emergency only','ATC backup'], ans:1, exp:'PA = Passenger Address = one-way broadcast' },
+    { q:'ROGER WILCO is:', opts:['Standard','Non-standard — redundant','HF only','Emergency use'], ans:1, exp:'WILCO already implies receipt — ROGER WILCO is redundant and non-standard' },
+    { q:'F2 layer is present:', opts:['Day only','Night only','Day and night','Only during solar max'], ans:2, exp:'F2 = primary HF reflector, present day AND night' },
+    { q:'The digit "9" is spoken as:', opts:['NINE','NINER','NEE-NER','NIN'], ans:1, exp:'NINER to distinguish from German "nein" = no' },
+    { q:'QDR is:', opts:['Heading TO station','True bearing from station','Magnetic bearing FROM station','Distance to station'], ans:2, exp:'QDR = magnetic bearing of position FROM station = radial' },
+    { q:'British Airways R/T callsign:', opts:['BRITAIR','SPEEDBIRD','AIRWAYS','BRITISH'], ans:1, exp:'British Airways = SPEEDBIRD' },
+    { q:'SILENCE FEENEE means:', opts:['Impose silence','Emergency over, resume comms','Escalate to MAYDAY','Switch frequencies'], ans:1, exp:'French "fini" = finished. Ends the silence period.' },
+    { q:'VDL Mode 2 used for:', opts:['Legacy ACARS','ADS-B','CPDLC and ATC datalink','Voice only'], ans:2, exp:'VDL Mode 2 = current ATC datalink standard, includes CPDLC' },
+    { q:'SELCAL tone transmission duration:', opts:['1 second','2 seconds','2.2 seconds','4 seconds'], ans:2, exp:'2.2 seconds = 1s + 0.2s gap + 1s' },
+  ].sort(() => Math.random() - 0.5);
+}
+
+function startRapidFire() {
+  rfQuestions = collectAllQuestions();
+  rfCurrent = 0; rfCorrect = 0; rfDone = 0;
+  clearInterval(rfTimer);
+
+  hideAllPanels();
+  document.getElementById('rf-panel').style.display = 'block';
+  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+  document.getElementById('mod-title').textContent = '⚡ RAPID FIRE';
+  document.getElementById('mod-sub').textContent   = 'ALL TOPICS — 12 SEC / QUESTION';
+  document.getElementById('freq-num').textContent  = '121.500';
+  document.getElementById('mod-badge').className   = '';
+
+  updateRFStats();
+  showRFQuestion();
+}
+
+function showRFQuestion() {
+  const area = document.getElementById('rf-question-area');
+  if (rfCurrent >= rfQuestions.length) {
+    clearInterval(rfTimer);
+    const pct = Math.round(rfCorrect / rfQuestions.length * 100);
+    area.innerHTML = `
+      <div class="note ${pct >= 80 ? 'green' : pct >= 60 ? 'amber' : 'red'}">
+        <div class="note-title">RAPID FIRE COMPLETE</div>
+        <div class="note-body">
+          Score: <strong>${rfCorrect} / ${rfQuestions.length}</strong> &nbsp;|&nbsp;
+          Accuracy: <strong>${pct}%</strong><br><br>
+          ${pct >= 80 ? '✓ EXCELLENT — ready for the exam!' : pct >= 60 ? '⚠ GOOD — review missed questions.' : '✗ NEEDS WORK — go back to the modules.'}
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="startRapidFire()">RESTART RAPID FIRE</button>
+      <button class="btn" onclick="showMissed()" style="margin-left:8px">REVIEW MISTAKES</button>
+    `;
+    return;
+  }
+
+  const q = rfQuestions[rfCurrent];
+  rfTimeLeft = 12;
+  updateTimerBar();
+
+  clearInterval(rfTimer);
+  rfTimer = setInterval(() => {
+    rfTimeLeft--;
+    updateTimerBar();
+    if (rfTimeLeft <= 0) { clearInterval(rfTimer); autoTimeOut(); }
+  }, 1000);
+
+  area.innerHTML = `
+    <div class="quiz-block">
+      <div class="quiz-q"><span class="tag tag-amber" style="margin-right:8px">Q${rfCurrent+1}/${rfQuestions.length}</span>${q.q}</div>
+      <div class="quiz-opts" id="rf-opts">
+        ${q.opts.map((o,i) => `<button class="opt-btn" onclick="answerRF(${i})">${o}</button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="rf-fb"></div>
+    </div>
+  `;
+}
+
+function answerRF(chosen) {
+  clearInterval(rfTimer);
+  const q = rfQuestions[rfCurrent];
+  const opts = document.querySelectorAll('#rf-opts .opt-btn');
+  opts.forEach(b => b.disabled = true);
+  const fb = document.getElementById('rf-fb');
+  if (chosen === q.ans) {
+    opts[chosen].classList.add('correct');
+    fb.textContent = '✓  CORRECT — ' + q.exp;
+    fb.className = 'quiz-feedback show-ok';
+    rfCorrect++; scores.c++;
+  } else {
+    opts[chosen].classList.add('wrong');
+    opts[q.ans].classList.add('correct');
+    fb.textContent = '✗  INCORRECT — ' + q.exp;
+    fb.className = 'quiz-feedback show-bad';
+    missedQ.push({ question: q.q, correct: q.opts[q.ans], exp: q.exp, module: 'rapid-fire' });
+  }
+  rfDone++; scores.t++;
+  updateScoreBadge(); updateRFStats(); saveState();
+  rfCurrent++;
+  setTimeout(() => showRFQuestion(), 1800);
+}
+
+function autoTimeOut() {
+  const q = rfQuestions[rfCurrent];
+  const opts = document.querySelectorAll('#rf-opts .opt-btn');
+  if (!opts.length) return;
+  opts.forEach(b => b.disabled = true);
+  opts[q.ans].classList.add('correct');
+  document.getElementById('rf-fb').textContent = '⏱  TIME OUT — ' + q.exp;
+  document.getElementById('rf-fb').className = 'quiz-feedback show-bad';
+  missedQ.push({ question: q.q, correct: q.opts[q.ans], exp: q.exp, module: 'rapid-fire' });
+  rfDone++; scores.t++;
+  updateScoreBadge(); updateRFStats(); saveState();
+  rfCurrent++;
+  setTimeout(() => showRFQuestion(), 1800);
+}
+
+function updateTimerBar() {
+  const fill = document.getElementById('rf-timer-fill');
+  fill.style.width = (rfTimeLeft / 12 * 100) + '%';
+  fill.style.background = rfTimeLeft > 6 ? 'var(--amber)' : rfTimeLeft > 3 ? '#FF8C00' : 'var(--red)';
+}
+
+function updateRFStats() {
+  document.getElementById('rf-score').textContent = rfCorrect;
+  document.getElementById('rf-total').textContent = rfDone;
+  document.getElementById('rf-left').textContent  = rfQuestions.length - rfCurrent;
+  document.getElementById('rf-pct').textContent   = rfDone ? Math.round(rfCorrect/rfDone*100)+'%' : '—';
+}
+
+/* ============================================================
+   8. MISSED QUESTIONS
+   ============================================================ */
+function showMissed() {
+  hideAllPanels();
+  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+  document.getElementById('mod-title').textContent = 'REVIEW MISTAKES';
+  document.getElementById('mod-sub').textContent   = 'QUESTIONS ANSWERED INCORRECTLY';
+  document.getElementById('freq-num').textContent  = '000.000';
+  document.getElementById('mod-badge').className   = '';
+  document.getElementById('missed-panel').style.display = 'block';
+
+  const list = document.getElementById('missed-list');
+  if (!missedQ.length) {
+    list.innerHTML = '<div class="note green"><div class="note-title">ALL CLEAR</div><div class="note-body">No missed questions yet. Complete some quizzes or Rapid Fire first!</div></div>';
+  } else {
+    list.innerHTML = missedQ.map((m,i) => `
+      <div class="note red" style="margin-bottom:10px">
+        <div class="note-title">MISSED #${i+1} ${m.module ? '— '+m.module.toUpperCase() : ''}</div>
+        <div class="note-body">
+          <strong>Q:</strong> ${m.question}<br>
+          <strong>Correct answer:</strong> ${m.correct}<br>
+          <span style="color:var(--muted)">→ ${m.exp}</span>
+        </div>
+      </div>`).join('');
+  }
+}
+
+function clearMissed() {
+  missedQ.length = 0;
+  saveState();
+  showMissed();
+}
+
+/* ============================================================
+   9. PHONETIC DRILL
+   ============================================================ */
+function startDrill() {
+  drillLetters = Object.keys(PHONETICS).sort(() => Math.random() - 0.5);
+  drillIdx = 0; drillCorrect = 0; drillDone = 0;
+  clearInterval(drillTimer);
+
+  hideAllPanels();
+  document.getElementById('drill-panel').style.display = 'block';
+  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+  document.getElementById('mod-title').textContent = '🔤 PHONETIC DRILL';
+  document.getElementById('mod-sub').textContent   = 'TYPE THE ICAO PHONETIC WORD — 8 SEC EACH';
+  document.getElementById('freq-num').textContent  = '126.900';
+  document.getElementById('mod-badge').className   = '';
+
+  showDrillLetter();
+}
+
+function showDrillLetter() {
+  if (drillIdx >= drillLetters.length) {
+    const pct = Math.round(drillCorrect / drillLetters.length * 100);
+    document.getElementById('drill-letter').textContent = pct + '%';
+    document.getElementById('drill-hint').textContent = drillCorrect + ' / ' + drillLetters.length + ' correct';
+    document.getElementById('drill-input').style.display = 'none';
+    document.getElementById('drill-feedback').textContent = pct >= 80 ? '✓ EXCELLENT! Phonetics mastered.' : 'Keep practising!';
+    document.getElementById('drill-feedback').style.color = pct >= 80 ? 'var(--green)' : 'var(--red)';
+    clearInterval(drillTimer);
+    return;
+  }
+
+  const letter = drillLetters[drillIdx];
+  document.getElementById('drill-letter').textContent = letter;
+  document.getElementById('drill-hint').textContent = '';
+  document.getElementById('drill-feedback').textContent = '';
+  document.getElementById('drill-input').value = '';
+  document.getElementById('drill-input').className = '';
+  document.getElementById('drill-input').style.display = '';
+  document.getElementById('drill-input').focus();
+
+  drillTimeLeft = 8;
+  updateDrillTimer();
+  clearInterval(drillTimer);
+  drillTimer = setInterval(() => {
+    drillTimeLeft--;
+    updateDrillTimer();
+    if (drillTimeLeft <= 0) {
+      clearInterval(drillTimer);
+      drillAutoTimeout();
+    }
+  }, 1000);
+
+  updateDrillStats();
+}
+
+function drillKeydown(e) {
+  if (e.key === 'Enter') {
+    clearInterval(drillTimer);
+    const val = document.getElementById('drill-input').value.trim().toUpperCase().replace(/[^A-Z-]/g,'');
+    const letter = drillLetters[drillIdx];
+    const correct = PHONETICS[letter];
+    const isCorrect = val === correct || val === correct.replace('-','');
+    document.getElementById('drill-input').className = isCorrect ? 'correct-anim' : 'wrong-anim';
+    if (isCorrect) {
+      document.getElementById('drill-feedback').textContent = '✓  CORRECT — ' + correct;
+      document.getElementById('drill-feedback').style.color = 'var(--green)';
+      drillCorrect++;
+    } else {
+      document.getElementById('drill-feedback').textContent = '✗  Answer: ' + correct;
+      document.getElementById('drill-feedback').style.color = 'var(--red)';
+      document.getElementById('drill-hint').textContent = letter + ' = ' + correct;
+    }
+    drillDone++;
+    updateDrillStats();
+    drillIdx++;
+    setTimeout(showDrillLetter, 1200);
+  }
+}
+
+function skipDrillLetter() {
+  clearInterval(drillTimer);
+  const letter = drillLetters[drillIdx];
+  document.getElementById('drill-feedback').textContent = 'Skipped — Answer: ' + PHONETICS[letter];
+  document.getElementById('drill-feedback').style.color = 'var(--muted)';
+  drillDone++;
+  drillIdx++;
+  setTimeout(showDrillLetter, 1000);
+}
+
+function drillAutoTimeout() {
+  const letter = drillLetters[drillIdx];
+  document.getElementById('drill-input').className = 'wrong-anim';
+  document.getElementById('drill-feedback').textContent = '⏱  TIME OUT — Answer: ' + PHONETICS[letter];
+  document.getElementById('drill-feedback').style.color = 'var(--red)';
+  drillDone++;
+  drillIdx++;
+  setTimeout(showDrillLetter, 1400);
+}
+
+function updateDrillTimer() {
+  const fill = document.getElementById('drill-timer-fill');
+  fill.style.width = (drillTimeLeft / 8 * 100) + '%';
+  fill.style.background = drillTimeLeft > 4 ? 'var(--amber)' : drillTimeLeft > 2 ? '#FF8C00' : 'var(--red)';
+}
+
+function updateDrillStats() {
+  document.getElementById('drill-score').textContent = drillCorrect;
+  document.getElementById('drill-done').textContent  = drillDone;
+  document.getElementById('drill-pct').textContent   = drillDone ? Math.round(drillCorrect/drillDone*100)+'%' : '—';
+}
+
+/* ============================================================
+   10. UTILITIES
+   ============================================================ */
+function hideAllPanels() {
+  ['landing','rf-panel','missed-panel','drill-panel','notes-panel'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  // Clear only the module content slot
+  document.getElementById('module-slot').innerHTML = '';
+}
+
+/* ============================================================
+   11. INIT
+   ============================================================ */
+buildNav();
+loadState();
+</script>
+</body>
+</html>
