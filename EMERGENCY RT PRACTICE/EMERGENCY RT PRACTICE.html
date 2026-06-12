@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<script src="../protection.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emergency RT Practice — PAN-PAN & MAYDAY</title>
+<style>
+/* =====================================================
+   TOKENS
+   ===================================================== */
+:root[data-theme="dark"] {
+  --bg:          #0c0f14;
+  --bg-card:     #13181f;
+  --bg-panel:    #191f28;
+  --bg-hover:    #1e2635;
+  --border:      #252d3a;
+  --border-hi:   #344055;
+  --txt:         #dde4ee;
+  --txt-2:       #7a8a9e;
+  --txt-3:       #3d4f63;
+  --mayday:      #e84040;
+  --mayday-dim:  #2a1010;
+  --mayday-mid:  #5a1515;
+  --pan:         #e8a020;
+  --pan-dim:     #2a1f08;
+  --pan-mid:     #5a3c08;
+  --blue:        #4a9eff;
+  --blue-dim:    #0d2040;
+  --green:       #3cbe6a;
+  --green-dim:   #0d2a18;
+  --shadow:      0 8px 32px rgba(0,0,0,.6);
+  --shadow-sm:   0 2px 8px rgba(0,0,0,.4);
+  --radius:      10px;
+}
+:root[data-theme="light"] {
+  --bg:          #eef2ec;
+  --bg-card:     #ffffff;
+  --bg-panel:    #e4ece1;
+  --bg-hover:    #d8e6d3;
+  --border:      #c4d8bc;
+  --border-hi:   #a4c49a;
+  --txt:         #1a2e14;
+  --txt-2:       #3d5c35;
+  --txt-3:       #8aaa80;
+  --mayday:      #c0302a;
+  --mayday-dim:  #fde8e6;
+  --mayday-mid:  #f5c0bc;
+  --pan:         #a06010;
+  --pan-dim:     #fef3e2;
+  --pan-mid:     #f5dab0;
+  --blue:        #1e6eb0;
+  --blue-dim:    #d4e8f8;
+  --green:       #1e7a3a;
+  --green-dim:   #d0f0d8;
+  --shadow:      0 8px 32px rgba(60,100,50,.12);
+  --shadow-sm:   0 2px 8px rgba(60,100,50,.08);
+  --radius:      10px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--txt);
+  min-height:100vh;font-size:15px;line-height:1.6;
+  transition:background .3s,color .3s;
+}
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+header{
+  background:var(--bg-card);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:200;
+}
+.hdr{
+  max-width:960px;margin:0 auto;padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:56px;gap:12px;
+}
+.hdr-brand{display:flex;align-items:center;gap:10px}
+.hdr-icon{font-size:20px;line-height:1}
+.hdr-title{font-size:15px;font-weight:700;letter-spacing:.3px}
+.hdr-sub{font-size:10px;color:var(--txt-3);text-transform:uppercase;letter-spacing:.8px}
+.hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+.stat-pill{
+  background:var(--bg-panel);border:1px solid var(--border);
+  border-radius:20px;padding:3px 12px;font-size:12px;color:var(--txt-2);
+  white-space:nowrap;display:flex;align-items:center;gap:6px
+}
+.stat-pill .got{color:var(--green);font-weight:700}
+.stat-pill .missed{color:var(--mayday);font-weight:700}
+
+.theme-btn{
+  background:var(--bg-panel);border:1px solid var(--border);
+  border-radius:20px;padding:4px 12px;cursor:pointer;
+  font-size:12px;color:var(--txt-2);display:flex;align-items:center;gap:5px;
+  transition:background .15s;white-space:nowrap
+}
+.theme-btn:hover{background:var(--bg-hover);color:var(--txt)}
+
+.ref-float-btn{
+  background:var(--blue-dim);border:1px solid var(--blue);
+  border-radius:20px;padding:4px 12px;cursor:pointer;
+  font-size:12px;color:var(--blue);display:flex;align-items:center;gap:5px;
+  transition:background .15s;white-space:nowrap
+}
+.ref-float-btn:hover{opacity:.85}
+
+/* =====================================================
+   SCREENS
+   ===================================================== */
+.screen{display:none;animation:fadeUp .22s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.wrap{max-width:960px;margin:0 auto;padding:28px 20px 80px}
+
+/* =====================================================
+   SCREEN 1 — HOME
+   ===================================================== */
+.home-hero{
+  text-align:center;padding:40px 20px 32px;
+}
+.home-hero h1{font-size:26px;font-weight:800;letter-spacing:-.3px;margin-bottom:6px}
+.home-hero p{font-size:14px;color:var(--txt-2);max-width:420px;margin:0 auto}
+
+.type-section{margin-bottom:32px}
+.type-section-title{
+  font-size:11px;text-transform:uppercase;letter-spacing:1px;
+  color:var(--txt-3);margin-bottom:12px;padding-left:2px
+}
+
+.cat-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:10px
+}
+.cat-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px 16px;cursor:pointer;
+  transition:all .15s;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;gap:6px
+}
+.cat-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  border-radius:3px 0 0 3px;transition:width .15s
+}
+.cat-card.mayday-cat::before{background:var(--mayday)}
+.cat-card.pan-cat::before{background:var(--pan)}
+.cat-card:hover{background:var(--bg-hover);border-color:var(--border-hi);transform:translateY(-1px)}
+.cat-card:hover::before{width:5px}
+
+.cat-icon{font-size:22px;line-height:1;margin-bottom:2px}
+.cat-name{font-size:14px;font-weight:600;color:var(--txt)}
+.cat-meta{font-size:11px;color:var(--txt-3)}
+.cat-progress-bar{
+  height:3px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden
+}
+.cat-progress-fill{height:100%;border-radius:2px;transition:width .4s}
+.cat-card.mayday-cat .cat-progress-fill{background:var(--mayday)}
+.cat-card.pan-cat .cat-progress-fill{background:var(--pan)}
+
+.type-header{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px;border-radius:var(--radius);
+  margin-bottom:14px;border:1px solid var(--border)
+}
+.type-header.mayday-hdr{background:var(--mayday-dim);border-color:var(--mayday-mid)}
+.type-header.pan-hdr{background:var(--pan-dim);border-color:var(--pan-mid)}
+.type-hdr-badge{
+  font-size:11px;font-weight:800;letter-spacing:1px;
+  padding:3px 10px;border-radius:4px
+}
+.mayday-hdr .type-hdr-badge{background:var(--mayday);color:#fff}
+.pan-hdr .type-hdr-badge{background:var(--pan);color:#fff}
+.type-hdr-info{flex:1}
+.type-hdr-info h2{font-size:15px;font-weight:700}
+.type-hdr-info p{font-size:12px;color:var(--txt-2);margin-top:1px}
+
+/* =====================================================
+   SCREEN 2 — SCENARIO LIST
+   ===================================================== */
+.back-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:7px;
+  background:var(--bg-panel);border:1px solid var(--border);
+  cursor:pointer;font-size:13px;color:var(--txt-2);
+  transition:all .15s;margin-bottom:20px
+}
+.back-btn:hover{background:var(--bg-hover);color:var(--txt);border-color:var(--border-hi)}
+
+.list-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;flex-wrap:wrap;gap:8px
+}
+.list-title{
+  display:flex;align-items:center;gap:10px
+}
+.list-title h2{font-size:18px;font-weight:700}
+.count-badge{
+  font-size:11px;padding:2px 9px;border-radius:10px;
+  background:var(--bg-panel);border:1px solid var(--border);color:var(--txt-2)
+}
+.shuffle-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 13px;border-radius:7px;
+  background:var(--bg-panel);border:1px solid var(--border);
+  cursor:pointer;font-size:12px;color:var(--txt-2);transition:all .15s
+}
+.shuffle-btn:hover{background:var(--bg-hover);color:var(--txt)}
+
+.scenario-list{display:flex;flex-direction:column;gap:8px}
+.scenario-item{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px 18px;cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;gap:14px
+}
+.scenario-item:hover{background:var(--bg-hover);border-color:var(--border-hi);transform:translateX(3px)}
+.si-num{
+  font-size:12px;color:var(--txt-3);min-width:22px;
+  font-weight:700;flex-shrink:0
+}
+.si-body{flex:1;min-width:0}
+.si-title{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:3px}
+.si-preview{
+  font-size:12px;color:var(--txt-2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.si-status{
+  font-size:18px;flex-shrink:0;
+  opacity:.4;transition:opacity .15s
+}
+.si-status.done{opacity:1}
+.si-arrow{font-size:12px;color:var(--txt-3);flex-shrink:0}
+
+/* =====================================================
+   SCREEN 3 — PRACTICE
+   ===================================================== */
+.practice-nav{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;flex-wrap:wrap;gap:8px
+}
+.practice-nav-left{display:flex;align-items:center;gap:8px}
+.practice-counter{font-size:12px;color:var(--txt-3)}
+
+.scenario-box{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:14px;
+  box-shadow:var(--shadow-sm)
+}
+.scenario-box-hdr{
+  padding:11px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap
+}
+.type-badge{
+  font-size:10px;font-weight:800;letter-spacing:1.2px;
+  padding:3px 9px;border-radius:4px;text-transform:uppercase
+}
+.badge-m{background:var(--mayday);color:#fff}
+.badge-p{background:var(--pan);color:#fff}
+.cat-label{
+  font-size:11px;padding:2px 8px;border-radius:4px;
+  background:var(--bg-panel);border:1px solid var(--border);color:var(--txt-2)
+}
+.bookmark-btn{
+  margin-left:auto;background:none;border:none;cursor:pointer;
+  font-size:18px;opacity:.4;transition:opacity .15s;padding:0 2px
+}
+.bookmark-btn:hover,.bookmark-btn.active{opacity:1}
+
+.scenario-body{padding:18px}
+.scenario-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.9px;color:var(--txt-3);margin-bottom:7px}
+.scenario-txt{
+  font-size:15px;color:var(--txt);line-height:1.75;
+  background:var(--bg-panel);border:1px solid var(--border);
+  border-radius:8px;padding:14px 16px
+}
+.scenario-txt strong{color:var(--blue)}
+
+.hints{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.hint{
+  font-size:11px;padding:3px 9px;border-radius:5px;
+  background:var(--bg-panel);border:1px dashed var(--border-hi);color:var(--txt-2)
+}
+
+/* Voice scenario btn */
+.voice-scenario-btn{
+  display:flex;align-items:center;gap:6px;
+  margin-top:12px;padding:6px 14px;border-radius:7px;
+  background:transparent;border:1px solid var(--border);
+  cursor:pointer;font-size:12px;color:var(--txt-2);transition:all .15s
+}
+.voice-scenario-btn:hover{background:var(--bg-hover);color:var(--txt);border-color:var(--border-hi)}
+
+/* Reveal section */
+.reveal-section{margin-bottom:14px}
+
+.reveal-btn{
+  width:100%;padding:16px;border-radius:var(--radius);
+  border:2px dashed var(--border-hi);
+  background:var(--bg-panel);cursor:pointer;
+  font-size:15px;font-weight:700;color:var(--txt-2);
+  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px
+}
+.reveal-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+
+.answer-box{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+  animation:flipIn .3s ease;
+}
+@keyframes flipIn{
+  from{opacity:0;transform:rotateX(-8deg) translateY(-6px)}
+  to{opacity:1;transform:rotateX(0) translateY(0)}
+}
+.answer-box-hdr{
+  padding:10px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between
+}
+.answer-box-title{
+  font-size:11px;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--green);font-weight:700;display:flex;align-items:center;gap:6px
+}
+.answer-actions{display:flex;gap:6px}
+.icon-btn{
+  padding:4px 10px;border-radius:5px;border:1px solid var(--border);
+  background:var(--bg-panel);cursor:pointer;font-size:11px;color:var(--txt-2);
+  transition:all .15s;display:flex;align-items:center;gap:4px
+}
+.icon-btn:hover{background:var(--bg-hover);color:var(--txt);border-color:var(--border-hi)}
+.icon-btn.playing{background:var(--blue-dim);border-color:var(--blue);color:var(--blue)}
+
+.answer-call{
+  font-family:'Courier New',Courier,monospace;
+  font-size:13.5px;line-height:2;
+  padding:16px;white-space:pre-wrap;color:var(--txt)
+}
+.hl-m{color:var(--mayday);font-weight:800}
+.hl-p{color:var(--pan);font-weight:800}
+.hl-k{color:var(--blue)}
+
+.notes-box{
+  margin:0 16px 16px;padding:12px 14px;
+  background:var(--bg-panel);border-radius:8px;
+  border-left:3px solid var(--blue)
+}
+.notes-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--blue);font-weight:700;margin-bottom:5px}
+.notes-txt{font-size:13px;color:var(--txt-2);line-height:1.65}
+
+/* Self assess */
+.assess-row{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px;border-top:1px solid var(--border);flex-wrap:wrap
+}
+.assess-lbl{font-size:13px;color:var(--txt-2);flex:1}
+.assess-got{
+  padding:7px 18px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;
+  background:var(--green-dim);color:var(--green);border:1px solid var(--green);transition:all .15s
+}
+.assess-got:hover,.assess-got.selected{background:var(--green);color:#fff}
+.assess-miss{
+  padding:7px 18px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;
+  background:var(--mayday-dim);color:var(--mayday);border:1px solid var(--mayday);transition:all .15s
+}
+.assess-miss:hover,.assess-miss.selected{background:var(--mayday);color:#fff}
+
+/* Prev/Next */
+.nav-row{
+  display:flex;gap:10px;justify-content:space-between;margin-top:14px
+}
+.nav-btn{
+  flex:1;padding:11px;border-radius:8px;font-size:14px;font-weight:600;
+  cursor:pointer;border:1px solid var(--border);background:var(--bg-panel);
+  color:var(--txt-2);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px
+}
+.nav-btn:hover{background:var(--bg-hover);color:var(--txt);border-color:var(--border-hi)}
+.nav-btn:disabled{opacity:.3;cursor:not-allowed}
+.nav-btn-next{background:var(--bg-hover);color:var(--txt)}
+
+/* Voice status bar */
+.voice-bar{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:var(--bg-card);border:1px solid var(--blue);border-radius:30px;
+  padding:8px 20px;font-size:13px;color:var(--blue);
+  display:flex;align-items:center;gap:8px;box-shadow:var(--shadow);
+  opacity:0;pointer-events:none;transition:opacity .2s;z-index:300
+}
+.voice-bar.show{opacity:1;pointer-events:auto}
+.vdot{width:7px;height:7px;border-radius:50%;background:var(--blue);animation:vp 1s infinite}
+@keyframes vp{0%,100%{opacity:1}50%{opacity:.2}}
+.vstop{
+  padding:3px 10px;border-radius:10px;background:var(--blue-dim);
+  border:1px solid var(--blue);cursor:pointer;font-size:11px;color:var(--blue);
+  transition:background .15s
+}
+.vstop:hover{background:var(--blue)}
+
+/* =====================================================
+   FORMAT MODAL
+   ===================================================== */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .2s
+}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:14px;
+  max-width:640px;width:100%;max-height:85vh;overflow-y:auto;
+  transform:scale(.95);transition:transform .2s;box-shadow:var(--shadow)
+}
+.modal-overlay.open .modal{transform:scale(1)}
+.modal-hdr{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between
+}
+.modal-hdr h3{font-size:15px;font-weight:700}
+.modal-close{
+  background:none;border:none;cursor:pointer;font-size:18px;
+  color:var(--txt-2);transition:color .15s;padding:0 4px
+}
+.modal-close:hover{color:var(--txt)}
+.modal-body{padding:20px}
+.fmt-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:500px){.fmt-grid{grid-template-columns:1fr}}
+.fmt-box{background:var(--bg-panel);border-radius:8px;padding:14px;border:1px solid var(--border)}
+.fmt-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.fmt-title.m{color:var(--mayday)}.fmt-title.p{color:var(--pan)}
+.fmt-row{
+  font-size:12px;color:var(--txt-2);padding:5px 0;
+  border-bottom:1px solid var(--border);display:flex;gap:8px
+}
+.fmt-row:last-child{border-bottom:none}
+.fmt-n{color:var(--txt-3);min-width:16px;font-size:11px}
+
+/* =====================================================
+   BOOKMARKS PANEL
+   ===================================================== */
+.bookmarks-section{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;margin-bottom:24px;display:none
+}
+.bookmarks-section.has-items{display:block}
+.bm-title{font-size:12px;color:var(--txt-3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.bm-list{display:flex;flex-direction:column;gap:6px}
+.bm-item{
+  display:flex;align-items:center;gap:8px;padding:8px 12px;
+  background:var(--bg-panel);border-radius:7px;border:1px solid var(--border);
+  cursor:pointer;transition:all .15s
+}
+.bm-item:hover{background:var(--bg-hover);border-color:var(--border-hi)}
+.bm-tag{font-size:10px;padding:2px 7px;border-radius:4px}
+.bm-tag.m{background:var(--mayday-dim);color:var(--mayday);border:1px solid var(--mayday)}
+.bm-tag.p{background:var(--pan-dim);color:var(--pan);border:1px solid var(--pan)}
+.bm-name{font-size:13px;color:var(--txt);flex:1}
+.bm-cat{font-size:11px;color:var(--txt-3)}
+
+/* =====================================================
+   TOAST
+   ===================================================== */
+.toast{
+  position:fixed;bottom:20px;right:20px;
+  background:var(--bg-panel);border:1px solid var(--border-hi);
+  border-radius:8px;padding:10px 16px;font-size:13px;color:var(--txt);
+  box-shadow:var(--shadow);z-index:500;
+  opacity:0;transform:translateY(6px);transition:all .2s;pointer-events:none
+}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* responsive */
+@media(max-width:600px){
+  .hdr-sub,.ref-float-btn span{display:none}
+  .home-hero h1{font-size:20px}
+  .cat-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<script>
+(function(){
+  const a=sessionStorage.getItem('rtr_auth');
+  if(!a){window.location.replace('../login.html');return;}
+  try{const d=JSON.parse(a);if(!d.loggedIn||Date.now()-d.time>14400000){sessionStorage.removeItem('rtr_auth');window.location.replace('../login.html');}}catch(e){window.location.replace('../login.html');}
+})();
+</script>
+<!-- HEADER -->
+<header>
+  <div class="hdr">
+    <div class="hdr-brand">
+      <div class="hdr-icon">🚨</div>
+      <div>
+        <div class="hdr-title">Emergency RT Practice</div>
+        <div class="hdr-sub">PAN-PAN &amp; MAYDAY · DGCA CPL/ATPL</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="stat-pill">
+        <span class="got" id="hdr-got">0</span>✅
+        <span class="missed" id="hdr-missed">0</span>❌
+      </div>
+      <button class="ref-float-btn" onclick="openModal()">
+        📋 <span>Format Ref</span>
+      </button>
+      <button class="theme-btn" onclick="toggleTheme()">
+        <span id="t-icon">☀️</span><span id="t-lbl">Light</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- SCREENS -->
+<div id="s-home"  class="screen active"><div class="wrap" id="home-wrap"></div></div>
+<div id="s-list"  class="screen"><div class="wrap" id="list-wrap"></div></div>
+<div id="s-prac"  class="screen"><div class="wrap" id="prac-wrap"></div></div>
+
+<!-- VOICE BAR -->
+<div class="voice-bar" id="voice-bar">
+  <div class="vdot"></div>
+  <span id="voice-bar-txt">Reading...</span>
+  <button class="vstop" onclick="stopVoice()">⏹ Stop</button>
+</div>
+
+<!-- FORMAT MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3>📋 Call Format Reference</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fmt-grid">
+        <div class="fmt-box">
+          <div class="fmt-title m">MAYDAY — Distress</div>
+          <div class="fmt-row"><span class="fmt-n">1.</span>MAYDAY MAYDAY MAYDAY</div>
+          <div class="fmt-row"><span class="fmt-n">2.</span>Station called</div>
+          <div class="fmt-row"><span class="fmt-n">3.</span>Callsign × 3</div>
+          <div class="fmt-row"><span class="fmt-n">4.</span>Nature of emergency</div>
+          <div class="fmt-row"><span class="fmt-n">5.</span>Intentions</div>
+          <div class="fmt-row"><span class="fmt-n">6.</span>Position</div>
+          <div class="fmt-row"><span class="fmt-n">7.</span>Altitude / Level</div>
+          <div class="fmt-row"><span class="fmt-n">8.</span>Souls on board</div>
+          <div class="fmt-row"><span class="fmt-n">9.</span>Fuel remaining</div>
+          <div class="fmt-row"><span class="fmt-n">10.</span>Any other info</div>
+        </div>
+        <div class="fmt-box">
+          <div class="fmt-title p">PAN-PAN — Urgency</div>
+          <div class="fmt-row"><span class="fmt-n">1.</span>PAN-PAN PAN-PAN PAN-PAN</div>
+          <div class="fmt-row"><span class="fmt-n">2.</span>Station called</div>
+          <div class="fmt-row"><span class="fmt-n">3.</span>Callsign × 3</div>
+          <div class="fmt-row"><span class="fmt-n">4.</span>Nature of urgency</div>
+          <div class="fmt-row"><span class="fmt-n">5.</span>Intentions</div>
+          <div class="fmt-row"><span class="fmt-n">6.</span>Position</div>
+          <div class="fmt-row"><span class="fmt-n">7.</span>Altitude / Level</div>
+          <div class="fmt-row"><span class="fmt-n">8.</span>Souls on board</div>
+          <div class="fmt-row"><span class="fmt-n">9.</span>Fuel remaining</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding:12px 14px;background:var(--bg-panel);border-radius:8px;border-left:3px solid var(--pan)">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--pan);margin-bottom:5px">Key Difference</div>
+        <div style="font-size:13px;color:var(--txt-2);line-height:1.6">
+          <b>MAYDAY</b> = life in immediate danger. <b>PAN-PAN</b> = urgent situation that may become dangerous. When in doubt between the two — always declare <b>MAYDAY</b>. You can always downgrade, never too late to upgrade.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   ██████╗ ██╗   ██╗███████╗███████╗████████╗██╗ ██████╗ ███╗  ██╗
+   ██╔══██╗██║   ██║██╔════╝██╔════╝╚══██╔══╝██║██╔═══██╗████╗ ██║
+   ██║  ██║██║   ██║█████╗  ███████╗   ██║   ██║██║   ██║██╔██╗██║
+   ██║  ██║██║   ██║██╔══╝  ╚════██║   ██║   ██║██║   ██║██║╚████║
+   ██████╔╝╚██████╔╝███████╗███████║   ██║   ██║╚██████╔╝██║ ╚███║
+   ╚═════╝  ╚═════╝ ╚══════╝╚══════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚══╝
+
+   HOW TO ADD QUESTIONS:
+   ──────────────────────────────────────────────────────────────
+   Add a new object to the SCENARIOS array below.
+   Fields:
+     id       : unique string, e.g. "m10" or "p8"
+     type     : "mayday" or "pan"
+     category : must match a CATEGORIES entry name exactly
+     title    : short title shown in list (e.g. "VT-AXB — Engine Fire, FL180")
+     scenario : HTML string — use <strong> for key data
+     hints    : array of short strings shown as chips
+     answer   : plain text, use \n for new lines
+     notes    : examiner tip text
+   ──────────────────────────────────────────────────────────────
+================================================================ */
+
+/* ── CATEGORIES ─────────────────────────────────────────────── */
+const CATEGORIES = [
+  { id:"engine",   type:"mayday", name:"Engine Failure",        icon:"🔥" },
+  { id:"incap",    type:"mayday", name:"Pilot Incapacitation",  icon:"🫀" },
+  { id:"fire",     type:"mayday", name:"Fire on Board",         icon:"🔥" },
+  { id:"struct",   type:"mayday", name:"Structural / Bird",     icon:"🐦" },
+  { id:"hydro",    type:"mayday", name:"Hydraulic / Systems",   icon:"⚙️"  },
+  { id:"decomp",   type:"mayday", name:"Rapid Decompression",   icon:"💨" },
+  { id:"wind",     type:"mayday", name:"Windshear / GPWS",      icon:"🌪️"  },
+  { id:"med-pax",  type:"pan",    name:"Medical — Passenger",   icon:"🏥" },
+  { id:"med-crew", type:"pan",    name:"Medical — Crew",        icon:"👨‍✈️" },
+  { id:"nav",      type:"pan",    name:"Navigation Failure",    icon:"🧭" },
+  { id:"fuel",     type:"pan",    name:"Fuel Emergency",        icon:"⛽" },
+  { id:"press",    type:"pan",    name:"Pressurisation",        icon:"🔵" },
+  { id:"comms",    type:"pan",    name:"Comms Failure",         icon:"📻" },
+];
+
+/* ── SCENARIOS ──────────────────────────────────────────────── */
+const SCENARIOS = [
+
+  /* ══ MAYDAY — Engine Failure ══ */
+  {
+    id:"m1", type:"mayday", category:"Engine Failure",
+    title:"VT-AXB · B737 · FL180 · Engine No.2 Fire · Mumbai",
+    scenario:`You are crew of <strong>VT-AXB</strong>, Boeing 737, cruising at <strong>FL180</strong>. Engine No. 2 has caught fire. You are <strong>40 NM south of Mumbai</strong>, diverting to <strong>Mumbai (VABB)</strong>. <strong>152 souls</strong> on board, <strong>3 hours 30 minutes</strong> fuel. Request emergency services on landing.`,
+    hints:["VT-AXB","B737","FL180","Engine No.2 Fire","40 NM S of Mumbai","VABB","152 SOB","3h 30m fuel"],
+    answer:`MAYDAY MAYDAY MAYDAY
+Mumbai Approach, VT-AXB VT-AXB VT-AXB
+Engine fire No. 2
+Diverting to Mumbai, request straight-in Runway 27
+Position 40 NM South of Mumbai
+Altitude FL180 descending
+152 souls on board
+Fuel 3 hours 30 minutes
+Request emergency services on landing`,
+    notes:"Engine fire = MAYDAY, not PAN. State souls as 'souls on board'. Fuel in hours and minutes. Always state intentions — ATC needs runway clearance and ARFF positioning."
+  },
+  {
+    id:"m2", type:"mayday", category:"Engine Failure",
+    title:"VT-SIC · A320 · FL250 · Both Engines Flame Out · Chennai",
+    scenario:`You are crew of <strong>VT-SIC</strong>, Airbus A320, at <strong>FL250</strong>. Both engines have flamed out due to fuel exhaustion over the <strong>Bay of Bengal, 80 NM east of Chennai</strong>. You are gliding towards <strong>Chennai (VOMM)</strong> while attempting restarts. <strong>186 souls</strong> on board. Fuel is <strong>exhausted</strong>.`,
+    hints:["VT-SIC","A320","FL250","Both engines flame out","80 NM E of Chennai","186 SOB","Fuel exhausted"],
+    answer:`MAYDAY MAYDAY MAYDAY
+Chennai Approach, VT-SIC VT-SIC VT-SIC
+Both engines flamed out, fuel exhausted
+Attempting engine restart, gliding towards Chennai
+Position 80 NM east of Chennai, Bay of Bengal
+Altitude FL250 descending
+186 souls on board
+Fuel exhausted
+Request all emergency services, longest runway available`,
+    notes:"Fuel exhausted — state 'fuel exhausted', not a time. Both engines out = maximum ATC priority. Mention restart attempt so ATC understands uncertain capability."
+  },
+  {
+    id:"m3", type:"mayday", category:"Engine Failure",
+    title:"VT-ONE · C172 · 5500 ft · Single Engine Failure · Trichy",
+    scenario:`You are solo pilot of <strong>VT-ONE</strong>, Cessna 172, at <strong>5500 ft</strong>. The engine has seized and stopped. You are <strong>18 NM northwest of Trichy</strong>. You are searching for a suitable forced landing field. <strong>1 soul</strong> on board, fuel was <strong>1 hour 20 minutes</strong> at time of failure.`,
+    hints:["VT-ONE","C172","5500 ft","Engine seized","18 NM NW Trichy","1 SOB","1h 20m fuel"],
+    answer:`MAYDAY MAYDAY MAYDAY
+Trichy Approach, VT-ONE VT-ONE VT-ONE
+Engine failure, engine has seized
+Searching for forced landing area
+Position 18 NM northwest of Trichy
+Altitude 5500 feet descending
+1 soul on board
+Fuel 1 hour 20 minutes at time of failure
+Request any known airstrip or open field information`,
+    notes:"For forced landing, ATC may know of nearby airstrips or military fields. State fuel at time of failure since engine is no longer running. Single soul = still state 'souls on board' for standardisation."
+  },
+
+  /* ══ MAYDAY — Pilot Incapacitation ══ */
+  {
+    id:"m4", type:"mayday", category:"Pilot Incapacitation",
+    title:"VT-RAM · ATR72 · 8000 ft · Captain Cardiac Arrest · Coimbatore",
+    scenario:`You are the <strong>co-pilot</strong> of <strong>VT-RAM</strong>, ATR 72, at <strong>8000 ft</strong>, <strong>20 NM northeast of Coimbatore</strong>. The captain has suffered a suspected cardiac arrest and is incapacitated. You have taken full control. Diverting to <strong>Coimbatore (VOCB)</strong>. <strong>68 souls</strong> on board, <strong>2 hours 10 minutes</strong> fuel.`,
+    hints:["VT-RAM","ATR72","8000 ft","Captain incapacitated","Co-pilot in control","20 NM NE Coimbatore","68 SOB","2h 10m fuel"],
+    answer:`MAYDAY MAYDAY MAYDAY
+Coimbatore Approach, VT-RAM VT-RAM VT-RAM
+Captain incapacitated, suspected cardiac arrest
+Co-pilot declaring emergency, sole pilot in control
+Diverting to Coimbatore
+Position 20 NM northeast of Coimbatore
+Altitude 8000 feet
+68 souls on board
+Fuel 2 hours 10 minutes
+Request medical assistance on landing`,
+    notes:"State who is making the call. 'Sole pilot in control' is critical — ATC reduces all workload on your frequency. This is MAYDAY because flight deck capability is critically reduced."
+  },
+  {
+    id:"m5", type:"mayday", category:"Pilot Incapacitation",
+    title:"VT-SOL · C172 · 3500 ft · Student Disoriented · Mysuru",
+    scenario:`You are a <strong>passenger who holds a PPL</strong> aboard <strong>VT-SOL</strong>, Cessna 172. The solo student pilot has become severely disoriented and has handed over control to you. You are at <strong>3500 ft</strong>, <strong>12 NM south of Mysuru</strong>. <strong>2 souls</strong> on board, approximately <strong>1 hour 30 minutes</strong> fuel.`,
+    hints:["VT-SOL","C172","3500 ft","Student disoriented","PPL passenger in control","12 NM S Mysuru","2 SOB","1h 30m fuel"],
+    answer:`MAYDAY MAYDAY MAYDAY
+Mysuru Information, VT-SOL VT-SOL VT-SOL
+Student pilot disoriented and incapacitated, passenger PPL holder has taken control
+Diverting to Mysuru
+Position 12 NM south of Mysuru
+Altitude 3500 feet
+2 souls on board
+Fuel 1 hour 30 minutes
+Request landing information and talk-down assistance`,
+    notes:"State clearly that a passenger has taken control and their qualification. ATC may offer a talk-down (verbal guidance) for an unfamiliar pilot. Request 'talk-down assistance' if not current on the aircraft."
+  },
+
+  /* ══ MAYDAY — Fire on Board ══ */
+  {
+    id:"m6", type:"mayday", category:"Fire on Board",
+    title:"VT-KLM · B737 · FL220 · Lavatory Fire · Hyderabad",
+    scenario:`You are crew of <strong>VT-KLM</strong>, Boeing 737, at <strong>FL220</strong>, <strong>60 NM northeast of Hyderabad</strong>. Cabin crew has reported a fire in the rear lavatory that is not yet extinguished. Emergency descent initiated, diverting to <strong>Hyderabad (VOHS)</strong>. <strong>165 souls</strong> on board, <strong>4 hours</strong> fuel.`,
+    hints:["VT-KLM","B737","FL220","Lavatory fire","Not extinguished","60 NM NE Hyderabad","165 SOB","4h fuel"],
+    answer:`MAYDAY MAYDAY MAYDAY
+Hyderabad Approach, VT-KLM VT-KLM VT-KLM
+Cabin fire, rear lavatory, fire not extinguished
+Emergency descent, diverting to Hyderabad
+Position 60 NM northeast of Hyderabad
+Altitude FL220 descending
+165 souls on board
+Fuel 4 hours
+Request ARFF and all emergency equipment on landing`,
+    notes:"Fire on board is always MAYDAY regardless of size. State location of fire and current status. ARFF = Aircraft Rescue and Fire Fighting. ATC will alert crash crew to stand by."
+  },
+  {
+    id:"m7", type:"mayday", category:"Fire on Board",
+    title:"VT-ENG · A320 · FL280 · Engine No.1 Fire · Delhi",
+    scenario:`You are crew of <strong>VT-ENG</strong>, Airbus A320, at <strong>FL280</strong>, <strong>75 NM south of Delhi</strong>. Engine No. 1 fire warning has activated. Fire handle pulled and bottle discharged — fire not confirmed extinguished. Diverting to <strong>Delhi (VIDP)</strong> on one engine. <strong>178 souls</strong> on board, <strong>2 hours 45 minutes</strong> fuel.`,
+    hints:["VT-ENG","A320","FL280","Engine No.1 fire","Fire bottle discharged","75 NM S Delhi","178 SOB","2h 45m fuel"],
+    answer:`MAYDAY MAYDAY MAYDAY
+Delhi Approach, VT-ENG VT-ENG VT-ENG
+Engine fire No. 1, fire handle pulled, bottle discharged, fire status uncertain
+Single engine operation, diverting to Delhi
+Position 75 NM south of Delhi
+Altitude FL280 descending
+178 souls on board
+Fuel 2 hours 45 minutes
+Request long straight-in, ARFF on standby`,
+    notes:"State fire fighting actions taken and result. 'Fire status uncertain' tells ATC the threat is not confirmed eliminated. Single-engine operation affects performance — request long straight-in."
+  },
+
+  /* ══ MAYDAY — Structural / Bird ══ */
+  {
+    id:"m8", type:"mayday", category:"Structural / Bird",
+    title:"VT-BLZ · C172 · 4500 ft · Bird Strike / Cracked Windshield · Bengaluru",
+    scenario:`You are crew of <strong>VT-BLZ</strong>, Cessna 172, at <strong>4500 ft</strong>, <strong>15 NM west of Bengaluru</strong>. A bird strike has cracked the windshield — forward visibility is severely impaired. Diverting to <strong>Bengaluru (VOBL)</strong>. <strong>4 souls</strong> on board, <strong>1 hour 45 minutes</strong> fuel.`,
+    hints:["VT-BLZ","C172","4500 ft","Bird strike","Cracked windshield","Impaired visibility","15 NM W Bengaluru","4 SOB","1h 45m fuel"],
+    answer:`MAYDAY MAYDAY MAYDAY
+Bengaluru Approach, VT-BLZ VT-BLZ VT-BLZ
+Bird strike, windshield cracked, severely impaired forward visibility
+Diverting to Bengaluru, request radar vectors
+Position 15 NM west of Bengaluru
+Altitude 4500 feet
+4 souls on board
+Fuel 1 hour 45 minutes
+Request emergency services on landing`,
+    notes:"Impaired visibility = MAYDAY — directly endangers safe navigation. Request radar vectors since pilot cannot see ahead. ATC will provide headings and distances to runway."
+  },
+  {
+    id:"m9", type:"mayday", category:"Structural / Bird",
+    title:"VT-LTN · B737 · FL310 · Lightning Strike / Windshield Cracked · Mumbai",
+    scenario:`You are crew of <strong>VT-LTN</strong>, Boeing 737, at <strong>FL310</strong>, <strong>90 NM north of Mumbai</strong>. Aircraft was struck by lightning — windshield has cracked and avionics are intermittently failing. Multiple warning lights on. Diverting to <strong>Mumbai (VABB)</strong>. <strong>160 souls</strong> on board, <strong>3 hours</strong> fuel.`,
+    hints:["VT-LTN","B737","FL310","Lightning strike","Windshield cracked","Avionics intermittent","90 NM N Mumbai","160 SOB","3h fuel"],
+    answer:`MAYDAY MAYDAY MAYDAY
+Mumbai Control, VT-LTN VT-LTN VT-LTN
+Lightning strike, windshield cracked, avionics intermittently failing, multiple warnings
+Diverting to Mumbai
+Position 90 NM north of Mumbai
+Altitude FL310 descending
+160 souls on board
+Fuel 3 hours
+Request direct track, standby for further system status updates`,
+    notes:"Lightning strikes can cause multiple simultaneous failures. State all known impacts on aircraft systems. 'Standby for updates' keeps ATC informed that the situation may evolve — they will hold frequency priority for you."
+  },
+
+  /* ══ MAYDAY — Hydraulic / Systems ══ */
+  {
+    id:"m10", type:"mayday", category:"Hydraulic / Systems",
+    title:"VT-INX · A321 · FL300 · Full Hydraulic Failure · Delhi",
+    scenario:`You are crew of <strong>VT-INX</strong>, Airbus A321, at <strong>FL300</strong>, <strong>90 NM south of Delhi</strong>. Complete hydraulic system failure — gear and flap extension are uncertain. Continuing to <strong>Delhi (VIDP)</strong>. <strong>174 souls</strong> on board, <strong>2 hours 50 minutes</strong> fuel.`,
+    hints:["VT-INX","A321","FL300","Full hydraulic failure","Gear/flap uncertain","90 NM S Delhi","174 SOB","2h 50m fuel"],
+    answer:`MAYDAY MAYDAY MAYDAY
+Delhi Approach, VT-INX VT-INX VT-INX
+Complete hydraulic failure, uncertain gear and flap extension
+Continuing to Delhi
+Position 90 NM south of Delhi
+Altitude FL300 descending
+174 souls on board
+Fuel 2 hours 50 minutes
+Request long straight-in approach, all emergency services on landing`,
+    notes:"Hydraulic failure affecting gear = potential belly landing. Request long straight-in for maximum time for gear extension attempts. ATC will foam the runway if gear-up landing is confirmed likely."
+  },
+
+  /* ══ MAYDAY — Rapid Decompression ══ */
+  {
+    id:"m11", type:"mayday", category:"Rapid Decompression",
+    title:"VT-DCP · B737 · FL390 · Rapid Decompression · Hyderabad",
+    scenario:`You are crew of <strong>VT-DCP</strong>, Boeing 737, at <strong>FL390</strong>. Rapid decompression has occurred — oxygen masks deployed. Emergency descent to <strong>FL100</strong> initiated. Position is <strong>100 NM northwest of Hyderabad</strong>. <strong>155 souls</strong> on board, <strong>3 hours</strong> fuel.`,
+    hints:["VT-DCP","B737","FL390","Rapid decompression","Masks deployed","Emergency descent FL100","100 NM NW Hyderabad","155 SOB","3h fuel"],
+    answer:`MAYDAY MAYDAY MAYDAY
+Mumbai Control, VT-DCP VT-DCP VT-DCP
+Rapid decompression, oxygen masks deployed, emergency descent
+Descending to FL100, requesting track shortening to Hyderabad
+Position 100 NM northwest of Hyderabad
+Altitude FL390 descending rapidly
+155 souls on board
+Fuel 3 hours
+Request direct Hyderabad, priority approach`,
+    notes:"Emergency descent is immediate — ATC clears traffic below you. Contact Area Control when far from destination. 'Track shortening' = direct routing. At FL390 descent rate may exceed 6000 fpm."
+  },
+
+  /* ══ MAYDAY — Windshear / GPWS ══ */
+  {
+    id:"m12", type:"mayday", category:"Windshear / GPWS",
+    title:"VT-WND · A320 · 800 ft · Windshear + GPWS · Mumbai",
+    scenario:`You are crew of <strong>VT-WND</strong>, Airbus A320, on final approach to <strong>Runway 27 at Mumbai (VABB)</strong>, at <strong>800 ft AGL</strong>. Severe windshear encountered — GPWS <em>PULL UP</em> warning activated. Executing immediate go-around, climbing to <strong>3000 ft</strong>. <strong>168 souls</strong> on board, <strong>1 hour 40 minutes</strong> fuel.`,
+    hints:["VT-WND","A320","800 ft AGL","Severe windshear","GPWS PULL UP","Go-around climbing","168 SOB","1h 40m fuel"],
+    answer:`MAYDAY MAYDAY MAYDAY
+Mumbai Approach, VT-WND VT-WND VT-WND
+Severe windshear on final, GPWS PULL UP activated
+Go-around, climbing to 3000 feet
+Position short final Runway 27, Mumbai
+Altitude 800 feet climbing
+168 souls on board
+Fuel 1 hour 40 minutes
+Request vectors for another approach when ready`,
+    notes:"GPWS PULL UP + windshear = MAYDAY. ATC clears conflicting traffic instantly. After stabilising you can cancel emergency and request another approach. Never ignore a GPWS warning — always execute the escape manoeuvre."
+  },
+
+  /* ══ PAN-PAN — Medical Passenger ══ */
+  {
+    id:"p1", type:"pan", category:"Medical — Passenger",
+    title:"VT-GHI · ATR72 · 12000 ft · Passenger Stroke · Pune",
+    scenario:`You are crew of <strong>VT-GHI</strong>, ATR 72, at <strong>12000 ft</strong>, <strong>35 NM west of Pune</strong>. A passenger is unresponsive with suspected stroke. No doctor on board. Diverting to <strong>Pune (VAPO)</strong>. <strong>72 souls</strong> on board, <strong>1 hour 20 minutes</strong> fuel.`,
+    hints:["VT-GHI","ATR72","12000 ft","Passenger unresponsive","Suspected stroke","No doctor","35 NM W Pune","72 SOB","1h 20m fuel"],
+    answer:`PAN-PAN PAN-PAN PAN-PAN
+Pune Approach, VT-GHI VT-GHI VT-GHI
+Medical emergency, passenger unresponsive, suspected stroke, no doctor on board
+Diverting to Pune, request priority landing
+Position 35 NM west of Pune
+Altitude 12000 feet
+72 souls on board
+Fuel 1 hour 20 minutes
+Request ambulance and medical team on landing`,
+    notes:"Passenger medical = PAN-PAN (urgency). MAYDAY only if the medical situation also threatens the aircraft. Always state 'no doctor on board' — ATC may patch a remote medical advisor via radio."
+  },
+  {
+    id:"p2", type:"pan", category:"Medical — Passenger",
+    title:"VT-MED · B737 · FL280 · Passenger Cardiac Arrest · Bengaluru",
+    scenario:`You are crew of <strong>VT-MED</strong>, Boeing 737, at <strong>FL280</strong>, <strong>120 NM north of Bengaluru</strong>. A passenger has suffered a cardiac arrest. A doctor on board is performing CPR. Diverting to <strong>Bengaluru (VOBL)</strong> for immediate medical attention. <strong>190 souls</strong> on board, <strong>3 hours 10 minutes</strong> fuel.`,
+    hints:["VT-MED","B737","FL280","Passenger cardiac arrest","Doctor on board CPR","120 NM N Bengaluru","190 SOB","3h 10m fuel"],
+    answer:`PAN-PAN PAN-PAN PAN-PAN
+Bengaluru Control, VT-MED VT-MED VT-MED
+Medical emergency, passenger in cardiac arrest, doctor on board administering CPR
+Diverting to Bengaluru, request priority landing
+Position 120 NM north of Bengaluru
+Altitude FL280 descending
+190 souls on board
+Fuel 3 hours 10 minutes
+Request ambulance with cardiac care on standby`,
+    notes:"State 'doctor on board administering CPR' — relevant for ATC medical coordination. Request specific medical resources (cardiac care team). The more specific you are, the better prepared the ground team will be."
+  },
+
+  /* ══ PAN-PAN — Medical Crew ══ */
+  {
+    id:"p3", type:"pan", category:"Medical — Crew",
+    title:"VT-CPL · ATR72 · FL180 · Co-Pilot Incapacitated · Chennai",
+    scenario:`You are the <strong>captain</strong> of <strong>VT-CPL</strong>, ATR 72, at <strong>FL180</strong>, <strong>50 NM west of Chennai</strong>. The co-pilot has become suddenly incapacitated — unresponsive, possibly hypoglycaemia. You are continuing to <strong>Chennai (VOMM)</strong> as sole operating pilot. <strong>68 souls</strong> on board, <strong>2 hours</strong> fuel.`,
+    hints:["VT-CPL","ATR72","FL180","Co-pilot incapacitated","Captain sole pilot","50 NM W Chennai","68 SOB","2h fuel"],
+    answer:`PAN-PAN PAN-PAN PAN-PAN
+Chennai Approach, VT-CPL VT-CPL VT-CPL
+Co-pilot incapacitated, medical emergency on flight deck
+Captain is sole operating pilot, continuing to Chennai
+Position 50 NM west of Chennai
+Altitude FL180
+68 souls on board
+Fuel 2 hours
+Request priority approach and medical team on landing`,
+    notes:"Captain incapacitation = MAYDAY. Co-pilot incapacitation with captain in control = PAN-PAN. Sole operating pilot means increased workload — ATC will minimise radio calls and provide simple, clear instructions."
+  },
+
+  /* ══ PAN-PAN — Navigation Failure ══ */
+  {
+    id:"p4", type:"pan", category:"Navigation Failure",
+    title:"VT-NAV · C172 · 6500 ft · GPS + Nav Failure · Nagpur",
+    scenario:`You are crew of <strong>VT-NAV</strong>, Cessna 172, at <strong>6500 ft</strong>. All navigation instruments have failed, including GPS. You are uncertain of your position but estimate <strong>approximately 30 NM east of Nagpur</strong>. Weather is deteriorating. Requesting radar identification and vectors to <strong>Nagpur (VANP)</strong>. <strong>2 souls</strong> on board, <strong>2 hours</strong> fuel.`,
+    hints:["VT-NAV","C172","6500 ft","All nav failed incl GPS","Position uncertain","~30 NM E Nagpur","2 SOB","2h fuel"],
+    answer:`PAN-PAN PAN-PAN PAN-PAN
+Nagpur Approach, VT-NAV VT-NAV VT-NAV
+All navigation instruments failed including GPS, uncertain of position
+Request radar identification and vectors to Nagpur
+Estimated position 30 NM east of Nagpur
+Altitude 6500 feet
+2 souls on board
+Fuel 2 hours
+Request immediate radar assistance`,
+    notes:"Nav failure alone = PAN-PAN. If fuel becomes critical or weather closes in completely, upgrade to MAYDAY. ATC SSR radar can identify you if squawking. Set 7700 if declaring emergency, 7600 if comms also failing."
+  },
+
+  /* ══ PAN-PAN — Fuel Emergency ══ */
+  {
+    id:"p5", type:"pan", category:"Fuel Emergency",
+    title:"VT-FUL · B737 · FL240 · Minimum Fuel · Mumbai",
+    scenario:`You are crew of <strong>VT-FUL</strong>, Boeing 737, at <strong>FL240</strong>. Due to extended ATC holding, you now declare <strong>minimum fuel</strong> — you can accept <strong>one approach only</strong> to <strong>Mumbai (VABB)</strong>. <strong>189 souls</strong> on board, <strong>40 minutes</strong> fuel remaining.`,
+    hints:["VT-FUL","B737","FL240","MINIMUM FUEL","One approach only","VABB","189 SOB","40 min fuel"],
+    answer:`PAN-PAN PAN-PAN PAN-PAN
+Mumbai Approach, VT-FUL VT-FUL VT-FUL
+Minimum fuel, can accept one approach only
+Request immediate clearance and priority approach to Mumbai
+Currently in holding as assigned
+Altitude FL240 descending
+189 souls on board
+Fuel 40 minutes
+Unable to accept any further delay or go-around`,
+    notes:"MINIMUM FUEL = PAN-PAN. If fuel reaches 30 minutes or below with no guaranteed landing option, declare MAYDAY FUEL EMERGENCY. State 'one approach only' and 'unable to accept delay' — these are critical phrases ATC will action immediately."
+  },
+  {
+    id:"p6", type:"pan", category:"Fuel Emergency",
+    title:"VT-LOW · B737 · FL200 · Low Fuel Weather Diversion · Bengaluru",
+    scenario:`You are crew of <strong>VT-LOW</strong>, Boeing 737, diverting from <strong>Chennai to Bengaluru</strong> due to weather. At <strong>FL200</strong>, fuel is critically low at <strong>55 minutes</strong> due to extended holding and diversion. <strong>156 souls</strong> on board. Requesting priority clearance into <strong>Bengaluru (VOBL)</strong>.`,
+    hints:["VT-LOW","B737","FL200","Weather diversion Chennai→Bengaluru","55 min fuel","156 SOB","Priority request"],
+    answer:`PAN-PAN PAN-PAN PAN-PAN
+Bengaluru Approach, VT-LOW VT-LOW VT-LOW
+Low fuel, 55 minutes remaining due to weather diversion from Chennai
+Request immediate priority clearance and straight-in approach
+Position on diversion track to Bengaluru
+Altitude FL200 descending
+156 souls on board
+Fuel 55 minutes
+Unable to accept holding or any further delay`,
+    notes:"Always state reason for low fuel — ATC notes this for investigation. 55 minutes is PAN-PAN. State you cannot accept holding. If alternate is no longer viable and fuel drops further, escalate to MAYDAY."
+  },
+
+  /* ══ PAN-PAN — Pressurisation ══ */
+  {
+    id:"p7", type:"pan", category:"Pressurisation",
+    title:"VT-PRE · A320 · FL350 · Pressurisation Warning · Kolkata",
+    scenario:`You are crew of <strong>VT-PRE</strong>, Airbus A320, at <strong>FL350</strong>, <strong>120 NM north of Kolkata</strong>. Cabin pressurisation warning has activated. Cabin altitude is slowly climbing but not yet at emergency level. Initiating precautionary descent to <strong>FL100</strong>, diverting to <strong>Kolkata (VECC)</strong>. <strong>180 souls</strong> on board, <strong>3 hours 15 minutes</strong> fuel.`,
+    hints:["VT-PRE","A320","FL350","Pressurisation warning","Cabin alt climbing","Precautionary descent FL100","120 NM N Kolkata","180 SOB","3h 15m fuel"],
+    answer:`PAN-PAN PAN-PAN PAN-PAN
+Kolkata Control, VT-PRE VT-PRE VT-PRE
+Pressurisation warning, cabin altitude climbing, initiating precautionary descent to FL100
+Diverting to Kolkata
+Position 120 NM north of Kolkata
+Altitude FL350 descending
+180 souls on board
+Fuel 3 hours 15 minutes
+Request direct track to Kolkata and priority approach`,
+    notes:"Controllable pressurisation issue = PAN-PAN. If cabin altitude reaches 14,000 ft uncontrolled and masks deploy = MAYDAY. Descent to FL100 is standard — breathable without oxygen masks below 10,000 ft."
+  },
+
+  /* ══ PAN-PAN — Comms Failure ══ */
+  {
+    id:"p8", type:"pan", category:"Comms Failure",
+    title:"VT-COM · ATR72 · FL180 · VHF No.1 Failure · Chennai",
+    scenario:`You are crew of <strong>VT-COM</strong>, ATR 72, at <strong>FL180</strong>, <strong>50 NM east of Chennai</strong>. VHF No. 1 radio has failed. You are transmitting on <strong>VHF No. 2</strong> but are uncertain if ATC can receive you. Continuing to <strong>Chennai (VOMM)</strong>. <strong>68 souls</strong> on board, <strong>2 hours 45 minutes</strong> fuel.`,
+    hints:["VT-COM","ATR72","FL180","VHF No.1 failed","Transmitting VHF No.2","Uncertain if readable","50 NM E Chennai","68 SOB","2h 45m fuel"],
+    answer:`PAN-PAN PAN-PAN PAN-PAN
+Chennai Approach, VT-COM VT-COM VT-COM
+VHF No. 1 radio failed, transmitting on VHF No. 2, uncertain if readable
+Continuing to Chennai
+Position 50 NM east of Chennai
+Altitude FL180
+68 souls on board
+Fuel 2 hours 45 minutes
+Request acknowledgement, if unreadable squawk 7600`,
+    notes:"Partial comms failure = PAN-PAN. State which radio failed and which you are using. Ask for acknowledgement — if no reply after two attempts on guard (121.5), squawk 7600. NEVER squawk 7700 unless also declaring a full emergency."
+  },
+];
+
+/* ================================================================
+   STATE
+================================================================ */
+let sessionGot    = 0;
+let sessionMissed = 0;
+let bookmarks     = new Set();
+let catProgress   = {}; // catName -> Set of completed ids
+let currentCat    = null;
+let catList       = [];
+let pracIdx       = 0;
+let assessedThisCard = false;
+
+/* ================================================================
+   INIT
+================================================================ */
+function init(){
+  buildHome();
+  showScreen('s-home');
+}
+
+/* ================================================================
+   SCREEN ROUTING
+================================================================ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ================================================================
+   HOME
+================================================================ */
+function buildHome(){
+  const wrap = document.getElementById('home-wrap');
+
+  // hero
+  let html = `
+  <div class="home-hero">
+    <h1>🚨 Emergency RT Practice</h1>
+    <p>Pick a call type and category, then practice each scenario. Reveal the correct call when ready.</p>
+  </div>`;
+
+  // bookmarks
+  html += buildBookmarksBlock();
+
+  // MAYDAY section
+  const maydayCats = CATEGORIES.filter(c=>c.type==='mayday');
+  html += `
+  <div class="type-section">
+    <div class="type-header mayday-hdr">
+      <span class="type-hdr-badge">MAYDAY</span>
+      <div class="type-hdr-info">
+        <h2>Distress Calls</h2>
+        <p>Life-threatening emergencies — immediate assistance required</p>
+      </div>
+    </div>
+    <div class="type-section-title">Categories</div>
+    <div class="cat-grid">`;
+  maydayCats.forEach(cat=>{
+    const scens = SCENARIOS.filter(s=>s.category===cat.name);
+    const done  = catProgress[cat.name] ? catProgress[cat.name].size : 0;
+    const pct   = scens.length ? Math.round((done/scens.length)*100) : 0;
+    html += `
+      <div class="cat-card mayday-cat" onclick="openCategory('${cat.id}')">
+        <div class="cat-icon">${cat.icon}</div>
+        <div class="cat-name">${cat.name}</div>
+        <div class="cat-meta">${scens.length} scenario${scens.length!==1?'s':''} · ${done}/${scens.length} done</div>
+        <div class="cat-progress-bar"><div class="cat-progress-fill" style="width:${pct}%"></div></div>
+      </div>`;
+  });
+  html += `</div></div>`;
+
+  // PAN-PAN section
+  const panCats = CATEGORIES.filter(c=>c.type==='pan');
+  html += `
+  <div class="type-section">
+    <div class="type-header pan-hdr">
+      <span class="type-hdr-badge">PAN-PAN</span>
+      <div class="type-hdr-info">
+        <h2>Urgency Calls</h2>
+        <p>Urgent situations — safety of aircraft or persons at risk</p>
+      </div>
+    </div>
+    <div class="type-section-title">Categories</div>
+    <div class="cat-grid">`;
+  panCats.forEach(cat=>{
+    const scens = SCENARIOS.filter(s=>s.category===cat.name);
+    const done  = catProgress[cat.name] ? catProgress[cat.name].size : 0;
+    const pct   = scens.length ? Math.round((done/scens.length)*100) : 0;
+    html += `
+      <div class="cat-card pan-cat" onclick="openCategory('${cat.id}')">
+        <div class="cat-icon">${cat.icon}</div>
+        <div class="cat-name">${cat.name}</div>
+        <div class="cat-meta">${scens.length} scenario${scens.length!==1?'s':''} · ${done}/${scens.length} done</div>
+        <div class="cat-progress-bar"><div class="cat-progress-fill" style="width:${pct}%"></div></div>
+      </div>`;
+  });
+  html += `</div></div>`;
+
+  wrap.innerHTML = html;
+}
+
+function buildBookmarksBlock(){
+  if(!bookmarks.size) return '';
+  const items = SCENARIOS.filter(s=>bookmarks.has(s.id));
+  let html = `<div class="bookmarks-section has-items"><div class="bm-title">⭐ Bookmarked Scenarios</div><div class="bm-list">`;
+  items.forEach(s=>{
+    const t = s.type==='mayday'?'m':'p';
+    const label = s.type==='mayday'?'MAYDAY':'PAN-PAN';
+    html += `<div class="bm-item" onclick="openScenarioById('${s.id}')">
+      <span class="bm-tag ${t}">${label}</span>
+      <span class="bm-name">${s.title}</span>
+      <span class="bm-cat">${s.category}</span>
+    </div>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
+/* ================================================================
+   CATEGORY LIST SCREEN
+================================================================ */
+function openCategory(catId){
+  const cat = CATEGORIES.find(c=>c.id===catId);
+  if(!cat) return;
+  currentCat = cat;
+  catList    = SCENARIOS.filter(s=>s.category===cat.name);
+  buildList();
+  showScreen('s-list');
+}
+
+function buildList(){
+  const cat   = currentCat;
+  const type  = cat.type;
+  const cls   = type==='mayday' ? 'mayday-cat' : 'pan-cat';
+  const badge = type==='mayday' ? '<span class="type-badge badge-m">MAYDAY</span>' : '<span class="type-badge badge-p">PAN-PAN</span>';
+
+  let html = `
+  <button class="back-btn" onclick="goHome()">← All Categories</button>
+  <div class="list-header">
+    <div class="list-title">
+      ${badge}
+      <h2>${cat.icon} ${cat.name}</h2>
+      <span class="count-badge">${catList.length} scenarios</span>
+    </div>
+    <button class="shuffle-btn" onclick="shuffleList()">🔀 Shuffle</button>
+  </div>
+  <div class="scenario-list">`;
+
+  catList.forEach((s,i)=>{
+    const done   = catProgress[cat.name] && catProgress[cat.name].has(s.id);
+    const bm     = bookmarks.has(s.id) ? '⭐' : '☆';
+    const status = done ? '✅' : '○';
+    // strip html for preview
+    const preview= s.scenario.replace(/<[^>]+>/g,'').substring(0,80)+'...';
+    html += `
+    <div class="scenario-item" onclick="openScenario(${i})">
+      <span class="si-num">${i+1}</span>
+      <div class="si-body">
+        <div class="si-title">${s.title}</div>
+        <div class="si-preview">${preview}</div>
+      </div>
+      <span class="si-status${done?' done':''}">${status}</span>
+      <span class="si-arrow">›</span>
+    </div>`;
+  });
+  html += `</div>`;
+  document.getElementById('list-wrap').innerHTML = html;
+}
+
+function shuffleList(){
+  catList = [...catList].sort(()=>Math.random()-.5);
+  buildList();
+  toast('🔀 Shuffled!');
+}
+
+/* ================================================================
+   PRACTICE SCREEN
+================================================================ */
+function openScenario(idx){
+  pracIdx = idx;
+  assessedThisCard = false;
+  buildPractice();
+  showScreen('s-prac');
+}
+
+function openScenarioById(id){
+  const s   = SCENARIOS.find(sc=>sc.id===id);
+  if(!s) return;
+  const cat = CATEGORIES.find(c=>c.name===s.category);
+  if(!cat) return;
+  currentCat = cat;
+  catList    = SCENARIOS.filter(sc=>sc.category===s.category);
+  pracIdx    = catList.findIndex(sc=>sc.id===id);
+  assessedThisCard = false;
+  buildPractice();
+  showScreen('s-prac');
+}
+
+function buildPractice(){
+  const s    = catList[pracIdx];
+  const type = s.type;
+  const isBm = bookmarks.has(s.id);
+  const catBadge = type==='mayday'
+    ? '<span class="type-badge badge-m">MAYDAY</span>'
+    : '<span class="type-badge badge-p">PAN-PAN</span>';
+
+  let html = `
+  <div class="practice-nav">
+    <div class="practice-nav-left">
+      <button class="back-btn" style="margin-bottom:0" onclick="goList()">← ${currentCat.name}</button>
+      <span class="practice-counter">${pracIdx+1} / ${catList.length}</span>
+    </div>
+  </div>
+
+  <!-- Scenario Card -->
+  <div class="scenario-box">
+    <div class="scenario-box-hdr">
+      ${catBadge}
+      <span class="cat-label">${s.category}</span>
+      <button class="bookmark-btn${isBm?' active':''}" id="bm-btn" onclick="toggleBookmark('${s.id}')" title="Bookmark this scenario">
+        ${isBm?'⭐':'☆'}
+      </button>
+    </div>
+    <div class="scenario-body">
+      <div class="scenario-lbl">Scenario</div>
+      <div class="scenario-txt">${s.scenario}</div>
+      <div class="hints">${s.hints.map(h=>`<span class="hint">${h}</span>`).join('')}</div>
+      <button class="voice-scenario-btn" onclick="speakText(\`${s.scenario.replace(/<[^>]+>/g,'').replace(/`/g,"'")}\`, 'scenario')">
+        🔊 Hear Scenario Read Aloud
+      </button>
+    </div>
+  </div>
+
+  <!-- Reveal Section -->
+  <div class="reveal-section" id="reveal-section">
+    <button class="reveal-btn" id="reveal-btn" onclick="revealAnswer()">
+      👁 Tap to Reveal Correct Call Format
+    </button>
+  </div>
+
+  <!-- Nav Row -->
+  <div class="nav-row">
+    <button class="nav-btn" onclick="prevScenario()" ${pracIdx===0?'disabled':''}>← Prev</button>
+    <button class="nav-btn nav-btn-next" onclick="nextScenario()" ${pracIdx===catList.length-1?'disabled':''}>Next →</button>
+  </div>`;
+
+  document.getElementById('prac-wrap').innerHTML = html;
+}
+
+function revealAnswer(){
+  const s    = catList[pracIdx];
+  const type = s.type;
+
+  // Mark progress
+  if(!catProgress[s.category]) catProgress[s.category] = new Set();
+  catProgress[s.category].add(s.id);
+
+  // Highlight answer
+  const highlighted = s.answer
+    .replace(/(MAYDAY)/g,  '<span class="hl-m">$1</span>')
+    .replace(/(PAN-PAN)/g, '<span class="hl-p">$1</span>');
+
+  const answerHTML = `
+  <div class="answer-box" id="answer-box">
+    <div class="answer-box-hdr">
+      <span class="answer-box-title">✅ Correct Call</span>
+      <div class="answer-actions">
+        <button class="icon-btn" id="voice-call-btn" onclick="speakText(\`${s.answer.replace(/`/g,"'")}\`, 'call')">🔊 Hear Call</button>
+        <button class="icon-btn" onclick="copyText(\`${s.answer.replace(/`/g,"'")}\`)">📋 Copy</button>
+      </div>
+    </div>
+    <div class="answer-call">${highlighted}</div>
+    <div class="notes-box">
+      <div class="notes-lbl">📌 Examiner Notes</div>
+      <div class="notes-txt">${s.notes}</div>
+    </div>
+    <div class="assess-row">
+      <span class="assess-lbl">How did you do?</span>
+      <button class="assess-got"  id="ag" onclick="assess('got')">✅ Got It</button>
+      <button class="assess-miss" id="am" onclick="assess('missed')">❌ Need Practice</button>
+    </div>
+  </div>`;
+
+  document.getElementById('reveal-section').innerHTML = answerHTML;
+}
+
+function assess(type){
+  if(assessedThisCard) return;
+  assessedThisCard = true;
+  if(type==='got'){
+    sessionGot++;
+    document.getElementById('ag').classList.add('selected');
+    toast('✅ Great! Moving on...');
+  } else {
+    sessionMissed++;
+    document.getElementById('am').classList.add('selected');
+    toast('📝 Keep practicing — you\'ll get it!');
+  }
+  document.getElementById('hdr-got').textContent    = sessionGot;
+  document.getElementById('hdr-missed').textContent = sessionMissed;
+}
+
+function prevScenario(){
+  if(pracIdx>0){ pracIdx--; assessedThisCard=false; buildPractice(); window.scrollTo({top:0}); }
+}
+function nextScenario(){
+  if(pracIdx<catList.length-1){ pracIdx++; assessedThisCard=false; buildPractice(); window.scrollTo({top:0}); }
+}
+
+function toggleBookmark(id){
+  if(bookmarks.has(id)){
+    bookmarks.delete(id);
+    toast('Bookmark removed');
+  } else {
+    bookmarks.add(id);
+    toast('⭐ Bookmarked!');
+  }
+  const btn = document.getElementById('bm-btn');
+  if(btn){ btn.textContent = bookmarks.has(id)?'⭐':'☆'; btn.classList.toggle('active',bookmarks.has(id)); }
+}
+
+/* ================================================================
+   NAV HELPERS
+================================================================ */
+function goHome(){
+  stopVoice();
+  buildHome();
+  showScreen('s-home');
+}
+function goList(){
+  stopVoice();
+  buildList();
+  showScreen('s-list');
+}
+
+/* ================================================================
+   VOICE
+================================================================ */
+let synth = window.speechSynthesis;
+function speakText(text, mode){
+  stopVoice();
+  if(!synth){ toast('⚠️ Speech not supported in this browser'); return; }
+  const u  = new SpeechSynthesisUtterance(text.replace(/\n/g,', '));
+  u.rate   = 0.85;
+  u.pitch  = 1.0;
+  const vs = synth.getVoices();
+  const v  = vs.find(v=>v.lang==='en-GB') || vs.find(v=>v.lang.startsWith('en'));
+  if(v) u.voice = v;
+
+  const bar = document.getElementById('voice-bar');
+  const txt = document.getElementById('voice-bar-txt');
+  txt.textContent = mode==='call' ? 'Reading correct call...' : 'Reading scenario...';
+
+  u.onstart = ()=> bar.classList.add('show');
+  u.onend = u.onerror = ()=> bar.classList.remove('show');
+  synth.speak(u);
+
+  // update button state
+  const btn = document.getElementById('voice-call-btn');
+  if(btn && mode==='call') btn.classList.add('playing');
+  u.onend = ()=>{ bar.classList.remove('show'); if(btn) btn.classList.remove('playing'); };
+}
+function stopVoice(){
+  if(synth) synth.cancel();
+  document.getElementById('voice-bar').classList.remove('show');
+}
+if(synth) synth.onvoiceschanged = ()=>{};
+
+/* ================================================================
+   COPY
+================================================================ */
+function copyText(txt){
+  navigator.clipboard.writeText(txt).then(()=>toast('📋 Copied!'));
+}
+
+/* ================================================================
+   FORMAT MODAL
+================================================================ */
+function openModal(){ document.getElementById('modal').classList.add('open'); }
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+function closeModalOutside(e){ if(e.target===document.getElementById('modal')) closeModal(); }
+
+/* ================================================================
+   THEME
+================================================================ */
+function toggleTheme(){
+  const html   = document.documentElement;
+  const isDark = html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme', isDark?'light':'dark');
+  document.getElementById('t-icon').textContent = isDark?'🌙':'☀️';
+  document.getElementById('t-lbl').textContent  = isDark?'Dark':'Light';
+}
+
+/* ================================================================
+   TOAST
+================================================================ */
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* ── START ── */
+init();
+</script>
+</body>
+</html>
