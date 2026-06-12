@@ -14,6 +14,7 @@
 const PAPERS = [
   { name: "RTR PART 1 NOTES",  folder: "PART 1 NOTES",  file: "PART 1 NOTES.html"  },
   { name: "RTR FORMATS PRACTICE",  folder: "RTR FORMATS",  file: "RTR FORMATS.html"  },
+  { name: "EMERGENCY RT PRACTICE",  folder: "EMERGENCY RT PRACTICE",  file: "EMERGENCY RT PRACTICE.html"  },
   { name: "VT-KNT",  folder: "VT-KNT",  file: "VT-KNT.html"  },
   { name: "QP-142",  folder: "QP-142",  file: "QP-142.html"  },
   { name: "AI-321",  folder: "AI-321 VT-NMS",   file: "AI-321.html"   },
