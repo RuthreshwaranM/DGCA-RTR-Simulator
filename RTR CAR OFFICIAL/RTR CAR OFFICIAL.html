@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../protection.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAR Section 7 – RTR Examination & Licence | DGCA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&family=Georgia:ital,wght@0,400;0,700;1,400&family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── THEME TOKENS ─────────────────────────────────────────── */
+    :root {
+      /* Light / PDF-replica mode (default) */
+      --bg:           #f5f5f0;
+      --page-bg:      #ffffff;
+      --page-shadow:  rgba(0,0,0,0.15);
+      --border-dark:  #1a1a1a;
+      --border-mid:   #555;
+      --border-light: #bbb;
+      --text-main:    #111111;
+      --text-sec:     #333333;
+      --text-muted:   #666666;
+      --accent:       #1a3a6b;   /* DGCA navy blue */
+      --accent-bg:    #e8edf5;
+      --header-bg:    #1a3a6b;
+      --header-text:  #ffffff;
+      --tag-bg:       #e8edf5;
+      --tag-text:     #1a3a6b;
+      --annex-bg:     #f0f4f8;
+      --table-head:   #1a3a6b;
+      --table-head-t: #ffffff;
+      --table-row:    #f8f8f8;
+      --table-alt:    #eef2f7;
+      --topbar-bg:    #1a3a6b;
+      --topbar-text:  #ffffff;
+    }
+
+    [data-theme="dark"] {
+      --bg:           #0d1117;
+      --page-bg:      #161b22;
+      --page-shadow:  rgba(0,0,0,0.5);
+      --border-dark:  #30363d;
+      --border-mid:   #484f58;
+      --border-light: #30363d;
+      --text-main:    #e6edf3;
+      --text-sec:     #c9d1d9;
+      --text-muted:   #8b949e;
+      --accent:       #58a6ff;
+      --accent-bg:    #0d1a2d;
+      --header-bg:    #0d1a2d;
+      --header-text:  #58a6ff;
+      --tag-bg:       #0d1a2d;
+      --tag-text:     #58a6ff;
+      --annex-bg:     #0d1117;
+      --table-head:   #0d1a2d;
+      --table-head-t: #58a6ff;
+      --table-row:    #161b22;
+      --table-alt:    #0d1a2d;
+      --topbar-bg:    #0d1a2d;
+      --topbar-text:  #58a6ff;
+    }
+
+    /* ── RESET ────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      transition: background 0.35s, color 0.35s;
+    }
+
+    /* ── TOPBAR ───────────────────────────────────────────────── */
+    .topbar {
+      background: var(--topbar-bg);
+      color: var(--topbar-text);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 28px;
+      position: sticky; top: 0; z-index: 100;
+      border-bottom: 3px solid #c8a84b;
+    }
+    .topbar-left {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 13px; font-weight: 700; letter-spacing: 2px;
+      color: var(--topbar-text);
+    }
+    .topbar-left span { color: #c8a84b; }
+    .toggle-wrap { display: flex; align-items: center; gap: 10px; }
+    .toggle-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 11px; letter-spacing: 1.5px;
+      color: var(--topbar-text); opacity: 0.7; text-transform: uppercase;
+    }
+    .toggle-btn {
+      width: 50px; height: 26px;
+      background: rgba(255,255,255,0.15);
+      border: 1.5px solid rgba(255,255,255,0.3);
+      border-radius: 13px; cursor: pointer;
+      position: relative; outline: none; transition: background 0.3s;
+    }
+    .toggle-btn::after {
+      content: '';
+      position: absolute; top: 3px; left: 3px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #c8a84b;
+      transition: transform 0.3s;
+    }
+    [data-theme="dark"] .toggle-btn::after { transform: translateX(24px); }
+
+    /* ── DOCUMENT PAGE WRAPPER ───────────────────────────────── */
+    .doc-page {
+      max-width: 860px;
+      margin: 32px auto 60px;
+      background: var(--page-bg);
+      box-shadow: 0 4px 24px var(--page-shadow);
+      border: 1px solid var(--border-light);
+    }
+
+    /* ── RUNNING HEADER (page header band) ───────────────────── */
+    .running-header {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      border-bottom: 2px solid var(--border-dark);
+      padding: 10px 32px;
+      background: var(--accent-bg);
+      font-size: 11px; font-family: 'Georgia', serif;
+      color: var(--text-sec);
+    }
+    .running-header .rh-left  { text-align: left; font-weight: bold; }
+    .running-header .rh-mid   { text-align: center; font-size: 10px; color: var(--text-muted); }
+    .running-header .rh-right { text-align: right; }
+
+    /* ── COVER HEADER ────────────────────────────────────────── */
+    .cover-header {
+      text-align: center;
+      padding: 36px 40px 24px;
+      border-bottom: 3px solid var(--border-dark);
+    }
+    .emblem {
+      font-size: 52px; margin-bottom: 10px; line-height: 1;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+    .cover-header h3 {
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 1px; color: var(--text-main);
+      line-height: 1.6; margin-bottom: 2px;
+    }
+    .cover-header p {
+      font-size: 12px; color: var(--text-sec);
+      letter-spacing: 0.5px; line-height: 1.6;
+    }
+    .divider-thin { height: 1px; background: var(--border-mid); margin: 12px 60px; }
+
+    .car-title-block {
+      margin-top: 16px;
+      padding: 14px 40px;
+      background: var(--header-bg);
+      color: var(--header-text);
+      text-align: center;
+    }
+    .car-title-block p { font-size: 12px; font-weight: bold; letter-spacing: 1px; line-height: 1.8; }
+
+    .series-row {
+      display: flex; justify-content: space-between;
+      padding: 10px 40px 6px;
+      font-size: 12px; font-weight: bold;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border-mid);
+    }
+    .fno-row {
+      text-align: center;
+      font-size: 11px; color: var(--text-sec);
+      padding: 4px 40px 10px;
+      border-bottom: 2px solid var(--border-dark);
+      font-style: italic;
+    }
+
+    .subject-block {
+      text-align: center;
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .subject-block .sub-label {
+      font-size: 12px; font-weight: bold; color: var(--text-muted);
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;
+    }
+    .subject-block h1 {
+      font-size: 16px; font-weight: bold;
+      color: var(--text-main); letter-spacing: 0.5px; line-height: 1.5;
+      text-transform: uppercase;
+    }
+
+    /* ── BODY CONTENT ────────────────────────────────────────── */
+    .doc-body { padding: 28px 48px 40px; }
+
+    /* Section headings */
+    .sec-num {
+      font-size: 13px; font-weight: bold; color: var(--text-main);
+      margin-top: 28px; margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .sec-num.underlined {
+      text-decoration: underline; text-underline-offset: 3px;
+    }
+
+    /* Paragraph blocks */
+    .para-block { margin-bottom: 14px; }
+    .para-block p {
+      font-size: 13px; line-height: 1.9; color: var(--text-main);
+      text-align: justify;
+    }
+    .para-num { font-weight: bold; }
+
+    /* Nested numbered list */
+    .doc-list { list-style: none; padding-left: 0; margin: 6px 0; }
+    .doc-list li {
+      font-size: 13px; line-height: 1.85; color: var(--text-main);
+      padding: 3px 0 3px 28px; position: relative;
+      text-align: justify;
+    }
+    .doc-list li .li-marker {
+      position: absolute; left: 0; font-weight: bold;
+    }
+    .doc-list.alpha > li::before { content: attr(data-alpha)'.'; position: absolute; left: 0; font-weight: bold; }
+    .doc-list.roman > li { padding-left: 36px; }
+    .doc-list.roman > li .li-marker { font-style: normal; }
+
+    /* Sub-list indent */
+    .doc-sub-list { list-style: none; padding-left: 24px; margin: 4px 0; }
+    .doc-sub-list li {
+      font-size: 12.5px; line-height: 1.8; color: var(--text-sec);
+      padding: 2px 0 2px 20px; position: relative;
+    }
+    .doc-sub-list li::before { content: '–'; position: absolute; left: 4px; color: var(--text-muted); }
+
+    /* Annexure header */
+    .annexure-hdr {
+      text-align: center;
+      background: var(--annex-bg);
+      border: 1px solid var(--border-mid);
+      border-left: 4px solid var(--accent);
+      margin: 32px 0 20px;
+      padding: 16px 24px;
+    }
+    .annexure-hdr h2 {
+      font-size: 14px; font-weight: bold;
+      text-transform: uppercase; letter-spacing: 1px;
+      color: var(--accent); margin-bottom: 4px;
+    }
+    .annexure-hdr p { font-size: 12px; color: var(--text-sec); }
+
+    /* Syllabus category label */
+    .syl-cat {
+      font-size: 13px; font-weight: bold;
+      color: var(--accent); text-decoration: underline;
+      text-underline-offset: 3px;
+      margin-top: 20px; margin-bottom: 6px;
+    }
+
+    /* Module table */
+    .mod-table {
+      width: 100%; border-collapse: collapse;
+      margin: 14px 0; font-size: 12.5px;
+    }
+    .mod-table th {
+      background: var(--table-head);
+      color: var(--table-head-t);
+      padding: 10px 14px; text-align: left;
+      font-size: 12px; letter-spacing: 0.5px;
+      border: 1px solid var(--border-dark);
+    }
+    .mod-table td {
+      padding: 9px 14px; border: 1px solid var(--border-light);
+      color: var(--text-main); line-height: 1.7;
+      vertical-align: top;
+    }
+    .mod-table tr:nth-child(odd)  td { background: var(--table-row); }
+    .mod-table tr:nth-child(even) td { background: var(--table-alt); }
+    .mod-table tfoot td {
+      background: var(--accent-bg);
+      font-weight: bold; color: var(--accent);
+      font-size: 13px;
+    }
+
+    /* RTR Lab table */
+    .lab-table {
+      width: 100%; border-collapse: collapse;
+      margin: 14px 0; font-size: 12px;
+    }
+    .lab-table th {
+      background: var(--table-head);
+      color: var(--table-head-t);
+      padding: 9px 12px; text-align: left;
+      border: 1px solid var(--border-dark);
+      font-size: 11.5px;
+    }
+    .lab-table td {
+      padding: 8px 12px; border: 1px solid var(--border-light);
+      color: var(--text-main); line-height: 1.7;
+      vertical-align: top;
+    }
+    .lab-table tr:nth-child(odd)  td { background: var(--table-row); }
+    .lab-table tr:nth-child(even) td { background: var(--table-alt); }
+    .lab-table td strong { color: var(--accent); }
+
+    /* Signature block */
+    .sig-block {
+      margin-top: 40px; padding-top: 20px;
+      border-top: 1px solid var(--border-mid);
+      text-align: right;
+    }
+    .sig-block p { font-size: 13px; color: var(--text-main); line-height: 1.8; }
+    .sig-block .sig-name { font-weight: bold; }
+
+    /* Page number */
+    .page-break-marker {
+      border-top: 2px solid var(--border-dark);
+      margin: 36px 0 24px;
+      position: relative;
+      text-align: center;
+    }
+    .page-break-marker span {
+      position: absolute; top: -10px;
+      background: var(--page-bg);
+      padding: 0 12px;
+      font-size: 10px; color: var(--text-muted);
+      font-family: 'Rajdhani', sans-serif;
+      letter-spacing: 2px;
+      left: 50%; transform: translateX(-50%);
+    }
+
+    /* Note box */
+    .note-box {
+      background: var(--accent-bg);
+      border: 1px solid var(--accent);
+      border-left: 4px solid var(--accent);
+      border-radius: 3px;
+      padding: 12px 16px; margin: 12px 0;
+      font-size: 12.5px; line-height: 1.8;
+      color: var(--text-main);
+    }
+
+    /* Bullet list (non-numbered) */
+    .bullet-list { list-style: disc; padding-left: 26px; margin: 6px 0; }
+    .bullet-list li {
+      font-size: 12.5px; line-height: 1.8; color: var(--text-main);
+      padding: 2px 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .doc-body { padding: 20px 22px 30px; }
+      .cover-header { padding: 24px 22px 16px; }
+      .series-row, .fno-row, .subject-block { padding-left: 22px; padding-right: 22px; }
+      .running-header { padding: 8px 16px; }
+    }
+
+    /* Scroll progress */
+    .progress-bar {
+      position: fixed; top: 0; left: 0; height: 3px;
+      background: #c8a84b; z-index: 200;
+      transition: width 0.1s linear;
+      box-shadow: 0 0 6px #c8a84b;
+    }
+  </style>
+</head>
+<body data-theme="light">
+<script>
+(function(){
+  const a=sessionStorage.getItem('rtr_auth');
+  if(!a){window.location.replace('../login.html');return;}
+  try{const d=JSON.parse(a);if(!d.loggedIn||Date.now()-d.time>14400000){sessionStorage.removeItem('rtr_auth');window.location.replace('../login.html');}}catch(e){window.location.replace('../login.html');}
+})();
+</script>
+<div class="progress-bar" id="progress"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">DGCA <span>|</span> CAR SECTION 7 – SERIES G PART VI</div>
+  <div class="toggle-wrap">
+    <span class="toggle-label" id="themeLabel">Light</span>
+    <button class="toggle-btn" id="themeToggle" aria-label="Toggle theme"></button>
+    <span class="toggle-label" id="themeIcon">☀️</span>
+  </div>
+</div>
+
+<div class="doc-page">
+
+  <!-- RUNNING HEADER -->
+  <div class="running-header">
+    <span class="rh-left">SECTION 7</span>
+    <span class="rh-mid">DATE DDMMYYYY</span>
+    <span class="rh-right">CIVIL AVIATION REQUIREMENTS &nbsp;·&nbsp; SERIES G PART VI</span>
+  </div>
+
+  <!-- COVER HEADER -->
+  <div class="cover-header">
+    <div class="emblem">🏛️</div>
+    <h3>GOVERNMENT OF INDIA</h3>
+    <h3>OFFICE OF THE DIRECTOR GENERAL OF CIVIL AVIATION</h3>
+    <p>TECHNICAL CENTRE, OPP. SAFDARJUNG AIRPORT, NEW DELHI</p>
+    <div class="divider-thin"></div>
+    <h3>CIVIL AVIATION REQUIREMENTS</h3>
+    <h3>SECTION 7 – FLIGHT CREW STANDARDS</h3>
+    <h3>TRAINING AND LICENSING</h3>
+  </div>
+
+  <div class="car-title-block">
+    <p>SERIES 'G' PART VI &nbsp;&nbsp;|&nbsp;&nbsp; ISSUE I , Dated: DDMMYYY &nbsp;&nbsp;|&nbsp;&nbsp; EFFECTIVE: DDMMYYYY</p>
+  </div>
+
+  <div class="fno-row">F. No. 1-8/53/94-L-II/RTR/CAR</div>
+
+  <div class="subject-block">
+    <div class="sub-label">Subject</div>
+    <h1>Radio Telephone Operator (Restricted):<br/>Examination and Issue of Certificate and Licence</h1>
+  </div>
+
+  <!-- BODY -->
+  <div class="doc-body">
+
+    <!-- 1. INTRODUCTION -->
+    <div class="sec-num underlined">1. &nbsp;Introduction:</div>
+
+    <div class="para-block">
+      <p><span class="para-num">1.1</span> &nbsp;Radio Telephone Operator (Restricted) Certificate and License Rules 2025 interalia authorizes the Directorate General of Civil Aviation to issue directions relating to the examination, grant and extension of Radio Telephone Operator (Restricted) Certificate and Licence to personnel engaged in the operation of radio telephone or telegraph for the conduct of operation and maintenance of aircraft and associated equipment.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">1.2</span> &nbsp;This Civil Aviation Requirement (CAR) is issued under the provisions of Rule 18 of Radio Telephone Operator (Restricted) Certificate and License Rules 2025 and lays down the procedures for examination and certification of personnel engaged in the operation of radio telephone or telegraph for the conduct of operation and maintenance of aircraft and associated equipment.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">1.3</span> &nbsp;This CAR lays down the requirements to be fulfilled by the applicant for appearing in the examination, conduct of examination and requirements for issue of Radio Telephone Operator (Restricted) Certificate and License.</p>
+    </div>
+
+    <!-- 2. DEFINITIONS -->
+    <div class="sec-num underlined">2. &nbsp;Definitions:</div>
+    <p style="font-size:13px;color:var(--text-main);margin-bottom:8px;">In this CAR, unless the context otherwise requires, –</p>
+    <ul class="doc-list">
+      <li><span class="li-marker">i.</span> "RTR" means Radio Telephone Operator (Restricted);</li>
+      <li><span class="li-marker">ii.</span> "International Telecommunication Convention" means the Convention of the International Telecommunication Union signed at Geneva in 1992 or any subsequent revision or modification thereof, which the Government of India has ratified or accepted.</li>
+      <li><span class="li-marker">iii.</span> "Radio Regulations" means the Regulations adopted by the World Radiocommunication Conference (Geneva 1995) and includes every revision or modification thereof which the Government of India has ratified or accepted.</li>
+    </ul>
+
+    <!-- 3. EXAMINATION -->
+    <div class="sec-num underlined">3. &nbsp;Examination:</div>
+    <div class="para-block">
+      <p><span class="para-num">3.1</span> &nbsp;The Radio Telephone Operator (Restricted) Certificate and Licence examination consists of the following parts:</p>
+    </div>
+    <ul class="doc-list" style="padding-left:32px;margin-bottom:10px;">
+      <li data-alpha="a" style="padding-left:20px;list-style:none;position:relative;font-size:13px;line-height:1.9;color:var(--text-main);">
+        <span style="position:absolute;left:0;font-weight:bold;">a)</span> Written Examination
+      </li>
+      <li data-alpha="b" style="padding-left:20px;list-style:none;position:relative;font-size:13px;line-height:1.9;color:var(--text-main);">
+        <span style="position:absolute;left:0;font-weight:bold;">b)</span> Practical Examination
+      </li>
+    </ul>
+    <div class="para-block">
+      <p><span class="para-num">3.2</span> &nbsp;An applicant is required to pass both the examinations for issue of RTR Certificate and Licence, unless exempted.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">3.3</span> &nbsp;The candidate shall obtain Computer number from Central Examination Organization (CEO), DGCA as per requirements mentioned in Para 6 of CAR Section 7 Series B Part 1 for appearing in Radio Telephone Operator's (Restricted) written and practical examination.</p>
+    </div>
+
+    <!-- 4. PAYMENT -->
+    <div class="sec-num underlined">4. &nbsp;Payment of Examination Fees:</div>
+    <div class="para-block">
+      <p><span class="para-num">4.1</span> &nbsp;The requirement of Examination Fee as applicable for written examination and practical examination is stipulated in Rule 9 of the Radio Telephone Operator (Restricted) Certificate and License Rules 2025.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">4.2</span> &nbsp;The mode of payment for written examination is described in the "User Manual for RTR Certificate and License Examination" published in <em>pariksha.dgca.gov.in</em>.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">4.3</span> &nbsp;Fee for practical examination is to be paid online through "<em>bharatkosh.gov.in</em>" on the eGCA portal.</p>
+    </div>
+
+    <!-- 5. EXEMPTION -->
+    <div class="sec-num underlined">5. &nbsp;Exemption from RTR Certificate and Licence Written Examination</div>
+    <div class="para-block">
+      <p><span class="para-num">5.1</span> &nbsp;The following categories of candidates may be exempted as per sub-rule (4) of Rule 8 of RTR Certificate and License Rules 2025 from written examination:</p>
+    </div>
+    <ul class="doc-list roman" style="margin-bottom:10px;">
+      <li><span class="li-marker">i.</span> A qualified pilot from the Indian Air Force, Indian Navy or Indian Army or Indian Coast Guard who produces satisfactory evidence of <strong>1500 hours</strong> of flying experience.</li>
+      <li><span class="li-marker">ii.</span> A person holding a valid Radio Telephone Operator's (Restricted) Certificate and Licence issued under the Indian Wireless Telegraphy (Commercial Radio Operator's Certificate of Proficiency and Licence to Operate Wireless Telegraphy) Rules 1954.</li>
+      <li><span class="li-marker">iii.</span> A person holding valid Flight Radio Telephone Operator's Licence or its equivalent issued by Commonwealth countries or Philippines.</li>
+    </ul>
+    <div class="para-block">
+      <p><span class="para-num">5.2</span> &nbsp;The applicant not meeting the requirements of Para 5.1 shall pass written examination and practical examination for issue of Radio Telephone Operator's (Restricted) Certificate and Licence.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">5.3</span> &nbsp;Applicant meeting the criteria as per Para 5.1 above, will be required to apply for grant of exemption from written examination, on eGCA portal. On successful grant of exemption applicant will be able to apply for Practical exam as per the process mentioned in Para 7 on eGCA portal. The validity of exemption shall be <strong>three years</strong>.</p>
+    </div>
+
+    <!-- 6. WRITTEN EXAM PROCEDURE -->
+    <div class="sec-num underlined">6. &nbsp;Procedure of RTR Certificate and Licence Written Examination</div>
+    <div class="para-block">
+      <p><span class="para-num">6.1</span> &nbsp;The details regarding submission of online application for RTR Certificate and Licence written examination, publication of list of Admitted / Rejected Candidates, procedure of conducting Radio Telephone Operator's (Restricted) Written Examination, identification of Candidates and publication of result are available in Para 6 of CAR Section 7 Series B Part 1.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">6.2</span> &nbsp;<strong>Syllabus and Pattern of Examination:</strong> The RTR Certificate and Licence written examination will be online computer based theoretical knowledge examination of <strong>50 Multiple Choice (Objective) questions</strong> as per the syllabus prescribed in Annexure A. The examinations will be conducted in English language.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">6.3</span> &nbsp;<strong>Pass Marks for Radio Telephone Operator's (Restricted) Written Examination:</strong></p>
+      <p style="margin-top:6px;">A candidate who secures a minimum of <strong>70% marks</strong> in the Radio Telephone Operator's (Restricted) Certificate and Licence written examination will be declared pass and will be eligible to appear in the Practical examination.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">6.4</span> &nbsp;<strong>Validity of Radio Telephone Operator's (Restricted) Written Examination:</strong></p>
+      <p style="margin-top:6px;">The Radio Telephone Operator's (Restricted) written examination will be valid for <strong>three years</strong> from the date of passing the written examination.</p>
+    </div>
+
+    <!-- 7. PRACTICAL EXAM -->
+    <div class="sec-num underlined">7. &nbsp;Procedure for Radio Telephone Operator's (Restricted) Certificate and Licence Practical Exam</div>
+
+    <div class="para-block">
+      <p><span class="para-num">7.1</span> &nbsp;<strong>Eligibility:</strong> Candidates who have successfully passed the written examination or otherwise exempted as per Para 5 above will be eligible to appear for the Practical examination.</p>
+    </div>
+
+    <div class="para-block">
+      <p><span class="para-num">7.2</span> &nbsp;<strong>Application for Practical Exam:</strong></p>
+    </div>
+    <ul class="doc-list roman">
+      <li><span class="li-marker">i.</span> Applicant is required to register in eGCA portal on DGCA website <em>www.dgca.gov.in</em>. (The detailed steps for registration in eGCA portal are mentioned in the "User Manual" published to this effect on DGCA website and before filing an online application.)</li>
+      <li><span class="li-marker">ii.</span> Candidates passed written examination or exempted from written examination as per Para 5.1 can select the date for practical exam on eGCA portal.</li>
+      <li><span class="li-marker">iii.</span> The candidate will be issued admit card on his eGCA portal, <strong>three days prior</strong> to date of practical exam.</li>
+      <li><span class="li-marker">iv.</span> Selected slot for practical exam will <strong>not be rescheduled or cancelled</strong>.</li>
+      <li><span class="li-marker">v.</span> No refund of fees will be made for candidates not appearing for practical exam.</li>
+      <li><span class="li-marker">vi.</span> Candidates not appearing in practical exam on the selected practical exam date would be declared as <strong>"ABSENT"</strong> and it would be counted towards practical exam attempt.</li>
+      <li><span class="li-marker">vii.</span> Director (RTR) may reschedule the slots of practical exam in case of unforeseen situations/unavailability of RTR lab or any other operational requirements.</li>
+    </ul>
+
+    <div class="para-block" style="margin-top:14px;">
+      <p><span class="para-num">7.3</span> &nbsp;<strong>Details of Practical Examination:</strong></p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">7.3.1</span> &nbsp;The total duration of the practical examination will be approximate <strong>30 minutes</strong>.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">7.3.2</span> &nbsp;The practical test will comprise of practical exercise conducted over simulated environment based on flight radiotelephony in English language. The candidate will be assessed on:</p>
+    </div>
+    <ul class="doc-list roman">
+      <li><span class="li-marker">i.</span> Practical knowledge of radiotelephone operation and procedure for different phases of flight.</li>
+      <li><span class="li-marker">ii.</span> Ability to send correctly and to receive correctly message by radiotelephone.</li>
+      <li><span class="li-marker">iii.</span> General knowledge of the Regulations applying to radiotelephone communications and specifically of that part of those Regulations relating to the safety of life.</li>
+      <li><span class="li-marker">iv.</span> Knowledge of the special provisions governing aeronautical fixed, mobile and radio navigation service (for aeronautical service only).</li>
+    </ul>
+
+    <div class="para-block" style="margin-top:14px;">
+      <p><span class="para-num">7.4</span> &nbsp;<strong>Passing Marks for Practical Examination:</strong></p>
+      <p style="margin-top:6px;">A candidate who secures a minimum of <strong>50% marks</strong> in the Practical Examination will be declared pass in the exam.</p>
+    </div>
+
+    <div class="para-block">
+      <p><span class="para-num">7.5</span> &nbsp;<strong>Result of Practical Examination:</strong></p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">7.5.1</span> &nbsp;The result of the RTR practical exam will be made available to the respective candidate on his eGCA portal or registered email.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">7.5.2</span> &nbsp;The candidate who passes the practical examination will be eligible to apply for RTR Certificate and Licence.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">7.5.3</span> &nbsp;The candidate will have a total of <strong>three attempts</strong> to appear for practical examination subject to the validity of his written examination after payment of requisite fees.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">7.5.4</span> &nbsp;In case, an applicant fails in all the three attempts of practical examination, he/she shall be required to re-appear in the written examination for appearing in further practical examination.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">7.5.5</span> &nbsp;The applicant exempted from written examination as per Para 5 will be given three attempts to appear for practical exam subject to validity of exemption. Exempted candidates failing in all three attempts shall then be required to appear for written examination prior to further practical exam attempts as per Para 7.5.2.</p>
+    </div>
+
+    <!-- 8. ISSUE OF LICENCE -->
+    <div class="sec-num underlined">8. &nbsp;Issue of RTR Certificate and Licence</div>
+    <div class="para-block">
+      <p>On successfully passing the practical examination applicant will be required to pay the requisite fees and apply for RTR Certificate and Licence on <strong>eGCA portal</strong>. The candidate will be issued RTR Certificate and Licence subject to correctness and completeness of the application.</p>
+    </div>
+
+    <!-- 9. EXTENSION -->
+    <div class="sec-num underlined">9. &nbsp;Extension of Validity of RTR Certificate and Licence:</div>
+    <div class="para-block">
+      <p><span class="para-num">9.1</span> &nbsp;The candidate seeking extension of RTR Certificate and Licence beyond the age of eighty years unless suspended or cancelled may be extended on production of experience certificate of not less than three months in a station working in the aero mobile service in preceding one year from date of application.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">9.2</span> &nbsp;The licence for such candidates will be extended on yearly basis.</p>
+    </div>
+
+    <!-- 10. TRAINING ORGS -->
+    <div class="sec-num underlined">10. &nbsp;Model Requirements and Guidance for Organisations Providing Training in Radio Telephony</div>
+    <div class="para-block">
+      <p><span class="para-num">10.1</span> &nbsp;The model requirements and guidance for organisations providing training in Radio Telephony is attached in Annexure B.</p>
+    </div>
+
+    <!-- SIGNATURE -->
+    <div class="sig-block">
+      <p>( <span class="sig-name">Faiz Ahmed Kidwai</span> )</p>
+      <p><strong>Director General of Civil Aviation</strong></p>
+    </div>
+
+    <!-- ── ANNEXURE A ──────────────────────────────────────── -->
+    <div class="page-break-marker"><span>ANNEXURE A</span></div>
+
+    <div class="annexure-hdr">
+      <h2>Annexure A</h2>
+      <p>RTR Certificate and Licence Written Exam – Syllabus</p>
+    </div>
+
+    <div class="syl-cat">I. &nbsp;Regulations and Procedure</div>
+    <ul class="doc-list roman">
+      <li><span class="li-marker">i.</span> International Telecommunication Convention and Radio Regulations.</li>
+      <li><span class="li-marker">ii.</span> General and Aeronautical 'Q' Code signals and other abbreviations as contained in Annex 10 (vol. I &amp; II) of ICAO.</li>
+      <li><span class="li-marker">iii.</span> General Radio-telephone Communication procedure and radio telephone communication procedure for distress, urgency and direction finding.</li>
+      <li><span class="li-marker">iv.</span> Procedure for distress communication in maritime mobile service.</li>
+      <li><span class="li-marker">v.</span> Words and figures spelling used in radio telephony.</li>
+      <li><span class="li-marker">vi.</span> Licensing requirement of installation and operation of radio apparatus used in aircraft.</li>
+      <li><span class="li-marker">vii.</span> Minimum requirement of radio equipment to be carried on aircraft as prescribed in Annexure 6 of the ICAO and DGCA in India.</li>
+      <li><span class="li-marker">viii.</span> FIR in India and main Radio communication and Navigation facilities available together with principal frequencies to be used for communication and navigation within India.</li>
+      <li><span class="li-marker">ix.</span> Meteorological codes, Pre Flight briefing service and their usages.</li>
+      <li><span class="li-marker">x.</span> Knowledge of notices to airmen issued by the Civil Aviation Authorities in India, as applicable to the Aeronautical mobile and Air traffic control services.</li>
+    </ul>
+
+    <div class="syl-cat" style="margin-top:22px;">II. &nbsp;Radio Principles and Practice:</div>
+    <ul class="doc-list roman">
+      <li><span class="li-marker">i.</span> Electrical units such as volt, Ampere, Ohm and Watt, Wavelength, frequency and their relationship.</li>
+      <li><span class="li-marker">ii.</span> Radio frequency propagation day and night frequencies, skip distance fading ground shadow and its effect on communication choice of frequencies to attain maximum efficiency in handling air ground HF communications.</li>
+      <li><span class="li-marker">iii.</span> System employed for air ground communications including, intercommunications and announcing system of aircraft.</li>
+      <li><span class="li-marker">iv.</span> Radio-navigation Aids, operation of microphones and headphones, squelch, AVC, Volume control tuning of transmitter, simplex and duplex operation; advantages and disadvantages of Radio telephone communication; limitations of range due to frequency interference etc.</li>
+    </ul>
+
+    <div class="syl-cat" style="margin-top:22px;">III. &nbsp;Radio Telephony:</div>
+    <ul class="doc-list roman">
+      <li><span class="li-marker">i.</span> <strong>General operating procedures:</strong> Transmitting technique, Transmission of letters, Transmission of numbers, Transmission of time, Standard words and phrases, Call signs, Call signs for aeronautical stations, Aircraft call signs, Communications, Establishment and continuation of communications, Transfer of communications, Issue of clearance and read-back requirements, Test procedures.</li>
+      <li><span class="li-marker">ii.</span> <strong>General phraseology:</strong> An explanation of the role of phraseologies and plain language in radiotelephony communications, Level instructions, Position reporting, Flight plans.</li>
+      <li><span class="li-marker">iii.</span> <strong>Aerodrome control – aircraft:</strong> Departure information and engine starting procedures, Push-back, Taxi instructions, Take-off procedures, Aerodrome traffic circuit, Final approach and landing, Go around, after landing, Essential aerodrome information.</li>
+      <li><span class="li-marker">iv.</span> <strong>General ATS surveillance service phraseology:</strong> Identification and vectoring, Traffic information and avoiding action, Secondary surveillance radar, Radar assistance to aircraft with radio communications failure, Alerting phraseologies.</li>
+      <li><span class="li-marker">v.</span> <strong>Aerodrome control – vehicles:</strong> Movement instructions, Crossing runways, Vehicles towing aircraft.</li>
+      <li><span class="li-marker">vi.</span> <strong>Approach control:</strong> IFR departures, VFR departures, IFR arrivals, VFR arrivals, Vectors to final approach, Surveillance radar approach, Precision radar approach.</li>
+      <li><span class="li-marker">vii.</span> <strong>Area control:</strong> Area control units, Position information, Level information, Flights joining airways, Flights leaving airways, Flights crossing airways, Flights holding en route, ATS Surveillance, Automatic Dependent Surveillance (ADS), Oceanic control.</li>
+      <li><span class="li-marker">viii.</span> <strong>Distress and urgency procedures and communications failure procedures:</strong> Distress messages, Aircraft in distress, Imposition of silence, Termination of distress and silence, Urgency messages, Emergency descent, Aircraft communications failure.</li>
+      <li><span class="li-marker">ix.</span> <strong>Transmission of meteorological and other aerodrome information:</strong> Runway Visual Range (RVR), Runway surface conditions.</li>
+      <li><span class="li-marker">x.</span> <strong>Miscellaneous flight handling:</strong> Selective Calling (SELCAL), Fuel dumping, Wake turbulence, Wind shear, Direction finding, ACAS manoeuvers.</li>
+    </ul>
+
+    <!-- ── ANNEXURE B ──────────────────────────────────────── -->
+    <div class="page-break-marker"><span>ANNEXURE B</span></div>
+
+    <div class="annexure-hdr">
+      <h2>Annexure B</h2>
+      <p>Model Requirements and Guidance for Organisations Providing Training in Radio Telephony</p>
+    </div>
+
+    <div class="sec-num">A. &nbsp;Model Requirements and Guidance for Organisations Providing Training in Radio Telephony</div>
+
+    <div class="para-block" style="margin-top:12px;">
+      <p><span class="para-num">1. &nbsp;Preferred Organisations:</span> &nbsp;DGCA approved Scheduled Operator / Non-Scheduled Operator / Private Operator / ANSP / Approved Flying Training Organization or Aviation English Language Training Organization approved by DGCA.</p>
+    </div>
+
+    <div class="para-block">
+      <p><span class="para-num">2. &nbsp;Facilities:</span> &nbsp;The Training organization shall establish facility appropriate to the size and scope of the training and shall provide physical environment conducive to the learning. These shall include:</p>
+    </div>
+
+    <div class="syl-cat" style="font-size:12.5px;">i. General:</div>
+    <ul class="bullet-list">
+      <li>Adequate Office Space for operational and administrative staff.</li>
+      <li>Storage area including secure area for training and personnel records.</li>
+    </ul>
+
+    <div class="syl-cat" style="font-size:12.5px;margin-top:14px;">ii. Classrooms, Library and Training Aids:</div>
+    <ul class="bullet-list">
+      <li>At least one AV equipped class room. The classrooms shall be properly lighted and furnished. The size of the rooms shall be appropriate to accommodate the maximum number of trainees expected to be trained at any time. The optimum number of students recommended per class is <strong>twelve (12)</strong> with maximum <strong>25</strong>. Size of room approx. 400 sq. feet (16 sq feet per person).</li>
+      <li>Library/e-library with adequate number of text books/e-books for enhancing radio telephony.</li>
+      <li>Training aids like computer, projector/suitable monitor, multimedia, Aviation English language learning software etc.</li>
+    </ul>
+
+    <div class="syl-cat" style="font-size:12.5px;margin-top:14px;">iii. Radio Telephony Communication Lab:</div>
+    <ul class="bullet-list">
+      <li>ATC and Pilot communication lab for practical radiotelephony communication for practice through computers, RT communication circuit and flight simulation software and relevant programme. Model requirement of RTR lab are attached in Annexure G.</li>
+      <li>Voice logging system with time stamping, annotation, and storage capacity for <strong>6 months</strong>.</li>
+    </ul>
+
+    <div class="para-block" style="margin-top:18px;">
+      <p><span class="para-num">3. &nbsp;Personnel:</span> &nbsp;Post Holders – Depending upon the size and scope of the organization, a post holder may perform a combination of key roles and the same shall be described in the training and procedures manual.</p>
+    </div>
+
+    <div class="syl-cat" style="font-size:12.5px;margin-top:14px;">a) Accountable Manager:</div>
+    <p style="font-size:13px;line-height:1.9;color:var(--text-main);text-align:justify;margin-bottom:8px;">The organization shall appoint an accountable manager who has corporate authority for ensuring that training can be financed and carried out to the standard required by Aircraft Rules and this CAR. He should possess a minimum of <strong>five years of experience</strong> in aviation, training, assessment, or regulatory compliance functions. The accountable manager shall ensure that all necessary resources are available to accomplish training in accordance with laid down standards and establish and promote the quality standards for the training.</p>
+
+    <div class="syl-cat" style="font-size:12.5px;margin-top:14px;">b) Radiotelephony Instructor:</div>
+    <ul class="bullet-list">
+      <li>An RTR Instructor is a person who has attended the <strong>02-day Certification Workshop</strong> to deliver theoretical and/or practical training for candidates preparing for the Restricted Radiotelephony (Aeronautical) Licence examination. (First time to be conducted by DGCA.)</li>
+      <li>Shall hold or held CPL or above, with a minimum <strong>2 years of teaching experience</strong> in an Instructor Role with a Training Institute/FTO/ATO or possess a minimum of <strong>1500 hrs Flying Experience</strong> or <strong>5 yrs of operational experience</strong> in aviation radiotelephony and be successfully evaluated to impart RTR training.</li>
+      <li>Shall undergo a refresher once every two years, conducted at RTTO.</li>
+      <li>Must have demonstrated good integrity.</li>
+      <li>Must demonstrate language proficiency at <strong>ICAO Level 5 or above</strong>.</li>
+      <li>Have held a role as trainer in the past / Completed TTT (Train The Trainer course).</li>
+      <li>In-depth knowledge of ICAO Doc 9432.</li>
+    </ul>
+
+    <div class="syl-cat" style="font-size:12.5px;margin-top:14px;">c) Head of Training for Radio Telephony Training Organization (RTTO):</div>
+    <p style="font-size:13px;line-height:1.9;color:var(--text-main);text-align:justify;margin-bottom:6px;">Shall hold or has held Flight Crew/ATC License/rating, with overall experience of at least <strong>10 years</strong> of Flying/Air Traffic Control and AELP of Expert Level 6 (six).</p>
+    <p style="font-size:13px;line-height:1.9;color:var(--text-sec);margin-bottom:8px;font-style:italic;">&nbsp;&nbsp;&nbsp;&nbsp;or</p>
+    <p style="font-size:13px;line-height:1.9;color:var(--text-main);text-align:justify;margin-bottom:8px;">Any suitably qualified person having expertise in Radio Telephony training/testing with a minimum experience of <strong>05 years</strong>.</p>
+
+    <div class="syl-cat" style="font-size:12.5px;margin-top:14px;">d) Quality Assurance Manager:</div>
+    <p style="font-size:13px;line-height:1.9;color:var(--text-main);text-align:justify;margin-bottom:6px;">Shall hold or has held Flight Crew/ATC License/rating with overall experience of at least <strong>5 years</strong> of Flying/Air Traffic Control and AELP of Expert Level 6 (six) and shall have been trained in Quality Assurance/Quality Management/Quality Auditing;</p>
+    <p style="font-size:13px;line-height:1.9;color:var(--text-sec);margin-bottom:6px;font-style:italic;">&nbsp;&nbsp;&nbsp;&nbsp;or</p>
+    <p style="font-size:13px;line-height:1.9;color:var(--text-main);text-align:justify;margin-bottom:8px;">Any person having trained in and have at least <strong>two years</strong> of experience of Quality Assurance/Quality Management/Quality Auditing.</p>
+
+    <!-- Training Hours Table -->
+    <div class="sec-num" style="margin-top:24px;">B. &nbsp;Recommended Training Hours</div>
+    <table class="mod-table" style="margin-top:12px;">
+      <thead>
+        <tr>
+          <th>Module</th>
+          <th>Recommended Hours</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Module 1.1 – Aeronautical Telecommunication</td>
+          <td><strong>2.5 Hours</strong></td>
+        </tr>
+        <tr>
+          <td>Module 1.2 – Aircraft Communication &amp; Navigational Aids</td>
+          <td><strong>2.5 Hours</strong></td>
+        </tr>
+        <tr>
+          <td>Module 2 – Radio Principle &amp; Practice</td>
+          <td><strong>10 Hours</strong></td>
+        </tr>
+        <tr>
+          <td>Module 3.1 – General Procedures</td>
+          <td><strong>15 Hours</strong></td>
+        </tr>
+        <tr>
+          <td>Module 3.2 – Radio Telephony including two mock tests</td>
+          <td><strong>18 Hours</strong></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td><strong>Total Hours</strong></td>
+          <td><strong>48 Hours</strong></td>
+        </tr>
+      </tfoot>
+    </table>
+    <p style="font-size:11px;color:var(--text-muted);margin-top:4px;font-style:italic;">* The training hours may vary as per requirement of training organisation.</p>
+
+    <!-- Practical Training Requirements -->
+    <div class="sec-num" style="margin-top:24px;">C. &nbsp;Requirements of Practical Training for RTR</div>
+
+    <div class="para-block" style="margin-top:10px;">
+      <p><span class="para-num">1. &nbsp;Compliance with Regulatory Standards:</span> &nbsp;The simulation environment must fully comply with international standards for radiotelephony communication as outlined in ICAO Annex 10, Doc 9432, and ITU Radio Regulations.</p>
+    </div>
+    <div class="para-block">
+      <p><span class="para-num">2. &nbsp;Training and Assessment Features:</span> &nbsp;The simulation lab should facilitate training of radiotelephony candidates across diverse operational scenarios. The system must simulate all phases of a typical flight, including:</p>
+    </div>
+    <ul class="bullet-list">
+      <li>Taxi, Takeoff, Climb, Cruise, Descent, Approach, and Landing</li>
+      <li>Realistic traffic conflicts and coordination</li>
+      <li>Emergency scenarios: distress, urgency, and medical</li>
+      <li>Varying flight routes and airfield layouts</li>
+      <li>Environmental variables like weather conditions and traffic density</li>
+      <li>Voice variations in air traffic controllers</li>
+      <li>Crew Resource Management (CRM) interactions (e.g., communication between Captain, Cabin Crew, ATC)</li>
+    </ul>
+
+    <!-- RTR Lab Table -->
+    <div class="sec-num" style="margin-top:24px;">D. &nbsp;Guidance for Establishment of RTR Lab for Training of Candidates</div>
+
+    <table class="lab-table" style="margin-top:14px;">
+      <thead>
+        <tr>
+          <th style="width:5%;">S.No.</th>
+          <th style="width:30%;">Components of RTR Lab</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>System Overview of RTR Lab</strong></td>
+          <td>The AV system will facilitate training and assessments by enabling seamless communication, content sharing, live streaming, and recording between the pilot (Candidate) and trainers. The design consists of two rooms: one for the pilot (Candidate) and one for the trainers. The system will incorporate high-quality audio and video solutions, recording and streaming capabilities, and an intuitive control interface for trainers.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>System Components</strong></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>2.1</td>
+          <td><strong>Display Systems</strong><br/><em>Pilot (Candidate) Room Display</em><br/><em>Trainer Room Display</em></td>
+          <td>
+            <strong>Pilot (Candidate) Room:</strong> The pilot (Candidate) will view content shared by trainers on this display.<br/>
+            <strong>Trainer Room:</strong> Displays shared content and video feedback in split-screen mode.
+          </td>
+        </tr>
+        <tr>
+          <td>2.2</td>
+          <td><strong>Audio Systems</strong></td>
+          <td>
+            <strong>Headsets:</strong> Push-to-talk microphone with headset for communication between pilot (Candidate) and trainers.<br/>
+            <strong>Handheld Microphones:</strong> Wireless handheld microphones may be provided for additional communication or announcements.<br/>
+            <strong>Audio Recording:</strong> All conversations between the pilot (Candidate) and the trainers will be recorded for feedback purpose.
+          </td>
+        </tr>
+        <tr>
+          <td>2.3</td>
+          <td><strong>Video Systems</strong></td>
+          <td>
+            <strong>Cameras:</strong> The trainer should provide examination environment as far as practicable. Preferably neither the candidate nor the trainers should be able to see each other during the test.<br/>
+            <strong>Document Camera:</strong> Provided to allow trainers to share physical documents or instant handwritten notes directly on the pilot (Candidate)'s screen display.<br/>
+            <strong>Video Recording:</strong> All video footage in synchronization with audio will be recorded and stored for future assessment.
+          </td>
+        </tr>
+        <tr>
+          <td>2.4</td>
+          <td><strong>Content Sharing &amp; Display Management</strong></td>
+          <td>Each trainer will have a desktop workstation/laptop/tab with the ability to share content (one at a time) with the pilot (Candidate)'s display.</td>
+        </tr>
+        <tr>
+          <td>3.0</td>
+          <td><strong>Additional Features</strong></td>
+          <td>
+            <strong>Content Backup:</strong> All recordings will be stored on a designated server.<br/>
+            <strong>Digital Clocks:</strong> Digital time displays must be installed on both sides (trainers and candidate) to maintain synchronized timing.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Quality Assurance -->
+    <div class="sec-num" style="margin-top:24px;">E. &nbsp;Mechanisms for Quality Assurance of Training Organisations</div>
+    <div class="para-block" style="margin-top:10px;">
+      <p>a) &nbsp;The organisation shall establish a quality assurance system, which ensures that training and instructional practices comply with all relevant regulatory training requirements.</p>
+    </div>
+    <div class="para-block">
+      <p>b) &nbsp;The Quality Assurance System must include a system for conducting internal audit covering the entire area of operation within <strong>12 months</strong>. The internal audit shall be conducted by those who are not involved in day to day instructional activity and shall be conducted using customized checklist(s). Each deficiency must be addressed properly to enhance the quality of training.</p>
+    </div>
+
+  </div><!-- /doc-body -->
+
+  <!-- BOTTOM RUNNING HEADER -->
+  <div class="running-header" style="border-bottom:none;border-top:2px solid var(--border-dark);">
+    <span class="rh-left">SECTION 7</span>
+    <span class="rh-mid">CIVIL AVIATION REQUIREMENTS &nbsp;·&nbsp; SERIES G PART VI</span>
+    <span class="rh-right">DGCA — INDIA</span>
+  </div>
+
+</div><!-- /doc-page -->
+
+<script>
+  // THEME TOGGLE
+  const btn   = document.getElementById('themeToggle');
+  const label = document.getElementById('themeLabel');
+  const icon  = document.getElementById('themeIcon');
+
+  btn.addEventListener('click', () => {
+    const isLight = document.body.getAttribute('data-theme') === 'light';
+    document.body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+    label.textContent = isLight ? 'Dark' : 'Light';
+    icon.textContent  = isLight ? '🌙' : '☀️';
+  });
+
+  // SCROLL PROGRESS
+  const bar = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = (window.scrollY / max * 100) + '%';
+  });
+</script>
+</body>
+</html>
