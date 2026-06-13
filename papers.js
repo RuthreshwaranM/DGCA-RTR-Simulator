@@ -12,6 +12,8 @@
    ============================================================ */
 
 const PAPERS = [
+  { name: "RTR SYLLABUS",  folder: "RTR SYLLABUS",  file: "rtr-syllabus.html"  },
+  { name: "RTR CAR OFFICIAL",  folder: "RTR CAR OFFICIAL",  file: "RTR CAR OFFICIAL.html"  },
   { name: "RTR PART 1 NOTES",  folder: "PART 1 NOTES",  file: "PART 1 NOTES.html"  },
   { name: "RTR FORMATS PRACTICE",  folder: "RTR FORMATS",  file: "RTR FORMATS.html"  },
   { name: "EMERGENCY RT PRACTICE",  folder: "EMERGENCY RT PRACTICE",  file: "EMERGENCY RT PRACTICE.html"  },
